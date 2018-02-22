@@ -25,7 +25,9 @@ SECRET_KEY = 'ix3#4ixwl!ao$&c%xqm)gve&3fa8t(@se*kcrqa+5jgo_-jwy9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '.cloudapps.unc.edu',
+]
 
 
 # Application definition
@@ -106,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'
 
 USE_I18N = True
 
