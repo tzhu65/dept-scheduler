@@ -1,0 +1,1 @@
+console.error("TypeScript error: ts/components/uploadfiles.tsx(15,56): Error TS2339: Property 'files' does not exist on type 'HTMLElement'.");
