@@ -26,7 +26,7 @@ SECRET_KEY = 'ix3#4ixwl!ao$&c%xqm)gve&3fa8t(@se*kcrqa+5jgo_-jwy9'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '.cloudapps.unc.edu',
+    '.cloudapps.unc.edu', 'localhost', '127.0.0.1'
 ]
 
 
