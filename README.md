@@ -1,4 +1,4 @@
-#dept-scheduler
+# dept-scheduler
 
 ## Setup
 This project requires python3 (along with pip) and npm to be installed.
@@ -13,4 +13,4 @@ This project requires python3 (along with pip) and npm to be installed.
   * Build the client code `yarn watch`
   * The packaged code should be found in `./schedule/static/js` and `./schedule/static/css`
 
-By default, the django server is running on `localhost:8000` so go there in your browser.
+By default, the django server is running on `localhost:8000` so go there in your browser. For development run `python manage.py runserver` in one terminal and `yarn watch` in another.
