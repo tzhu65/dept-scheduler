@@ -52,10 +52,10 @@ export class UploadFiles extends React.Component<null, { text: string }> {
           onSubmit={this.onSubmit}
         >
           Select courses to upload:
-          <input id="courses-select" type="file" name="coursesToUpload" />
+          <input id="vs-courses-input-id" type="file" name="courses" />
           <br />
           Select schedule to upload:
-          <input id="schedule-select" type="file" name="scheduleToUpload" />
+          <input id="vs-schedule-input-id" type="file" name="schedule" />
           <input type="submit" value="Upload Image" name="submit" />
         </form>
         <div>

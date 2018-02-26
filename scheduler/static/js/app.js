@@ -18145,10 +18145,10 @@ var UploadFiles = /** @class */ (function (_super) {
         return (React.createElement("div", null,
             React.createElement("form", { id: "verify-schedule-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
                 "Select courses to upload:",
-                React.createElement("input", { id: "courses-select", type: "file", name: "coursesToUpload" }),
+                React.createElement("input", { id: "vs-courses-input-id", type: "file", name: "courses" }),
                 React.createElement("br", null),
                 "Select schedule to upload:",
-                React.createElement("input", { id: "schedule-select", type: "file", name: "scheduleToUpload" }),
+                React.createElement("input", { id: "vs-schedule-input-id", type: "file", name: "schedule" }),
                 React.createElement("input", { type: "submit", value: "Upload Image", name: "submit" })),
             React.createElement("div", null, this.state.text)));
     };
