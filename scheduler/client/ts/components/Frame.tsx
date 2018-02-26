@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { UploadFiles } from "./UploadFiles";
+import { UploadFiles } from "./FileUpload/UploadFiles";
 
 export class Frame extends React.Component<null, null> {
   public render() {

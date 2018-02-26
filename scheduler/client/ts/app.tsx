@@ -1,6 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
+import { init } from "./init";
+
 import { Frame } from "./components/Frame";
 
 export class MainApp extends React.Component<null, null> {
@@ -12,6 +14,8 @@ export class MainApp extends React.Component<null, null> {
     );
   }
 }
+
+init();
 
 ReactDOM.render(
   <MainApp />,
