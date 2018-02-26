@@ -1,0 +1,53 @@
+{
+  "name": "dept-scheduler",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jquery": "^3.3.0",
+    "rimraf": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^22.1.1",
+    "@types/react": "^16.0.36",
+    "@types/react-dom": "^16.0.3",
+    "browserify": "^16.0.0",
+    "csv-parser": "^1.12.0",
+    "jest": "^22.2.1",
+    "node-sass": "^4.7.2",
+    "npm-run-all": "^4.1.2",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "redux": "^3.7.2",
+    "ts-jest": "^22.0.3",
+    "tsify": "^3.0.4",
+    "tslint": "^5.9.1",
+    "tslint-react": "^3.4.0",
+    "typescript": "^2.7.1",
+    "watch": "^1.0.2",
+    "watchify": "^3.10.0"
+  },
+  "scripts": {
+    "build:scss": "node-sass ./scss/style.scss ../static/css/style.css",
+    "watch:scss": "yarn build:scss & node-sass ./scss/style.scss ../static/css/style.css -w",
+    "build:ts": "mkdir -p ../static/js & browserify ./ts/app.tsx -p [ tsify --sourceMap ] -o ../static/js/app.js",
+    "watch:ts": "mkdir -p ../static/js & watchify ./ts/app.tsx -p [ tsify --sourceMap ] -o ../static/js/app.js",
+    "build": "npm-run-all --parallel build:*",
+    "watch": "npm-run-all --parallel watch:*",
+    "lint": "tslint --project ./tsconfig.json --force",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

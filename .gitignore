@@ -3,3 +3,6 @@ db.sqlite3
 .idea
 *.pyc
 .DS_Store
+node_modules
+scheduler/static/css
+scheduler/static/js
