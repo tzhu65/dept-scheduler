@@ -29,8 +29,8 @@
   "scripts": {
     "build:scss": "node-sass ./scss/style.scss ../static/css/style.css",
     "watch:scss": "yarn build:scss & node-sass ./scss/style.scss ../static/css/style.css -w",
-    "build:ts": "browserify ./ts/app.tsx -p [ tsify --sourceMap ] -o ../static/js/app.js",
-    "watch:ts": "watchify ./ts/app.tsx -p [ tsify --sourceMap ] -o ../static/js/app.js",
+    "build:ts": "mkdir -p ../static/js & browserify ./ts/app.tsx -p [ tsify --sourceMap ] -o ../static/js/app.js",
+    "watch:ts": "mkdir -p ../static/js & watchify ./ts/app.tsx -p [ tsify --sourceMap ] -o ../static/js/app.js",
     "build": "npm-run-all --parallel build:*",
     "watch": "npm-run-all --parallel watch:*",
     "lint": "tslint --project ./tsconfig.json --force",
