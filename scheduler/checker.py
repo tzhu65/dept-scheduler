@@ -1,2 +1,3 @@
-def check(courses, schedule):
-  print(courses, schedule)
+def check(courses, people):
+
+  print(courses, people)

@@ -20,7 +20,7 @@ def verifySchedule(request):
         form = VerifySchedule(request.POST, request.FILES)
         if form.is_valid():
             courses = form.cleaned_data['courses']
-            schedule = form.cleaned_data['schedule']
+            people = form.cleaned_data['people']
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             if courses and isinstance(courses, TemporaryUploadedFile):
                 parseCoursesFromPath(courses.temporary_file_path())
@@ -28,15 +28,13 @@ def verifySchedule(request):
                 f = TextIOWrapper(courses.file, encoding=request.encoding)
                 parseCourses(f)
 
-            if schedule and isinstance(schedule, TemporaryUploadedFile):
-                parsePeopleFromPath(schedule.temporary_file_path())
-            elif schedule and isinstance(schedule, InMemoryUploadedFile):
-                f = TextIOWrapper(schedule.file, encoding=request.encoding)
+            if people and isinstance(people, TemporaryUploadedFile):
+                parsePeopleFromPath(people.temporary_file_path())
+            elif people and isinstance(people, InMemoryUploadedFile):
+                f = TextIOWrapper(people.file, encoding=request.encoding)
                 parsePeople(f)
 
-            check(courses, schedule)
-
-            print(courses, schedule)
+            check(courses, people)
         else:
             print(form.errors)
         return HttpResponse("hi")

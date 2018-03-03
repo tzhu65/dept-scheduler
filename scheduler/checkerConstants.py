@@ -1,0 +1,1 @@
+strongComputerSkillClasses = ['383', '528', '529']
