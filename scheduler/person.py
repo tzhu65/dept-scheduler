@@ -6,10 +6,10 @@ class Person:
     def toString(self):
         str = ("name={%s} , year={%s}, currHours={%s}, availHours={%s}, "
                "teach={%s} , assist={%s}, recitation={%s}"
-               ", category={%s} , leastCategoryPref={%s}" % (
+               ", category={%s} , leastCategoryPref={%s} , computerSkills={%s} , qualifyingExams={%s}" % (
                    self.name, self.year, self.currHours, self.availHours,
                    self.teachPrefs, self.assistPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.categoryLeastPrefs))
+                   self.categoryPrefs, self.categoryLeastPrefs, self.computerSkills, self.qualifyingExams))
         conflictStr = "\n"
         for conflict in self.conflicts:
             conflictStr += conflict.toString() + "\n"
@@ -26,7 +26,9 @@ class Person:
                  recitationPrefs,
                  categoryPrefs,
                  categoryLeastPrefs,
-                 conflicts):
+                 conflicts,
+                 computerSkills,
+                 qualifyingExams):
         self.name = name
         self.year = year
         self.exams = exams
@@ -38,6 +40,8 @@ class Person:
         self.categoryPrefs = categoryPrefs
         self.categoryLeastPrefs = categoryLeastPrefs
         self.conflicts = conflicts
+        self.computerSkills = computerSkills
+        self.qualifyingExams = qualifyingExams
 
 
 class Conflict:

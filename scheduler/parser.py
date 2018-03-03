@@ -67,9 +67,11 @@ def parsePeople(file):
             categoryPref = row[fields[PREFERED_CATEGORY]].split(",")
             leastPrefCategory = row[fields[LEAST_PREFERED_CATEGORY]].split(",")
             conflicts = getConflicts(row, fields)
+            computerSkills = row[fields[COMPUTER_SKILLS]]
+            qualifyingExams = row[fields[QUALIFYING_EXAMS]].split(",")
             person = Person(name, yearInSchool, exams, currHours, availHours,
                             teachPrefs, assitancePref, recitationPref,
-                            categoryPref, leastPrefCategory, conflicts)
+                            categoryPref, leastPrefCategory, conflicts, computerSkills, qualifyingExams)
 
             print(person.toString())
 

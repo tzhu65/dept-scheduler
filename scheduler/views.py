@@ -23,16 +23,16 @@ def verifySchedule(request):
             people = form.cleaned_data['people']
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             if courses and isinstance(courses, TemporaryUploadedFile):
-                parseCoursesFromPath(courses.temporary_file_path())
+                courses = parseCoursesFromPath(courses.temporary_file_path())
             elif courses and isinstance(courses, InMemoryUploadedFile):
                 f = TextIOWrapper(courses.file, encoding=request.encoding)
-                parseCourses(f)
+                courses = parseCourses(f)
 
             if people and isinstance(people, TemporaryUploadedFile):
-                parsePeopleFromPath(people.temporary_file_path())
+                people = parsePeopleFromPath(people.temporary_file_path())
             elif people and isinstance(people, InMemoryUploadedFile):
                 f = TextIOWrapper(people.file, encoding=request.encoding)
-                parsePeople(f)
+                people = parsePeople(f)
 
             check(courses, people)
         else:
