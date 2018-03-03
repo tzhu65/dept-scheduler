@@ -41,8 +41,10 @@ def check(courses, people):
           continue
 
         # We need course list to be empty at end, so if course is assigned correctly, remove it from list
-        # TODO add catch KeyError exception
-        courseNames.remove(course.cse)
+        try:
+          courseNames.remove(course.cse)
+        except KeyError:
+          continue
         
   print("END: " + str(courseNames))
 
