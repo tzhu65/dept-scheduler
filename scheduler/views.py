@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUpload
 
 from .forms import VerifySchedule
 from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath
+from .checker import check
 
 # Create your views here.
 
@@ -32,6 +33,8 @@ def verifySchedule(request):
             elif schedule and isinstance(schedule, InMemoryUploadedFile):
                 f = TextIOWrapper(schedule.file, encoding=request.encoding)
                 parsePeople(f)
+
+            check(courses, schedule)
 
             print(courses, schedule)
         else:
