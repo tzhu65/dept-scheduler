@@ -3,6 +3,7 @@ import string
 
 
 def validateComputerSkill(person, course):
+    # if course is not a lab then return true cuz comp skills notneeded
     if course.cse[-1:] == 'L':
         # If insufficient computer skill
         if (int(person.computerSkills) < 3):
@@ -12,20 +13,24 @@ def validateComputerSkill(person, course):
             return False
         else:
             return True
+    else:
+        return True
 
 
 def validateQualifyingExam(person, course):
-    if course.cse in qualifyingExams:
+    # if no qualifying exams return true
+    if course.cse not in qualifyingExams:
+        return True
         # If qualifying exam not fulfilled
-        if qualifyingExams[course.cse] not in person.qualifyingExams:
-            print("%s cannot teach %s, missing required qualifying exam: %s" %
-                  (person.name, course.cse, qualifyingExams[course.cse]))
-            return False
-        else:
-            return True
+    if qualifyingExams[course.cse] not in person.qualifyingExams:
+        print("%s cannot teach %s, missing required qualifying exam: %s" %
+              (person.name, course.cse, qualifyingExams[course.cse]))
+        return False
+    else:
+        return True
 
 
-def checkIfClassIsPrefferedClass(person, course): 
+def checkIfClassIsPrefferedClass(person, course):
     if not any(course.cse in val for val in person.teachPrefs.values()):
         print("%s did not list %s as one of their preferences" %
               (person.name, course.cse))
@@ -66,6 +71,6 @@ def check(courses, people):
                 else:
                     print(course.cse, 'is NOT valid')
 
-    print("END: " + str(courseNames))
+    print("Invalid courses are: " + str(courseNames))
 
     # print(courses, people)
