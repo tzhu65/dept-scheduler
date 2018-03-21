@@ -1,4 +1,5 @@
 import csv
+import re
 from datetime import datetime
 from .person import Person
 from .person import Conflict
@@ -7,6 +8,7 @@ from .parserConstants import *
 
 
 def sanitizeList(text):
+    text = text.replace(';', ',')
     return [x for x in (map(lambda x: x.strip(), text.split(','))) if x != '']
 
 
@@ -52,26 +54,34 @@ def parsePeople(file):
         fields[field] = index
     for row in reader:
         # if has a datetime and are returning next semester, then we create person object
-        if row[0] and row[fields[RETURNING_2018]] != 'No':
+        if row[0] and row[fields[RETURNING]] != 'No':
             # get all data besides the conflicts
-            teachPrefs = {}
+            teachingPrefs = []
+            labPrefs = []
+            recitationPrefs = []
+            assistingPrefs = [] 
+            categoryPrefs = {}
+            categoryPrefs["Labs"] = re.sub("[^0-9]", "", row[fields[CATEGORY_LABS]])
+            categoryPrefs["Teaching"] = re.sub("[^0-9]", "", row[fields[CATEGORY_TEACHING]])
+            categoryPrefs["Assisting"] = re.sub("[^0-9]", "", row[fields[CATEGORY_ASSISTING]])
+            categoryPrefs["Recitation"] = re.sub("[^0-9]", "", row[fields[CATEGORY_RECITATION]])
+            categoryPrefs["MHC"] = re.sub("[^0-9]", "", row[fields[CATEGORY_MHC]])
             name = row[fields[NAME]]
-            yearInSchool = int(row[fields[YEAR]])
-            exams = sanitizeList(row[fields[EXAMS]])
-            currHours = int(row[fields[CURRENT_HOURS]])
-            availHours = int(row[fields[AVAILABLE_HOURS]])
-            teachPrefs[1] = row[fields[TEACHING_PREF_1]].split(",")
-            teachPrefs[2] = row[fields[TEACHING_PREF_2]].split(",")
-            assitancePref = row[fields[ASSISTANCE_PREF]].split(",")
-            recitationPref = row[fields[RECITATION_PREF]].split(",")
-            categoryPref = row[fields[PREFERED_CATEGORY]].split(",")
-            leastPrefCategory = row[fields[LEAST_PREFERED_CATEGORY]].split(",")
-            conflicts = getConflicts(row, fields)
+            fullySupported = row[fields[FULLY_SUPPORTED]]
+            yearInSchool = row[fields[YEAR_IN_SCHOOL]]
+            pureOrApplied = row[fields[PURE_OR_APPLIED]]
+            qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
+            teachingPrefs = row[fields[TEACHING_PREF]].split(",")
+            labPrefs = row[fields[LAB_PREF]].split(",")
+            assistingPrefs = row[fields[ASSISTING_PREF]].split(",")
+            recitationPrefs = row[fields[RECITATION_PREF]].split(",")
+            dayPrefs = row[fields[DAY_PREF]]
+            # conflicts = getConflicts(row, fields)
             computerSkills = row[fields[COMPUTER_SKILLS]]
-            qualifyingExams = row[fields[QUALIFYING_EXAMS]].split(",")
-            person = Person(name, yearInSchool, exams, currHours, availHours,
-                            teachPrefs, assitancePref, recitationPref,
-                            categoryPref, leastPrefCategory, conflicts, computerSkills, qualifyingExams)
+            
+            person = Person(name, fullySupported, yearInSchool, pureOrApplied,
+                            qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
+                            recitationPrefs, categoryPrefs, "", computerSkills)
 
             print(person.toString())
 

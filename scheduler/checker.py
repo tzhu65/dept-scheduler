@@ -4,6 +4,7 @@ import string
 def printError(person, course, message):
     print("ERR: %s, %s. %s" % (person.name, course.cse, message))
 
+
 def validateComputerSkill(person, course):
     # if course is not a lab then return true cuz comp skills notneeded
     if course.cse[-1:] == 'L':
@@ -67,5 +68,3 @@ def check(courses, people):
                         continue
 
     print("Invalid courses are: " + str(courseNames))
-
-    # print(courses, people)

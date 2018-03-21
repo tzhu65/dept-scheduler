@@ -4,12 +4,12 @@ from datetime import datetime
 class Person:
 
     def toString(self):
-        str = ("name={%s} , year={%s}, currHours={%s}, availHours={%s}, "
-               "teach={%s} , assist={%s}, recitation={%s}"
-               ", category={%s} , leastCategoryPref={%s} , computerSkills={%s} , qualifyingExams={%s}" % (
-                   self.name, self.year, self.currHours, self.availHours,
-                   self.teachPrefs, self.assistPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.categoryLeastPrefs, self.computerSkills, self.qualifyingExams))
+        str = ("name={%s}, fullySupported={%s}, yearInSchool={%s}, pureOrApplied={%s}, qualifyingExams={%s}"
+               ", teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
+               ", categoryPrefs={%s}, computerSkills={%s}" % (
+                   self.name, self.fullySupported, self.yearInSchool, self.pureOrApplied, self.qualifyingExams,
+                   self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
+                   self.categoryPrefs, self.computerSkills))
         conflictStr = "\n"
         for conflict in self.conflicts:
             conflictStr += conflict.toString() + "\n"
@@ -17,28 +17,27 @@ class Person:
 
     def __init__(self,
                  name,
-                 year,
-                 exams,
-                 currHours,
-                 availHours,
-                 teachPrefs,
-                 assistPrefs,
+                 fullySupported,
+                 yearInSchool,
+                 pureOrApplied,
+                 qualifyingExams,
+                 teachingPrefs,
+                 labPrefs,
+                 assistingPrefs,
                  recitationPrefs,
                  categoryPrefs,
-                 categoryLeastPrefs,
                  conflicts,
-                 computerSkills,
-                 qualifyingExams):
+                 computerSkills):
         self.name = name
-        self.year = year
-        self.exams = exams
-        self.currHours = currHours
-        self.availHours = availHours
-        self.teachPrefs = teachPrefs
-        self.assistPrefs = assistPrefs
+        self.fullySupported = fullySupported
+        self.yearInSchool = yearInSchool
+        self.pureOrApplied = pureOrApplied
+        self.qualifyingExams = qualifyingExams
+        self.teachingPrefs = teachingPrefs
+        self.labPrefs = labPrefs
+        self.assistingPrefs = assistingPrefs
         self.recitationPrefs = recitationPrefs
         self.categoryPrefs = categoryPrefs
-        self.categoryLeastPrefs = categoryLeastPrefs
         self.conflicts = conflicts
         self.computerSkills = computerSkills
         self.qualifyingExams = qualifyingExams
