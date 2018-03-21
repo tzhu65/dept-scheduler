@@ -6,3 +6,4 @@ db.sqlite3
 node_modules
 scheduler/static/css
 scheduler/static/js
+*.log

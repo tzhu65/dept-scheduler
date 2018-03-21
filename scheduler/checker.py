@@ -1,15 +1,16 @@
 from .checkerConstants import *
 import string
 
+def printError(person, course, message):
+    print("ERR: %s, %s. %s" % (person.name, course.cse, message))
 
 def validateComputerSkill(person, course):
     # if course is not a lab then return true cuz comp skills notneeded
     if course.cse[-1:] == 'L':
         # If insufficient computer skill
         if (int(person.computerSkills) < 3):
-            print("%s has computer skill: %s. %s requires computer skill: %s" %
-                  (person.name, person.computerSkills,
-                   course.cse, '3'))
+            printError(person, course, 
+                "Instructor has computer skill: %s. Course requires computer skill: 3" % person.computerSkills)
             return False
         else:
             return True
@@ -23,8 +24,7 @@ def validateQualifyingExam(person, course):
         return True
         # If qualifying exam not fulfilled
     if qualifyingExams[course.cse] not in person.qualifyingExams:
-        print("%s cannot teach %s, missing required qualifying exam: %s" %
-              (person.name, course.cse, qualifyingExams[course.cse]))
+        printError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.cse])
         return False
     else:
         return True
@@ -32,8 +32,7 @@ def validateQualifyingExam(person, course):
 
 def checkIfClassIsPrefferedClass(person, course):
     if not any(course.cse in val for val in person.teachPrefs.values()):
-        print("%s did not list %s as one of their preferences" %
-              (person.name, course.cse))
+        printError(person, course, "Instructor did not list course as one of their preferences")
         return False
     else:
         return True
@@ -59,17 +58,13 @@ def check(courses, people):
         for course in courses:
             # Found a course that person is teaching
             if person.name == course.instructor:
-
                 # if course is valid remove it from the coursenameList
                 if validate(person, course):
-                    print(course.cse, 'is valid')
                     # We need course list to be empty at end, so if course is assigned correctly, remove it from list
                     try:
                         courseNames.remove(course.cse)
                     except KeyError:
                         continue
-                else:
-                    print(course.cse, 'is NOT valid')
 
     print("Invalid courses are: " + str(courseNames))
 
