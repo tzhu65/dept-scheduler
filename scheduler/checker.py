@@ -14,7 +14,7 @@ def validateComputerSkill(person, course, errors):
     if course.cse[-1:] == 'L':
         # If insufficient computer skill
         if (int(person.computerSkills) < 3):
-            printError(person, course, 
+            printError(person, course,
                 "Instructor has computer skill: %s. Course requires computer skill: 3" % person.computerSkills)
             appendError(person, course,
                 "Instructor has computer skill: %s. Course requires computer skill: 3" % person.computerSkills, errors)
@@ -38,7 +38,7 @@ def validateQualifyingExam(person, course, errors):
         return True
 
 
-def checkIfClassIsPrefferedClass(person, course, errors):
+def checkIfClassIsPreferredClass(person, course, errors):
     if not any(course.cse in val for val in person.teachPrefs.values()):
         printError(person, course, "Instructor did not list course as one of their preferences")
         appendError(person, course, "Instructor did not list course as one of their preferences", errors)

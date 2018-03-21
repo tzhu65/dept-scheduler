@@ -22,21 +22,20 @@ def parseTime(time, formats):
     return 'N/A'
 
 
-def getConflicts(row, fields):
+def getConflicts(listOfConflicts):
     index = 0
     conflicts = []
-    if (row[fields[TIME_CONFLICT]] == "NO"):
-        return conflicts
-    i = 1
-    while True:
-        day = row[fields[CONFLICT_DAY + str(i)]]
-        time = row[fields[CONFLICT_TIME + str(i)]].split("-")
-        conflict = Conflict(day, time[0], time[1])
+    for potentialConflicts in listOfConflicts:
+        conflictParts = potentialConflicts.split(' ')
+
+        if len(conflictParts) != 5 or conflictParts[3] != '-':
+            return conflicts
+        days = conflictParts[1] == 'MWF' or conflictParts[1] == 'TR'
+        valdidNum = conflictParts[0].isdigit()
+        if not days or not valdidNum:
+            return conflicts
+        conflict = Conflict(conflictParts[0],conflictParts[1],conflictParts[2],conflictParts[4])
         conflicts.append(conflict)
-        nextval = ADDITIONAL_CONFLICT + str(i)
-        if row[fields[nextval]] == "No":
-            break
-        i += 1;
     return conflicts
 
 
@@ -59,7 +58,7 @@ def parsePeople(file):
             teachingPrefs = []
             labPrefs = []
             recitationPrefs = []
-            assistingPrefs = [] 
+            assistingPrefs = []
             categoryPrefs = {}
             categoryPrefs["Labs"] = re.sub("[^0-9]", "", row[fields[CATEGORY_LABS]])
             categoryPrefs["Teaching"] = re.sub("[^0-9]", "", row[fields[CATEGORY_TEACHING]])
@@ -76,12 +75,12 @@ def parsePeople(file):
             assistingPrefs = row[fields[ASSISTING_PREF]].split(",")
             recitationPrefs = row[fields[RECITATION_PREF]].split(",")
             dayPrefs = row[fields[DAY_PREF]]
-            # conflicts = getConflicts(row, fields)
+            conflicts = getConflicts(row[fields[TIME_CONFLICT]].split(";"))
             computerSkills = row[fields[COMPUTER_SKILLS]]
-            
+
             person = Person(name, fullySupported, yearInSchool, pureOrApplied,
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
-                            recitationPrefs, categoryPrefs, "", computerSkills)
+                            recitationPrefs, categoryPrefs, conflicts, computerSkills)
 
             print(person.toString())
 

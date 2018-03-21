@@ -47,16 +47,15 @@ class Conflict:
 
     def toString(self):
         if hasattr(self, "day"):
-            return ("day={%s}, start={%s}, end={%s}" % (
-                self.day, self.startTime, self.endTime))
+            return ("class={%s}, day={%s}, start={%s}, end={%s}" % (
+                self.classNumber, self.day, self.startTime, self.endTime))
         else:
             return ""
 
     def __init__(self,
-                 day
-                 , startTime
-                 , endTime):
+                 classNumber, day, startTime, endTime):
         if datetime.strptime(startTime, "%H:%M") < datetime.strptime(endTime, "%H:%M"):
+            self.classNumber = classNumber
             self.day = day
             self.startTime = datetime.strptime(startTime, "%H:%M").time()
             self.endTime = datetime.strptime(endTime, "%H:%M").time()
