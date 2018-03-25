@@ -56,7 +56,7 @@ export class UploadFiles extends React.Component<null, { text: string }> {
           <br />
           Select people to upload:
           <input id="vs-people-input-id" type="file" name="people" />
-          <input type="submit" value="Upload Image" name="submit" />
+          <input type="submit" value="Upload" name="submit" />
         </form>
         <div>
           {this.state.text}
