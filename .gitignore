@@ -7,3 +7,4 @@ node_modules
 scheduler/static/css
 scheduler/static/js
 *.log
+.env
