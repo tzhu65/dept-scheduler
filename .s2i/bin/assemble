@@ -8,6 +8,10 @@ if [ $rc -eq 0 ]; then
     echo "Bundling the client"
     cd scheduler/client
     echo "cd'ed"
+    sudo apt-get install nodejs
+    echo "installed node.js"
+    sudo apt-get install npm
+    echo "installed npm"
     npm install
     echo "npm installed"
 else
