@@ -7,7 +7,9 @@ rc=$?
 if [ $rc -eq 0 ]; then
     echo "Bundling the client"
     cd scheduler/client
+    echo "cd'ed"
     npm install
+    echo "npm installed"
 else
     echo "Failed assembling so not bundling the client"
 fi
