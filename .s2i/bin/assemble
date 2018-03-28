@@ -5,9 +5,11 @@
 rc=$?
 
 if [ $rc -eq 0 ]; then
-    echo "After successful assembling"
+    echo "Bundling the client"
+    cd scheduler/client
+    npm install
 else
-    echo "After failed assembling"
+    echo "Failed assembling so not bundling the client"
 fi
 
 exit $rc
