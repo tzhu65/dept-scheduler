@@ -4,7 +4,5 @@ db.sqlite3
 *.pyc
 .DS_Store
 node_modules
-scheduler/static/css
-scheduler/static/js
 *.log
 .env
