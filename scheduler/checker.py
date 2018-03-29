@@ -38,7 +38,6 @@ def validateQualifyingExam(person, course, errors):
         return True
 
 
-
 def checkIfClassIsPreferredClass(person, course, errors):
     if not any(course.cse in val for val in person.teachPrefs.values()):
         printError(person, course, "Instructor did not list course as one of their preferences")
