@@ -67,6 +67,11 @@ def parsePeople(file):
             categoryPrefs["MHC"] = re.sub("[^0-9]", "", row[fields[CATEGORY_MHC]])
             name = row[fields[NAME]]
             fullySupported = row[fields[FULLY_SUPPORTED]]
+            #check if person if fully supported
+            if row[fields[FULLY_SUPPORTED]] == 'Yes':
+                supportingProfessor = fields[SUPPORTING_PROFESSOR]
+            else:
+                supportingProfessor = "N/A"
             yearInSchool = row[fields[YEAR_IN_SCHOOL]]
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
@@ -77,10 +82,11 @@ def parsePeople(file):
             dayPrefs = row[fields[DAY_PREF]]
             conflicts = getConflicts(row[fields[TIME_CONFLICT]].split(";"))
             computerSkills = row[fields[COMPUTER_SKILLS]]
+            hoursCompleted = row[fields[HOURS_COMPLETED]]
 
-            person = Person(name, fullySupported, yearInSchool, pureOrApplied,
+            person = Person(name, fullySupported, supportingProfessor ,yearInSchool, pureOrApplied,
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
-                            recitationPrefs, categoryPrefs, conflicts, computerSkills)
+                            recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted)
 
             print(person.toString())
 
@@ -105,7 +111,7 @@ def parseCourses(file):
         if row[0]:
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
-            course = Course(row[fields['Cse']].strip(),  # course number
+            course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time

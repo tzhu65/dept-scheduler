@@ -22,3 +22,4 @@ CATEGORY_RECITATION = "If you could choose between teaching, recitation, assisti
 CATEGORY_MHC = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Math help center]"
 DAY_PREF = "Your day preference."
 HOURS_COMPLETED = "Hours completed last semester (0 for fall)"
+SUPPORTING_PROFESSOR = "If you will be bought out of any Fall hours, what is the name of the professor who will be supporting you?"

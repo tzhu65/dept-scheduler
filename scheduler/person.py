@@ -7,9 +7,9 @@ class Person:
         str = ("name={%s}, fullySupported={%s}, yearInSchool={%s}, pureOrApplied={%s}, qualifyingExams={%s}"
                ", teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
                ", categoryPrefs={%s}, computerSkills={%s}" % (
-                   self.name, self.fullySupported, self.yearInSchool, self.pureOrApplied, self.qualifyingExams,
+                   self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied, self.qualifyingExams,
                    self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.computerSkills))
+                   self.categoryPrefs, self.computerSkills, self.hoursCompleted))
         conflictStr = "\n"
         for conflict in self.conflicts:
             conflictStr += conflict.toString() + "\n"
@@ -18,6 +18,7 @@ class Person:
     def __init__(self,
                  name,
                  fullySupported,
+                 supportingProfessor,
                  yearInSchool,
                  pureOrApplied,
                  qualifyingExams,
@@ -27,9 +28,11 @@ class Person:
                  recitationPrefs,
                  categoryPrefs,
                  conflicts,
-                 computerSkills):
+                 computerSkills,
+                 hoursCompleted):
         self.name = name
         self.fullySupported = fullySupported
+        self.supportingProfessor = supportingProfessor
         self.yearInSchool = yearInSchool
         self.pureOrApplied = pureOrApplied
         self.qualifyingExams = qualifyingExams
@@ -41,6 +44,7 @@ class Person:
         self.conflicts = conflicts
         self.computerSkills = computerSkills
         self.qualifyingExams = qualifyingExams
+        self.hoursCompleted = hoursCompleted
 
 
 class Conflict:
