@@ -2,16 +2,16 @@ from .checkerConstants import *
 import string
 
 def printError(person, course, message):
-    print("ERR: %s, %s. %s" % (person.name, course.cse, message))
+    print("ERR: %s, %s. %s" % (person.name, course.courseNumber, message))
 
 
 def appendError(person, course, message, errors):
-    errors.append("ERR: %s, %s. %s" % (person.name, course.cse, message))
+    errors.append("ERR: %s, %s. %s" % (person.name, course.courseNumber, message))
 
 
 def validateComputerSkill(person, course, errors):
     # if course is not a lab then return true cuz comp skills not needed
-    if course.cse[-1:] == 'L':
+    if course.courseNumber[-1:] == 'L':
         # If insufficient computer skill
         if (int(person.computerSkills) < 3):
             printError(person, course,
@@ -27,19 +27,19 @@ def validateComputerSkill(person, course, errors):
 
 def validateQualifyingExam(person, course, errors):
     # if no qualifying exams return true
-    if course.cse not in qualifyingExams:
+    if course.courseNumber not in qualifyingExams:
         return True
         # If qualifying exam not fulfilled
-    if qualifyingExams[course.cse] not in person.qualifyingExams:
-        printError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.cse])
-        appendError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.cse], errors)
+    if qualifyingExams[course.courseNumber] not in person.qualifyingExams:
+        printError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.courseNumber])
+        appendError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.courseNumber], errors)
         return False
     else:
         return True
 
 
 def checkIfClassIsPreferredClass(person, course, errors):
-    if not any(course.cse in val for val in person.teachPrefs.values()):
+    if not any(course.courseNumber in val for val in person.teachPrefs.values()):
         printError(person, course, "Instructor did not list course as one of their preferences")
         appendError(person, course, "Instructor did not list course as one of their preferences", errors)
         return False
@@ -67,7 +67,7 @@ def checkClassTimes(person, course, courses, errors):
         if bool(set(course.days) & set(c.days)):    # Check if the days have overlap
             if checkTimeOverlap(course, c):
                 appendError(person, course, "Course has a time conflict with the another course: %s-%s" % \
-                            (c.cse, c.section), errors)
+                            (c.courseNumber, c.section), errors)
                 return False
     return True
 
@@ -96,7 +96,7 @@ def validate(person, course, personCourses, errors):
 
 def check(courses, people):
     # Make set of courseNames that will be used to ensure every course is assigned
-    courseNames = set([course.cse for course in courses])
+    courseNames = set([course.courseNumber for course in courses])
     print("START: " + str(courseNames))
 
     personCourses = {}      # Dict of mapping a person to their courses
@@ -111,7 +111,7 @@ def check(courses, people):
                     # We need course list to be empty at end, so if course is assigned correctly, remove it from list
 
                     try:
-                        courseNames.remove(course.cse)
+                        courseNames.remove(course.courseNumber)
                     except KeyError:
                         continue
                 c = personCourses.get(person.name, [])

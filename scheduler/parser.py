@@ -115,7 +115,9 @@ def parseCourses(file):
                             days,  # days
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
-                            row[fields['Instructor']].strip())  # instructor
+                            row[fields['Instructor']].strip(),  # instructor
+                            row[fields['Category']]
+                            )
             courses.append(course)
     return courses
 

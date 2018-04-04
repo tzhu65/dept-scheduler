@@ -1,7 +1,7 @@
 RETURNING = 'Will you be returning in Fall?'
-TEACHING_PREF = "Your preference for teaching.  "
+TEACHING_PREF = "Your preference for teaching."
 LAB_PREF = "Your preference for labs."
-ASSISTING_PREF = "Your preference for assisting. "
+ASSISTING_PREF = "Your preference for assisting."
 RECITATION_PREF = "Your recitation preference."
 YEAR_IN_SCHOOL = "What year will you be in Fall?" #TODO: handle Spring case? Regex?
 PREFERED_CATEGORY = "Category Preference"

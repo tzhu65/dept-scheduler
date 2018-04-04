@@ -4,12 +4,12 @@ from datetime import datetime
 class Person:
 
     def toString(self):
-        str = ("name={%s}, fullySupported={%s}, yearInSchool={%s}, pureOrApplied={%s}, qualifyingExams={%s}"
+        str = ("name={%s}, fullySupported={%s}, supportingProfessor={%s},yearInSchool={%s}, pureOrApplied={%s}, qualifyingExams={%s}"
                ", teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
-               ", categoryPrefs={%s}, computerSkills={%s}" % (
+               ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}" % (
                    self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied, self.qualifyingExams,
                    self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.computerSkills, self.hoursCompleted))
+                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted))
         conflictStr = "\n"
         for conflict in self.conflicts:
             conflictStr += conflict.toString() + "\n"
@@ -43,7 +43,6 @@ class Person:
         self.categoryPrefs = categoryPrefs
         self.conflicts = conflicts
         self.computerSkills = computerSkills
-        self.qualifyingExams = qualifyingExams
         self.hoursCompleted = hoursCompleted
 
 
