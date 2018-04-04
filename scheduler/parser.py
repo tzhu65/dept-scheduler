@@ -67,8 +67,7 @@ def parsePeople(file):
             categoryPrefs["MHC"] = re.sub("[^0-9]", "", row[fields[CATEGORY_MHC]])
             name = row[fields[NAME]]
             fullySupported = row[fields[FULLY_SUPPORTED]]
-            #check if person if fully supported
-            if row[fields[FULLY_SUPPORTED]] == 'Yes':
+            if fullySupported == 'Yes':
                 supportingProfessor = fields[SUPPORTING_PROFESSOR]
             else:
                 supportingProfessor = "N/A"
