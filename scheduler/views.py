@@ -21,6 +21,8 @@ def verifySchedule(request):
         if form.is_valid():
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
+            faculty = form.cleaned_data['faculty']
+            print(faculty)
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             if courses and isinstance(courses, TemporaryUploadedFile):
                 courses = parseCoursesFromPath(courses.temporary_file_path())

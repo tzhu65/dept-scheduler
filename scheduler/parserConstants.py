@@ -21,3 +21,4 @@ CATEGORY_ASSISTING = "If you could choose between teaching, recitation, assistin
 CATEGORY_RECITATION = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Recitation]"
 CATEGORY_MHC = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Math help center]"
 DAY_PREF = "Your day preference."
+HOURS_COMPLETED = "Hours completed last semester (0 for fall)"
