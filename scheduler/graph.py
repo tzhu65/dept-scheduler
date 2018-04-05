@@ -38,7 +38,7 @@ class WeightAssigner:
             prefIndex = -1
 
         # Grab the seniority
-        seniority = person.yearsInSchool
+        seniority = person.yearInSchool
 
         # Check if the instructor is the person's sponsor
         sponsor = person.supportingProfessor == course.instructor
@@ -120,7 +120,6 @@ class Graph:
         # Generate all the course nodes
         for c in courses:
             for t in c.types:
-                print(t)
                 for i in range(c.types[t]["amount"]):
                     # Deep copy this node and set the category
                     course = copy.deepcopy(c)
@@ -137,7 +136,7 @@ class Graph:
             self.people.append(n)
 
         # Generate the faculty nodes
-        for p in faculty:
+        for p in faculty[1]:            # TODO: remove this hack of hard coding the fall value
             n = Node('professor', p)
             self.faculty.append(n)
 
