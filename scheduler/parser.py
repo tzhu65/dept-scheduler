@@ -105,7 +105,7 @@ def parseCourses(file):
         if row[0]:
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
-            course = Course(row[fields['Cse']].strip(),  # course number
+            course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
@@ -113,6 +113,23 @@ def parseCourses(file):
                             row[fields['Instructor']].strip())  # instructor
             courses.append(course)
     return courses
+
+
+def parseFacultyFromPath(path):
+    with open(path, newline='') as file:
+        return parseFaculty(file)
+
+
+def parseFaculty(file):
+    faculty = []
+    fields = {}
+    reader = csv.reader(file)
+    headers = next(reader)
+    for index, field in enumerate(headers):
+        fields[field] = index
+    for row in reader:
+        print(row)
+    pass
 
 
 # if __name__ == '__main__':

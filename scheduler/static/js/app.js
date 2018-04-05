@@ -18088,7 +18088,78 @@ exports.MainApp = MainApp;
 init_1.init();
 ReactDOM.render(React.createElement(MainApp, null), document.getElementById("main"));
 
-},{"./components/Frame":29,"./init":30,"react":26,"react-dom":23}],28:[function(require,module,exports){
+},{"./components/Frame":30,"./init":31,"react":26,"react-dom":23}],28:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var GenerateScheduleInput = /** @class */ (function (_super) {
+    __extends(GenerateScheduleInput, _super);
+    function GenerateScheduleInput(props) {
+        var _this = _super.call(this, props) || this;
+        _this.state = { text: "test" };
+        _this.onSubmit = _this.onSubmit.bind(_this);
+        return _this;
+    }
+    GenerateScheduleInput.prototype.onSubmit = function (e) {
+        var _this = this;
+        e.preventDefault();
+        $.ajax({
+            url: "generateSchedule",
+            type: "POST",
+            data: new FormData($("#generate-schedule-id")[0]),
+            cache: false,
+            contentType: false,
+            processData: false,
+            // Custom XMLHttpRequest
+            xhr: function () {
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) {
+                    // For handling the progress of the upload
+                    myXhr.upload.addEventListener("progress", function (event) {
+                        if (event.lengthComputable) {
+                            console.log(event.loaded, event.total);
+                        }
+                    }, false);
+                }
+                return myXhr;
+            },
+            success: function (data, status, xhr) {
+                _this.setState({ text: "JSON data response: " + JSON.stringify(data, null, 2) });
+            },
+            error: function (xhr, status, error) {
+                _this.setState({ text: "ERROR\t" + status + "\t" + error });
+            },
+        });
+    };
+    GenerateScheduleInput.prototype.render = function () {
+        return (React.createElement("div", null,
+            React.createElement("form", { id: "generate-schedule-id", action: "/generateSchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
+                "Select courses to upload:",
+                React.createElement("input", { id: "vs-courses-input-id", type: "file", name: "courses" }),
+                React.createElement("br", null),
+                "Select people to upload:",
+                React.createElement("input", { id: "vs-people-input-id", type: "file", name: "people" }),
+                React.createElement("br", null),
+                "Select faculty to upload:",
+                React.createElement("input", { id: "vs-faculty-input-id", type: "file", name: "faculty" }),
+                React.createElement("input", { type: "submit", value: "Upload", name: "submit" })),
+            React.createElement("div", null, this.state.text)));
+    };
+    return GenerateScheduleInput;
+}(React.Component));
+exports.GenerateScheduleInput = GenerateScheduleInput;
+
+},{"react":26}],29:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18156,7 +18227,7 @@ var UploadFiles = /** @class */ (function (_super) {
 }(React.Component));
 exports.UploadFiles = UploadFiles;
 
-},{"react":26}],29:[function(require,module,exports){
+},{"react":26}],30:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18171,6 +18242,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var UploadFiles_1 = require("./FileUpload/UploadFiles");
+var GenerateScheduleInput_1 = require("./FileUpload/GenerateScheduleInput");
 var Frame = /** @class */ (function (_super) {
     __extends(Frame, _super);
     function Frame() {
@@ -18179,13 +18251,15 @@ var Frame = /** @class */ (function (_super) {
     Frame.prototype.render = function () {
         return (React.createElement("div", null,
             "Test Component",
-            React.createElement(UploadFiles_1.UploadFiles, null)));
+            React.createElement(UploadFiles_1.UploadFiles, null),
+            React.createElement("br", null),
+            React.createElement(GenerateScheduleInput_1.GenerateScheduleInput, null)));
     };
     return Frame;
 }(React.Component));
 exports.Frame = Frame;
 
-},{"./FileUpload/UploadFiles":28,"react":26}],30:[function(require,module,exports){
+},{"./FileUpload/GenerateScheduleInput":28,"./FileUpload/UploadFiles":29,"react":26}],31:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Exported bootstrap function for initializing the app.
