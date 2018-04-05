@@ -97,12 +97,12 @@ def validPersonCourseEdge(person, course, errors):
 
 def validProfessorCourseEdge(professor, course, errors):
     """
-    Returns true if the professor can teach a course.
+    Returns true if the professor can teach a course. Currently, they are only allowed to teach a course.
     :param professor:
     :param course:
     :return:
     """
-    return True
+    return course.category == 'teach'
 
 
 class Graph:
