@@ -67,6 +67,10 @@ def parsePeople(file):
             categoryPrefs["MHC"] = re.sub("[^0-9]", "", row[fields[CATEGORY_MHC]])
             name = row[fields[NAME]]
             fullySupported = row[fields[FULLY_SUPPORTED]]
+            if fullySupported == 'Yes':
+                supportingProfessor = fields[SUPPORTING_PROFESSOR]
+            else:
+                supportingProfessor = "N/A"
             yearInSchool = row[fields[YEAR_IN_SCHOOL]]
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
@@ -77,10 +81,11 @@ def parsePeople(file):
             dayPrefs = row[fields[DAY_PREF]]
             conflicts = getConflicts(row[fields[TIME_CONFLICT]].split(";"))
             computerSkills = row[fields[COMPUTER_SKILLS]]
+            hoursCompleted = row[fields[HOURS_COMPLETED]]
 
-            person = Person(name, fullySupported, yearInSchool, pureOrApplied,
+            person = Person(name, fullySupported, supportingProfessor ,yearInSchool, pureOrApplied,
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
-                            recitationPrefs, categoryPrefs, conflicts, computerSkills)
+                            recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted)
 
             print(person.toString())
 
@@ -105,32 +110,47 @@ def parseCourses(file):
         if row[0]:
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
+            #This needs to be cleaned up to make better code & also generic
+            hoursValue = 0
+            if row[fields["Teach(12)"]] == 1:
+                hoursValue = 12
+            elif row[fields["Recitation(3)"]] == 1:
+                hoursValue = 3
+            elif row[fields["Assist(6)"]] == 1:
+                hoursValue = 6
+            elif row[fields["Lab(6)"]] == 1:
+                hoursValue = 6
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
+                            hoursValue,
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
-                            row[fields['Instructor']].strip())  # instructor
+                            row[fields['Instructor']].strip(),  # instructor
+                            row[fields['Category']]
+                            )
             courses.append(course)
     return courses
 
-
-def parseFacultyFromPath(path):
+def parseFacultyHoursFromPath(path):
     with open(path, newline='') as file:
-        return parseFaculty(file)
+        return parseFacultyHours(file)
 
-
-def parseFaculty(file):
-    faculty = []
+def parseFacultyHours(file):
+    #currently hardcoded for fall
     fields = {}
+    fallFacultyLoadDict = {}
+    springFacultyLoadDict = {}
     reader = csv.reader(file)
     headers = next(reader)
-    for index, field in enumerate(headers):
-        fields[field] = index
+    for i, field in enumerate(headers):
+        fields[field] = i
     for row in reader:
-        print(row)
-    pass
-
+        if row[0]:
+            professorName = row[fields['Professor Name']].strip()
+            fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
+            springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
+    return fallFacultyLoadDict, springFacultyLoadDict
 
 # if __name__ == '__main__':
 #     people = parsePeople('./static/data/formS2018.csv')

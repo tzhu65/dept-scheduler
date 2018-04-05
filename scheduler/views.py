@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 
 from .forms import VerifySchedule, GenerateSchedule
-from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath, parseFaculty, parseFacultyFromPath
+from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath, parseFacultyHours, parseFacultyHoursFromPath
 from .checker import check
 from .generate import generate
 
@@ -22,6 +22,7 @@ def verifySchedule(request):
         if form.is_valid():
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
+            faculty = form.cleaned_data['faculty']
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             if courses and isinstance(courses, TemporaryUploadedFile):
                 courses = parseCoursesFromPath(courses.temporary_file_path())
@@ -35,7 +36,12 @@ def verifySchedule(request):
                 f = TextIOWrapper(people.file, encoding=request.encoding)
                 people = parsePeople(f)
 
-            check(courses, people)
+            if faculty and isinstance(faculty, TemporaryUploadedFile):
+                facultyHours = parseFacultyHoursFromPath(faculty.temporary_file_path())
+            elif faculty and isinstance(faculty, InMemoryUploadedFile):
+                f = TextIOWrapper(faculty.file, encoding=request.encoding)
+                facultyHours = parseFacultyHours(f)
+            check(courses, people, facultyHours[0])
         else:
             print(form.errors)
         return HttpResponse("hi")
@@ -64,10 +70,10 @@ def generateSchedule(request):
                 people = parsePeople(f)
 
             if faculty and isinstance(faculty, TemporaryUploadedFile):
-                faculty = parseFacultyFromPath(faculty.temporary_file_path())
+                faculty = parseFacultyHoursFromPath(faculty.temporary_file_path())
             elif faculty and isinstance(faculty, InMemoryUploadedFile):
                 f = TextIOWrapper(faculty.file, encoding=request.encoding)
-                faculty = parseFaculty(f)
+                faculty = parseFacultyHours(f)
 
             generate(courses, people, faculty)
         else:
