@@ -110,9 +110,20 @@ def parseCourses(file):
         if row[0]:
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
+            #This needs to be cleaned up to make better code & also generic
+            hoursValue = 0
+            if row[fields["Teach(12)"]] == 1:
+                hoursValue = 12
+            elif row[fields["Recitation(3)"]] == 1:
+                hoursValue = 3
+            elif row[fields["Assist(6)"]] == 1:
+                hoursValue = 6
+            elif row[fields["Lab(6)"]] == 1:
+                hoursValue = 6
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
+                            hoursValue,
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
                             row[fields['Instructor']].strip(),  # instructor

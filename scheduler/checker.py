@@ -46,6 +46,19 @@ def checkIfClassIsPreferredClass(person, course, errors):
     else:
         return True
 
+def checkHoursConstraint(person, course, errors):
+    print("GET HERE!_@#!@$@#$!#$")
+    avaliableHours = 30-person.hoursCompleted-course.hoursValue
+    if avaliableHours < 0:
+        #error
+        printError(person,course,"Instructor has passed their allowed hours for this semester")
+        appendError(person,course,"Instructor has passed their allowed hours for this semester", errors)
+        return False
+    else:
+        return True
+        print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
+
+
 
 # Check to make sure that no person has classes on MWF and TR
 def checkClassDaysOfTheWeek(person, course, courses, errors):
@@ -71,36 +84,7 @@ def checkClassTimes(person, course, courses, errors):
                 return False
     return True
 
-
-def checkTimeOverlap(courseA, courseB):
-    latestStart = max(courseA.startTime, courseB.startTime)
-    earliestEnd = min(courseA.endTime, courseB.endTime)
-    return earliestEnd > latestStart    # Returns true if their is a time conflict
-
-
-def validate(person, course, personCourses, errors):
-    # Ensure sufficient computer skills
-    # Ensure sufficient qualification exams passed
-    # Ensure course is one of person's preferences
-    # Ensure either M/W/F or T/Th schedule
-    return \
-        checkClassTimes(person, course, personCourses.get(person.name, []), errors) and \
-        checkClassDaysOfTheWeek(person, course, personCourses.get(person.name, []), errors) and \
-        validateComputerSkill(person, course, errors) and validateQualifyingExam(person, course, errors) and \
-        checkIfClassIsPrefferedClass(person, course, errors)
-
-    # NEED TO IMPLEMENT
-    # 600-level courses must have passed appropriate COMP
-    # if int(course.cse.strip(string.ascii_letters)) >= 600:
-
-
-def check(courses, people, facultyHours):
-    # Make set of courseNames that will be used to ensure every course is assigned
-    courseNames = set([course.courseNumber for course in courses])
-    print("START: " + str(courseNames))
-    personCourses = {}      # Dict of mapping a person to their courses
-    errors = []     # List of errors
-
+def checkFacultyHours(courses, facultyHours, errors):
     #Faculty correct course check
     for faculty in facultyHours:
         courseCount = 0
@@ -114,6 +98,35 @@ def check(courses, people, facultyHours):
             #error
             print("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, facultyHours[faculty], courseCount))
 
+
+def checkTimeOverlap(courseA, courseB):
+    latestStart = max(courseA.startTime, courseB.startTime)
+    earliestEnd = min(courseA.endTime, courseB.endTime)
+    return earliestEnd > latestStart    # Returns true if their is a time conflict
+
+
+def validate(person, course, personCourses, errors):
+    print("Performing validations")
+    # Ensure sufficient computer skills
+    # Ensure sufficient qualification exams passed
+    # Ensure course is one of person's preferences
+    # Ensure either M/W/F or T/Th schedule
+    return \
+        checkClassTimes(person, course, personCourses.get(person.name, []), errors) and \
+        checkClassDaysOfTheWeek(person, course, personCourses.get(person.name, []), errors) and \
+        validateComputerSkill(person, course, errors) and validateQualifyingExam(person, course, errors) and \
+        checkIfClassIsPrefferedClass(person, course, errors) and \
+        checkHoursConstraint(person,course,errors)
+
+
+def check(courses, people, facultyHours):
+    # Make set of courseNames that will be used to ensure every course is assigned
+    courseNames = set([course.courseNumber for course in courses])
+    print("START: " + str(courseNames))
+    personCourses = {}      # Dict of mapping a person to their courses
+    errors = []     # List of errors
+
+    checkFacultyHours(courses, facultyHours, errors)
 
     for person in people:
         for course in courses:
