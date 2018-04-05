@@ -18149,6 +18149,9 @@ var UploadFiles = /** @class */ (function (_super) {
                 React.createElement("br", null),
                 "Select people to upload:",
                 React.createElement("input", { id: "vs-people-input-id", type: "file", name: "people" }),
+                React.createElement("br", null),
+                "Select faculty to upload:",
+                React.createElement("input", { id: "vs-faculty-input-id", type: "file", name: "faculty" }),
                 React.createElement("input", { type: "submit", value: "Upload", name: "submit" })),
             React.createElement("div", null, this.state.text)));
     };
