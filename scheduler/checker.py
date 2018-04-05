@@ -98,9 +98,22 @@ def check(courses, people, facultyHours):
     # Make set of courseNames that will be used to ensure every course is assigned
     courseNames = set([course.courseNumber for course in courses])
     print("START: " + str(courseNames))
-    
     personCourses = {}      # Dict of mapping a person to their courses
     errors = []     # List of errors
+
+    #Faculty correct course check
+    for faculty in facultyHours:
+        courseCount = 0
+        for course in courses:
+            if course.instructor.lower() == faculty.lower():
+                courseCount+=1
+        if courseCount == int(facultyHours[faculty]):
+            #Expected Nothing is wrong
+            print("%s is enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, facultyHours[faculty], courseCount))
+        else:
+            #error
+            print("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, facultyHours[faculty], courseCount))
+
 
     for person in people:
         for course in courses:

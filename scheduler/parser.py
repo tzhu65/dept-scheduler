@@ -131,16 +131,12 @@ def parseFacultyHours(file):
     fallFacultyLoadDict = {}
     springFacultyLoadDict = {}
     reader = csv.reader(file)
-    print("Parsing faculty hours")
     headers = next(reader)
-    print(headers)
     for i, field in enumerate(headers):
         fields[field] = i
     for row in reader:
         if row[0]:
             professorName = row[fields['Professor Name']].strip()
-            print("Prof name: %s" % professorName)
-            print(row[fields['Fall']].strip())
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
     return fallFacultyLoadDict, springFacultyLoadDict
