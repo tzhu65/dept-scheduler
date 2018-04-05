@@ -94,11 +94,11 @@ def validate(person, course, personCourses, errors):
     # if int(course.cse.strip(string.ascii_letters)) >= 600:
 
 
-def check(courses, people):
+def check(courses, people, facultyHours):
     # Make set of courseNames that will be used to ensure every course is assigned
     courseNames = set([course.courseNumber for course in courses])
     print("START: " + str(courseNames))
-
+    
     personCourses = {}      # Dict of mapping a person to their courses
     errors = []     # List of errors
 

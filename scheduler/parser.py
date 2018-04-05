@@ -121,7 +121,29 @@ def parseCourses(file):
             courses.append(course)
     return courses
 
+def parseFacultyHoursFromPath(path):
+    with open(path, newline='') as file:
+        return parseFacultyHours(file)
 
+def parseFacultyHours(file):
+    #currently hardcoded for fall
+    fields = {}
+    fallFacultyLoadDict = {}
+    springFacultyLoadDict = {}
+    reader = csv.reader(file)
+    print("Parsing faculty hours")
+    headers = next(reader)
+    print(headers)
+    for i, field in enumerate(headers):
+        fields[field] = i
+    for row in reader:
+        if row[0]:
+            professorName = row[fields['Professor Name']].strip()
+            print("Prof name: %s" % professorName)
+            print(row[fields['Fall']].strip())
+            fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
+            springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
+    return fallFacultyLoadDict, springFacultyLoadDict
 # if __name__ == '__main__':
 #     people = parsePeople('./static/data/formS2018.csv')
 #     courses = parseCoursesFromPath('./static/data/s2018_schedule.csv')

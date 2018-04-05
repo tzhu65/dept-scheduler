@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 
 from .forms import VerifySchedule
-from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath
+from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath, parseFacultyHours, parseFacultyHoursFromPath
 from .checker import check
 
 # Create your views here.
@@ -37,7 +37,12 @@ def verifySchedule(request):
                 f = TextIOWrapper(people.file, encoding=request.encoding)
                 people = parsePeople(f)
 
-            check(courses, people)
+            if faculty and isinstance(faculty, TemporaryUploadedFile):
+                facultyHours = parseFacultyHoursFromPath(faculty.temporary_file_path())
+            elif faculty and isinstance(faculty, InMemoryUploadedFile):
+                f = TextIOWrapper(faculty.file, encoding=request.encoding)
+                facultyHours = parseFacultyHours(f)
+            check(courses, people, facultyHours)
         else:
             print("Error with form")
             print(form.errors)
