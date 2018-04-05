@@ -19,7 +19,5 @@ By default, the django server is running on `localhost:8000` so go there in your
 
 * Add SSH key to your GitLab profile
 * Push code to GitLab
- * `git remote add gitlab https://sc.unc.edu/dept-schedulechecker/dept-scheduler.git`
- * `git push gitlab master`
-* Go to OpenShift
- * Go to Project page -> Builds -> dept-scheduler -> Start Build
+  * `git remote add gitlab git@sc.unc.edu:dept-schedulechecker/dept-scheduler.git`
+  * `git push gitlab master`
