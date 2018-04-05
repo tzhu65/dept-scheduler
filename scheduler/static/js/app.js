@@ -18177,7 +18177,7 @@ var UploadFiles = /** @class */ (function (_super) {
     __extends(UploadFiles, _super);
     function UploadFiles(props) {
         var _this = _super.call(this, props) || this;
-        _this.state = { text: "test" };
+        _this.state = { text: "testeroni" };
         _this.onSubmit = _this.onSubmit.bind(_this);
         return _this;
     }

@@ -115,7 +115,7 @@ def validate(person, course, personCourses, errors):
         checkClassTimes(person, course, personCourses.get(person.name, []), errors) and \
         checkClassDaysOfTheWeek(person, course, personCourses.get(person.name, []), errors) and \
         validateComputerSkill(person, course, errors) and validateQualifyingExam(person, course, errors) and \
-        checkIfClassIsPrefferedClass(person, course, errors) and \
+        checkIfClassIsPreferredClass(person, course, errors) and \
         checkHoursConstraint(person,course,errors)
 
 

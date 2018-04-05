@@ -11,4 +11,3 @@ class GenerateSchedule(forms.Form):
     courses = forms.FileField(max_length=40, allow_empty_file=False)
     people = forms.FileField(max_length=40, allow_empty_file=False)
     faculty = forms.FileField(max_length=40, allow_empty_file=False)
-
