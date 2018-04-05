@@ -17,7 +17,8 @@ By default, the django server is running on `localhost:8000` so go there in your
 
 ## Deployment Instructions
 
-* Add SSH key to your GitLab profile
-* Push code to GitLab
-  * `git remote add gitlab git@sc.unc.edu:dept-schedulechecker/dept-scheduler.git`
+* Do this once: add SSH key to your GitLab profile
+* Do this once: `git remote add gitlab git@sc.unc.edu:dept-schedulechecker/dept-scheduler.git`
+* Do this every time: Push code to GitLab
+  * `python3 manage.py collectstatic`
   * `git push gitlab master`
