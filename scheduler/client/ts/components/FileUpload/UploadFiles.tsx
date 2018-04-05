@@ -4,7 +4,7 @@ export class UploadFiles extends React.Component<null, { text: string }> {
 
   constructor(props: any) {
     super(props);
-    this.state = { text: "test" };
+    this.state = { text: "testeroni" };
     this.onSubmit = this.onSubmit.bind(this);
   }
 
