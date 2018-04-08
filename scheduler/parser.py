@@ -74,10 +74,10 @@ def parsePeople(file):
             yearInSchool = row[fields[YEAR_IN_SCHOOL]]
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
-            teachingPrefs = [x.strip() for x in row[fields[TEACHING_PREF]].split(",")]
-            labPrefs = [x.strip() for x in row[fields[LAB_PREF]].split(",")]
-            assistingPrefs = [x.strip() for x in row[fields[ASSISTING_PREF]].split(",")]
-            recitationPrefs = [x.strip() for x in row[fields[RECITATION_PREF]].split(",")]
+            teachingPrefs = sanitizeList(row[fields[TEACHING_PREF]])
+            labPrefs = sanitizeList(row[fields[LAB_PREF]])
+            assistingPrefs = sanitizeList(row[fields[ASSISTING_PREF]])
+            recitationPrefs = sanitizeList(row[fields[RECITATION_PREF]])
             dayPrefs = row[fields[DAY_PREF]]
             conflicts = getConflicts(row[fields[TIME_CONFLICT]].split(";"))
             computerSkills = row[fields[COMPUTER_SKILLS]]
@@ -127,24 +127,24 @@ def parseCourses(file):
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
             #This needs to be cleaned up to make better code & also generic
-            types = {}
+            positions = {}
             hoursValue = 0
             if row[fields["Teach(12)"]] and int(row[fields["Teach(12)"]]) > 0:
-                types["teach"] = {"hours": 12, "amount": int(row[fields["Teach(12)"]])}
+                positions["teach"] = {"hours": 12, "amount": int(row[fields["Teach(12)"]])}
                 hoursValue = 12
             elif row[fields["Recitation(3)"]] and int(row[fields["Recitation(3)"]]) > 0:
-                types["recitation"] = {"hours": 3, "amount": int(row[fields["Recitation(3)"]])}
+                positions["recitation"] = {"hours": 3, "amount": int(row[fields["Recitation(3)"]])}
                 hoursValue = 3
             elif row[fields["Assist(6)"]] and int(row[fields["Assist(6)"]]) > 0:
-                types["assist"] = {"hours": 6, "amount": int(row[fields["Assist(6)"]])}
+                positions["assist"] = {"hours": 6, "amount": int(row[fields["Assist(6)"]])}
                 hoursValue = 6
             elif row[fields["Lab(6)"]] and int(row[fields["Lab(6)"]]) > 0:
-                types["lab"] = {"hours": 6, "amount": int(row[fields["Lab(6)"]])}
+                positions["lab"] = {"hours": 6, "amount": int(row[fields["Lab(6)"]])}
                 hoursValue = 6
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
-                            types,
+                            positions,
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
                             row[fields['Instructor']].strip(),  # instructor
