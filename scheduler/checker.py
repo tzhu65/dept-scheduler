@@ -14,8 +14,6 @@ def validateComputerSkill(person, course, errors):
     if course.courseNumber[-1:] == 'L':
         # If insufficient computer skill
         if (int(person.computerSkills) < 3):
-            printError(person, course,
-                "Instructor has computer skill: %s. Course requires computer skill: 3" % person.computerSkills)
             appendError(person, course,
                 "Instructor has computer skill: %s. Course requires computer skill: 3" % person.computerSkills, errors)
             return False
@@ -31,7 +29,6 @@ def validateQualifyingExam(person, course, errors):
         return True
         # If qualifying exam not fulfilled
     if qualifyingExams[course.courseNumber] not in person.qualifyingExams:
-        printError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.courseNumber])
         appendError(person, course, "Instructor is missing required qualifying exam: %s" % qualifyingExams[course.courseNumber], errors)
         return False
     else:
@@ -40,24 +37,20 @@ def validateQualifyingExam(person, course, errors):
 
 def checkIfClassIsPreferredClass(person, course, errors):
     if not any(course.courseNumber in val for val in person.teachPrefs.values()):
-        printError(person, course, "Instructor did not list course as one of their preferences")
         appendError(person, course, "Instructor did not list course as one of their preferences", errors)
         return False
     else:
         return True
 
 def checkHoursConstraint(person, course, errors):
-    print("GET HERE!_@#!@$@#$!#$")
     avaliableHours = 30-person.hoursCompleted-course.hoursValue
     if avaliableHours < 0:
         #error
-        printError(person,course,"Instructor has passed their allowed hours for this semester")
         appendError(person,course,"Instructor has passed their allowed hours for this semester", errors)
         return False
     else:
         return True
         print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
-
 
 
 # Check to make sure that no person has classes on MWF and TR
@@ -82,6 +75,14 @@ def checkClassTimes(person, course, courses, errors):
                 appendError(person, course, "Course has a time conflict with the another course: %s-%s" % \
                             (c.courseNumber, c.section), errors)
                 return False
+
+        # Check for overlap with the person's conflicts
+        for conflict in person.conflicts:
+            if conflict.day in set(c.days):
+                if checkTimeOverlap(conflict, c):
+                    appendError(person, course, "Course time conflicts with personal conflicts: %s-%s" % \
+                                (c.courseNumber, c.section), errors)
+                    return False
     return True
 
 def checkFacultyHours(courses, facultyHours, errors):
@@ -115,8 +116,8 @@ def validate(person, course, personCourses, errors):
         checkClassTimes(person, course, personCourses.get(person.name, []), errors) and \
         checkClassDaysOfTheWeek(person, course, personCourses.get(person.name, []), errors) and \
         validateComputerSkill(person, course, errors) and validateQualifyingExam(person, course, errors) and \
-        checkIfClassIsPrefferedClass(person, course, errors) and \
-        checkHoursConstraint(person,course,errors)
+        checkIfClassIsPreferredClass(person, course, errors) and \
+        checkHoursConstraint(person, course, errors)
 
 
 def check(courses, people, facultyHours):
@@ -146,5 +147,3 @@ def check(courses, people, facultyHours):
 
     print("Invalid courses are: " + str(courseNames))
     print(errors)
-
-    # print(courses, people)

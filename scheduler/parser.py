@@ -74,14 +74,25 @@ def parsePeople(file):
             yearInSchool = row[fields[YEAR_IN_SCHOOL]]
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
-            teachingPrefs = row[fields[TEACHING_PREF]].split(",")
-            labPrefs = row[fields[LAB_PREF]].split(",")
-            assistingPrefs = row[fields[ASSISTING_PREF]].split(",")
-            recitationPrefs = row[fields[RECITATION_PREF]].split(",")
+            teachingPrefs = sanitizeList(row[fields[TEACHING_PREF]])
+            labPrefs = sanitizeList(row[fields[LAB_PREF]])
+            assistingPrefs = sanitizeList(row[fields[ASSISTING_PREF]])
+            recitationPrefs = sanitizeList(row[fields[RECITATION_PREF]])
             dayPrefs = row[fields[DAY_PREF]]
             conflicts = getConflicts(row[fields[TIME_CONFLICT]].split(";"))
             computerSkills = row[fields[COMPUTER_SKILLS]]
             hoursCompleted = row[fields[HOURS_COMPLETED]]
+
+            # Convert hours completed to a number
+            if hoursCompleted.isdigit():
+                hoursCompleted = int(hoursCompleted)
+
+            # Convert computer skills to a number
+            SKILLS = {'weak': 1, 'ok': 2, 'strong': 3}
+            if computerSkills in SKILLS:
+                computerSkills = SKILLS[computerSkills]
+            else:
+                computerSkills = 0
 
             person = Person(name, fullySupported, supportingProfessor ,yearInSchool, pureOrApplied,
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
@@ -108,26 +119,37 @@ def parseCourses(file):
         fields[field] = i
     for row in reader:
         if row[0]:
+
+            # Skip a row if it's length isn't long enough
+            if len(row) == 1:
+                continue
+
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
             #This needs to be cleaned up to make better code & also generic
+            positions = {}
             hoursValue = 0
-            if row[fields["Teach(12)"]] == 1:
+            if row[fields["Teach(12)"]] and int(row[fields["Teach(12)"]]) > 0:
+                positions["teach"] = {"hours": 12, "amount": int(row[fields["Teach(12)"]])}
                 hoursValue = 12
-            elif row[fields["Recitation(3)"]] == 1:
+            elif row[fields["Recitation(3)"]] and int(row[fields["Recitation(3)"]]) > 0:
+                positions["recitation"] = {"hours": 3, "amount": int(row[fields["Recitation(3)"]])}
                 hoursValue = 3
-            elif row[fields["Assist(6)"]] == 1:
+            elif row[fields["Assist(6)"]] and int(row[fields["Assist(6)"]]) > 0:
+                positions["assist"] = {"hours": 6, "amount": int(row[fields["Assist(6)"]])}
                 hoursValue = 6
-            elif row[fields["Lab(6)"]] == 1:
+            elif row[fields["Lab(6)"]] and int(row[fields["Lab(6)"]]) > 0:
+                positions["lab"] = {"hours": 6, "amount": int(row[fields["Lab(6)"]])}
                 hoursValue = 6
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
-                            hoursValue,
+                            positions,
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
                             row[fields['Instructor']].strip(),  # instructor
-                            row[fields['Category']]
+                            row[fields['Category']],
+                            hoursValue
                             )
             courses.append(course)
     return courses
@@ -151,6 +173,7 @@ def parseFacultyHours(file):
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
     return fallFacultyLoadDict, springFacultyLoadDict
+
 # if __name__ == '__main__':
 #     people = parsePeople('./static/data/formS2018.csv')
 #     courses = parseCoursesFromPath('./static/data/s2018_schedule.csv')
