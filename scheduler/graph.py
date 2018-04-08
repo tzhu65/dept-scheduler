@@ -54,7 +54,7 @@ class WeightAssigner:
 
 class Node:
     def __init__(self, type, data):
-        self.type = type
+        self.type = type    # Represents the kind of node (i.e. course, ta, professor)
         self.data = data
         self.edges = []
 
@@ -119,12 +119,12 @@ class Graph:
 
         # Generate all the course nodes
         for c in courses:
-            for t in c.types:
-                for i in range(c.types[t]["amount"]):
+            for t in c.positions:
+                for i in range(c.positions[t]["amount"]):
                     # Deep copy this node and set the category
                     course = copy.deepcopy(c)
                     course.category = t
-                    course.hoursValue = c.types[t]["hours"]
+                    course.hoursValue = c.positions[t]["hours"]
                     if not isinstance(course.hoursValue, int):
                         course.hoursValue = 0
                     n = Node('course', course)
