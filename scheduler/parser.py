@@ -6,6 +6,13 @@ from .person import Conflict
 from .course import Course
 from .parserConstants import *
 
+def sanitizeName(name):
+    sanitized = name
+    if ',' in name:
+        nameParts = name.split(',')
+        sanitizedList = nameParts[1] , ' ' ,nameParts[0]
+        sanitized = ''.join(sanitizedList)
+    return sanitized
 
 def sanitizeList(text):
     text = text.replace(';', ',')
@@ -65,7 +72,7 @@ def parsePeople(file):
             categoryPrefs["Assisting"] = re.sub("[^0-9]", "", row[fields[CATEGORY_ASSISTING]])
             categoryPrefs["Recitation"] = re.sub("[^0-9]", "", row[fields[CATEGORY_RECITATION]])
             categoryPrefs["MHC"] = re.sub("[^0-9]", "", row[fields[CATEGORY_MHC]])
-            name = row[fields[NAME]]
+            name = sanitizeName(row[fields[NAME]])
             fullySupported = row[fields[FULLY_SUPPORTED]]
             if fullySupported == 'Yes':
                 supportingProfessor = fields[SUPPORTING_PROFESSOR]
@@ -169,7 +176,8 @@ def parseFacultyHours(file):
         fields[field] = i
     for row in reader:
         if row[0]:
-            professorName = row[fields['Professor Name']].strip()
+            professorName = sanitizeName(row[fields['Professor Name']].strip())
+            print(professorName)
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
     return fallFacultyLoadDict, springFacultyLoadDict
