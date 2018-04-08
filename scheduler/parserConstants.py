@@ -23,3 +23,4 @@ CATEGORY_MHC = "If you could choose between teaching, recitation, assisting, and
 DAY_PREF = "Your day preference."
 HOURS_COMPLETED = "Hours completed last semester (0 for fall)"
 SUPPORTING_PROFESSOR = "If you will be bought out of any Fall hours, what is the name of the professor who will be supporting you?"
+HOURS_BOUGHT_OUT = "Based on the above description of TA hours and assignments, how many hours, if any, do you expect to be BOUGHT OUT of?"

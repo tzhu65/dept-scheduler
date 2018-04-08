@@ -6,10 +6,10 @@ class Person:
     def toString(self):
         str = ("name={%s}, fullySupported={%s}, supportingProfessor={%s},yearInSchool={%s}, pureOrApplied={%s}, qualifyingExams={%s}"
                ", teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
-               ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}" % (
+               ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}, hoursBoughtOut={%s}" % (
                    self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied, self.qualifyingExams,
                    self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted))
+                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted, self.hoursBoughtOut))
         conflictStr = "\n"
         for conflict in self.conflicts:
             conflictStr += conflict.toString() + "\n"
@@ -29,7 +29,8 @@ class Person:
                  categoryPrefs,
                  conflicts,
                  computerSkills,
-                 hoursCompleted):
+                 hoursCompleted,
+                 hoursBoughtOut):
         self.name = name
         self.fullySupported = fullySupported
         self.supportingProfessor = supportingProfessor
@@ -44,6 +45,7 @@ class Person:
         self.conflicts = conflicts
         self.computerSkills = computerSkills
         self.hoursCompleted = hoursCompleted
+        self.hoursBoughtOut = hoursBoughtOut
 
 
 class Conflict:

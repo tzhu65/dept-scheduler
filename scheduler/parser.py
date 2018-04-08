@@ -79,6 +79,10 @@ def parsePeople(file):
             else:
                 supportingProfessor = "N/A"
             yearInSchool = row[fields[YEAR_IN_SCHOOL]]
+            try:
+                hoursBoughtOut = int(re.search(r'\d+', row[fields[HOURS_BOUGHT_OUT]]).group())
+            except:
+                hoursBoughtOut = 0
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
             teachingPrefs = sanitizeList(row[fields[TEACHING_PREF]])
@@ -103,7 +107,7 @@ def parsePeople(file):
 
             person = Person(name, fullySupported, supportingProfessor ,yearInSchool, pureOrApplied,
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
-                            recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted)
+                            recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted, hoursBoughtOut)
 
             print(person.toString())
 
