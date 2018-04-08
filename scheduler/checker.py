@@ -1,4 +1,5 @@
 from .checkerConstants import *
+from .parser import sanitizeName
 import string
 
 def printError(person, course, message):
@@ -90,14 +91,15 @@ def checkFacultyHours(courses, facultyHours, errors):
     for faculty in facultyHours:
         courseCount = 0
         for course in courses:
-            if course.instructor.lower() == faculty.lower():
+            sanitizedName = sanitizeName(course.instructor)
+            if sanitizedName.lower() == faculty.lower():
                 courseCount+=1
         if courseCount == int(facultyHours[faculty]):
             #Expected Nothing is wrong
-            print("%s is enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, facultyHours[faculty], courseCount))
+            print("%s is enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
         else:
             #error
-            print("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, facultyHours[faculty], courseCount))
+            print("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
 
 def checkTimeOverlap(courseA, courseB):

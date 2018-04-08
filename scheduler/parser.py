@@ -177,9 +177,9 @@ def parseFacultyHours(file):
     for row in reader:
         if row[0]:
             professorName = sanitizeName(row[fields['Professor Name']].strip())
-            print(professorName)
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
+            print(professorName,fallFacultyLoadDict[professorName],springFacultyLoadDict[professorName])
     return fallFacultyLoadDict, springFacultyLoadDict
 
 # if __name__ == '__main__':
