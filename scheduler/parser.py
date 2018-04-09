@@ -78,7 +78,7 @@ def parsePeople(file):
                 supportingProfessor = fields[SUPPORTING_PROFESSOR]
             else:
                 supportingProfessor = "N/A"
-            yearInSchool = row[fields[YEAR_IN_SCHOOL]]
+            yearInSchool = int(row[fields[YEAR_IN_SCHOOL]]) if row[fields[YEAR_IN_SCHOOL]] != '' else 0
             try:
                 hoursBoughtOut = int(re.search(r'\d+', row[fields[HOURS_BOUGHT_OUT]]).group())
             except:
@@ -109,7 +109,7 @@ def parsePeople(file):
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
                             recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted, hoursBoughtOut)
 
-            print(person.toString())
+            # print(person.toString())
 
             people.append(person)
     return people
