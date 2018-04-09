@@ -71,7 +71,7 @@ def parsePeople(file):
                 supportingProfessor = fields[SUPPORTING_PROFESSOR]
             else:
                 supportingProfessor = "N/A"
-            yearInSchool = row[fields[YEAR_IN_SCHOOL]]
+            yearInSchool = int(row[fields[YEAR_IN_SCHOOL]]) if row[fields[YEAR_IN_SCHOOL]] != '' else 0
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
             teachingPrefs = sanitizeList(row[fields[TEACHING_PREF]])
@@ -98,7 +98,7 @@ def parsePeople(file):
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
                             recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted)
 
-            print(person.toString())
+            # print(person.toString())
 
             people.append(person)
     return people

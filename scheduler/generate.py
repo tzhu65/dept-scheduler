@@ -5,4 +5,5 @@ def generate(courses, people, faculty):
     wa = WeightAssigner()
     g = Graph(people, faculty, courses, wa)
     g.printGraph()
-    g.generateSchedule()
+    schedule = g.generateSchedule()
+    g.printSchedule(schedule)
