@@ -51,13 +51,13 @@ export class UploadFiles extends React.Component<null, { text: string }> {
           encType="multipart/form-data"
           onSubmit={this.onSubmit}
         >
-          Select courses to upload:
+          Select schedule to upload:
           <input id="vs-courses-input-id" type="file" name="courses" />
           <br />
-          Select people to upload:
+          Select preferences to upload:
           <input id="vs-people-input-id" type="file" name="people" />
           <br />
-          Select faculty to upload:
+          Select faculty hours to upload:
           <input id="vs-faculty-input-id" type="file" name="faculty" />
           <input type="submit" value="Upload" name="submit" />
         </form>

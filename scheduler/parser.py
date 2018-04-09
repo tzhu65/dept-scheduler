@@ -6,6 +6,13 @@ from .person import Conflict
 from .course import Course
 from .parserConstants import *
 
+def sanitizeName(name):
+    sanitized = name
+    if ',' in name:
+        nameParts = name.split(',')
+        sanitizedList = nameParts[1] , ' ' ,nameParts[0]
+        sanitized = ''.join(sanitizedList)
+    return sanitized
 
 def sanitizeList(text):
     text = text.replace(';', ',')
@@ -65,13 +72,17 @@ def parsePeople(file):
             categoryPrefs["Assisting"] = re.sub("[^0-9]", "", row[fields[CATEGORY_ASSISTING]])
             categoryPrefs["Recitation"] = re.sub("[^0-9]", "", row[fields[CATEGORY_RECITATION]])
             categoryPrefs["MHC"] = re.sub("[^0-9]", "", row[fields[CATEGORY_MHC]])
-            name = row[fields[NAME]]
+            name = sanitizeName(row[fields[NAME]])
             fullySupported = row[fields[FULLY_SUPPORTED]]
             if fullySupported == 'Yes':
                 supportingProfessor = fields[SUPPORTING_PROFESSOR]
             else:
                 supportingProfessor = "N/A"
             yearInSchool = int(row[fields[YEAR_IN_SCHOOL]]) if row[fields[YEAR_IN_SCHOOL]] != '' else 0
+            try:
+                hoursBoughtOut = int(re.search(r'\d+', row[fields[HOURS_BOUGHT_OUT]]).group())
+            except:
+                hoursBoughtOut = 0
             pureOrApplied = row[fields[PURE_OR_APPLIED]]
             qualifyingExams = sanitizeList(row[fields[QUALIFYING_EXAMS]])
             teachingPrefs = sanitizeList(row[fields[TEACHING_PREF]])
@@ -96,7 +107,7 @@ def parsePeople(file):
 
             person = Person(name, fullySupported, supportingProfessor ,yearInSchool, pureOrApplied,
                             qualifyingExams, teachingPrefs, labPrefs, assistingPrefs,
-                            recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted)
+                            recitationPrefs, categoryPrefs, conflicts, computerSkills, hoursCompleted, hoursBoughtOut)
 
             # print(person.toString())
 
@@ -169,9 +180,10 @@ def parseFacultyHours(file):
         fields[field] = i
     for row in reader:
         if row[0]:
-            professorName = row[fields['Professor Name']].strip()
+            professorName = sanitizeName(row[fields['Professor Name']].strip())
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
+            print(professorName,fallFacultyLoadDict[professorName],springFacultyLoadDict[professorName])
     return fallFacultyLoadDict, springFacultyLoadDict
 
 # if __name__ == '__main__':

@@ -18144,13 +18144,13 @@ var GenerateScheduleInput = /** @class */ (function (_super) {
     GenerateScheduleInput.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("form", { id: "generate-schedule-id", action: "/generateSchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                "Select courses to upload:",
+                "Select schedule to upload:",
                 React.createElement("input", { id: "vs-courses-input-id", type: "file", name: "courses" }),
                 React.createElement("br", null),
-                "Select people to upload:",
+                "Select preferences to upload:",
                 React.createElement("input", { id: "vs-people-input-id", type: "file", name: "people" }),
                 React.createElement("br", null),
-                "Select faculty to upload:",
+                "Select faulty hours to upload:",
                 React.createElement("input", { id: "vs-faculty-input-id", type: "file", name: "faculty" }),
                 React.createElement("input", { type: "submit", value: "Upload", name: "submit" })),
             React.createElement("div", null, this.state.text)));
@@ -18215,13 +18215,13 @@ var UploadFiles = /** @class */ (function (_super) {
     UploadFiles.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("form", { id: "verify-schedule-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                "Select courses to upload:",
+                "Select schedule to upload:",
                 React.createElement("input", { id: "vs-courses-input-id", type: "file", name: "courses" }),
                 React.createElement("br", null),
-                "Select people to upload:",
+                "Select preferences to upload:",
                 React.createElement("input", { id: "vs-people-input-id", type: "file", name: "people" }),
                 React.createElement("br", null),
-                "Select faculty to upload:",
+                "Select faculty hours to upload:",
                 React.createElement("input", { id: "vs-faculty-input-id", type: "file", name: "faculty" }),
                 React.createElement("input", { type: "submit", value: "Upload", name: "submit" })),
             React.createElement("div", null, this.state.text)));
