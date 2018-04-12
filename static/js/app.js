@@ -1,4 +1,1307 @@
 (function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports['default'] = makeAction;
+
+var _functions = require('../functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+var _AltUtils = require('../utils/AltUtils');
+
+var utils = _interopRequireWildcard(_AltUtils);
+
+var _isPromise = require('is-promise');
+
+var _isPromise2 = _interopRequireDefault(_isPromise);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function makeAction(alt, namespace, name, implementation, obj) {
+  var id = utils.uid(alt._actionsRegistry, String(namespace) + '.' + String(name));
+  alt._actionsRegistry[id] = 1;
+
+  var data = { id: id, namespace: namespace, name: name };
+
+  var dispatch = function dispatch(payload) {
+    return alt.dispatch(id, payload, data);
+  };
+
+  // the action itself
+  var action = function action() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var invocationResult = implementation.apply(obj, args);
+    var actionResult = invocationResult;
+
+    // async functions that return promises should not be dispatched
+    if (invocationResult !== undefined && !(0, _isPromise2['default'])(invocationResult)) {
+      if (fn.isFunction(invocationResult)) {
+        // inner function result should be returned as an action result
+        actionResult = invocationResult(dispatch, alt);
+      } else {
+        dispatch(invocationResult);
+      }
+    }
+
+    if (invocationResult === undefined) {
+      utils.warn('An action was called but nothing was dispatched');
+    }
+
+    return actionResult;
+  };
+  action.defer = function () {
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    return setTimeout(function () {
+      return action.apply(null, args);
+    });
+  };
+  action.id = id;
+  action.data = data;
+
+  // ensure each reference is unique in the namespace
+  var container = alt.actions[namespace];
+  var namespaceId = utils.uid(container, name);
+  container[namespaceId] = action;
+
+  // generate a constant
+  var constant = utils.formatAsConstant(namespaceId);
+  container[constant] = id;
+
+  return action;
+}
+module.exports = exports['default'];
+},{"../functions":2,"../utils/AltUtils":7,"is-promise":28}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isMutableObject = isMutableObject;
+exports.eachObject = eachObject;
+exports.assign = assign;
+var isFunction = exports.isFunction = function isFunction(x) {
+  return typeof x === 'function';
+};
+
+function isMutableObject(target) {
+  var Ctor = target.constructor;
+
+  return !!target && Object.prototype.toString.call(target) === '[object Object]' && isFunction(Ctor) && !Object.isFrozen(target) && (Ctor instanceof Ctor || target.type === 'AltStore');
+}
+
+function eachObject(f, o) {
+  o.forEach(function (from) {
+    Object.keys(Object(from)).forEach(function (key) {
+      f(key, from[key]);
+    });
+  });
+}
+
+function assign(target) {
+  for (var _len = arguments.length, source = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    source[_key - 1] = arguments[_key];
+  }
+
+  eachObject(function (key, value) {
+    return target[key] = value;
+  }, source);
+  return target;
+}
+},{}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _flux = require('flux');
+
+var _StateFunctions = require('./utils/StateFunctions');
+
+var StateFunctions = _interopRequireWildcard(_StateFunctions);
+
+var _functions = require('./functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+var _store = require('./store');
+
+var store = _interopRequireWildcard(_store);
+
+var _AltUtils = require('./utils/AltUtils');
+
+var utils = _interopRequireWildcard(_AltUtils);
+
+var _actions = require('./actions');
+
+var _actions2 = _interopRequireDefault(_actions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } /* global window */
+
+
+var Alt = function () {
+  function Alt() {
+    var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+    _classCallCheck(this, Alt);
+
+    this.config = config;
+    this.serialize = config.serialize || JSON.stringify;
+    this.deserialize = config.deserialize || JSON.parse;
+    this.dispatcher = config.dispatcher || new _flux.Dispatcher();
+    this.batchingFunction = config.batchingFunction || function (callback) {
+      return callback();
+    };
+    this.actions = { global: {} };
+    this.stores = {};
+    this.storeTransforms = config.storeTransforms || [];
+    this.trapAsync = false;
+    this._actionsRegistry = {};
+    this._initSnapshot = {};
+    this._lastSnapshot = {};
+  }
+
+  Alt.prototype.dispatch = function () {
+    function dispatch(action, data, details) {
+      var _this = this;
+
+      this.batchingFunction(function () {
+        var id = Math.random().toString(18).substr(2, 16);
+
+        // support straight dispatching of FSA-style actions
+        if (action.hasOwnProperty('type') && action.hasOwnProperty('payload')) {
+          var fsaDetails = {
+            id: action.type,
+            namespace: action.type,
+            name: action.type
+          };
+          return _this.dispatcher.dispatch(utils.fsa(id, action.type, action.payload, fsaDetails));
+        }
+
+        if (action.id && action.dispatch) {
+          return utils.dispatch(id, action, data, _this);
+        }
+
+        return _this.dispatcher.dispatch(utils.fsa(id, action, data, details));
+      });
+    }
+
+    return dispatch;
+  }();
+
+  Alt.prototype.createUnsavedStore = function () {
+    function createUnsavedStore(StoreModel) {
+      var key = StoreModel.displayName || '';
+      store.createStoreConfig(this.config, StoreModel);
+      var Store = store.transformStore(this.storeTransforms, StoreModel);
+
+      for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      return fn.isFunction(Store) ? store.createStoreFromClass.apply(store, [this, Store, key].concat(args)) : store.createStoreFromObject(this, Store, key);
+    }
+
+    return createUnsavedStore;
+  }();
+
+  Alt.prototype.createStore = function () {
+    function createStore(StoreModel, iden) {
+      var key = iden || StoreModel.displayName || StoreModel.name || '';
+      store.createStoreConfig(this.config, StoreModel);
+      var Store = store.transformStore(this.storeTransforms, StoreModel);
+
+      /* istanbul ignore next */
+      if (module.hot) delete this.stores[key];
+
+      if (this.stores[key] || !key) {
+        if (this.stores[key]) {
+          utils.warn('A store named ' + String(key) + ' already exists, double check your store ' + 'names or pass in your own custom identifier for each store');
+        } else {
+          utils.warn('Store name was not specified');
+        }
+
+        key = utils.uid(this.stores, key);
+      }
+
+      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+        args[_key2 - 2] = arguments[_key2];
+      }
+
+      var storeInstance = fn.isFunction(Store) ? store.createStoreFromClass.apply(store, [this, Store, key].concat(args)) : store.createStoreFromObject(this, Store, key);
+
+      this.stores[key] = storeInstance;
+      StateFunctions.saveInitialSnapshot(this, key);
+
+      return storeInstance;
+    }
+
+    return createStore;
+  }();
+
+  Alt.prototype.generateActions = function () {
+    function generateActions() {
+      var actions = { name: 'global' };
+
+      for (var _len3 = arguments.length, actionNames = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        actionNames[_key3] = arguments[_key3];
+      }
+
+      return this.createActions(actionNames.reduce(function (obj, action) {
+        obj[action] = utils.dispatchIdentity;
+        return obj;
+      }, actions));
+    }
+
+    return generateActions;
+  }();
+
+  Alt.prototype.createAction = function () {
+    function createAction(name, implementation, obj) {
+      return (0, _actions2['default'])(this, 'global', name, implementation, obj);
+    }
+
+    return createAction;
+  }();
+
+  Alt.prototype.createActions = function () {
+    function createActions(ActionsClass) {
+      var _this3 = this;
+
+      var exportObj = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var actions = {};
+      var key = utils.uid(this._actionsRegistry, ActionsClass.displayName || ActionsClass.name || 'Unknown');
+
+      if (fn.isFunction(ActionsClass)) {
+        fn.assign(actions, utils.getPrototypeChain(ActionsClass));
+
+        var ActionsGenerator = function (_ActionsClass) {
+          _inherits(ActionsGenerator, _ActionsClass);
+
+          function ActionsGenerator() {
+            _classCallCheck(this, ActionsGenerator);
+
+            for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+              args[_key5] = arguments[_key5];
+            }
+
+            return _possibleConstructorReturn(this, _ActionsClass.call.apply(_ActionsClass, [this].concat(args)));
+          }
+
+          ActionsGenerator.prototype.generateActions = function () {
+            function generateActions() {
+              for (var _len6 = arguments.length, actionNames = Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+                actionNames[_key6] = arguments[_key6];
+              }
+
+              actionNames.forEach(function (actionName) {
+                actions[actionName] = utils.dispatchIdentity;
+              });
+            }
+
+            return generateActions;
+          }();
+
+          return ActionsGenerator;
+        }(ActionsClass);
+
+        for (var _len4 = arguments.length, argsForConstructor = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+          argsForConstructor[_key4 - 2] = arguments[_key4];
+        }
+
+        fn.assign(actions, new (Function.prototype.bind.apply(ActionsGenerator, [null].concat(argsForConstructor)))());
+      } else {
+        fn.assign(actions, ActionsClass);
+      }
+
+      this.actions[key] = this.actions[key] || {};
+
+      fn.eachObject(function (actionName, action) {
+        if (!fn.isFunction(action)) {
+          exportObj[actionName] = action;
+          return;
+        }
+
+        // create the action
+        exportObj[actionName] = (0, _actions2['default'])(_this3, key, actionName, action, exportObj);
+
+        // generate a constant
+        var constant = utils.formatAsConstant(actionName);
+        exportObj[constant] = exportObj[actionName].id;
+      }, [actions]);
+
+      return exportObj;
+    }
+
+    return createActions;
+  }();
+
+  Alt.prototype.takeSnapshot = function () {
+    function takeSnapshot() {
+      for (var _len7 = arguments.length, storeNames = Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+        storeNames[_key7] = arguments[_key7];
+      }
+
+      var state = StateFunctions.snapshot(this, storeNames);
+      fn.assign(this._lastSnapshot, state);
+      return this.serialize(state);
+    }
+
+    return takeSnapshot;
+  }();
+
+  Alt.prototype.rollback = function () {
+    function rollback() {
+      StateFunctions.setAppState(this, this.serialize(this._lastSnapshot), function (storeInst) {
+        storeInst.lifecycle('rollback');
+        storeInst.emitChange();
+      });
+    }
+
+    return rollback;
+  }();
+
+  Alt.prototype.recycle = function () {
+    function recycle() {
+      for (var _len8 = arguments.length, storeNames = Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+        storeNames[_key8] = arguments[_key8];
+      }
+
+      var initialSnapshot = storeNames.length ? StateFunctions.filterSnapshots(this, this._initSnapshot, storeNames) : this._initSnapshot;
+
+      StateFunctions.setAppState(this, this.serialize(initialSnapshot), function (storeInst) {
+        storeInst.lifecycle('init');
+        storeInst.emitChange();
+      });
+    }
+
+    return recycle;
+  }();
+
+  Alt.prototype.flush = function () {
+    function flush() {
+      var state = this.serialize(StateFunctions.snapshot(this));
+      this.recycle();
+      return state;
+    }
+
+    return flush;
+  }();
+
+  Alt.prototype.bootstrap = function () {
+    function bootstrap(data) {
+      StateFunctions.setAppState(this, data, function (storeInst, state) {
+        storeInst.lifecycle('bootstrap', state);
+        storeInst.emitChange();
+      });
+    }
+
+    return bootstrap;
+  }();
+
+  Alt.prototype.prepare = function () {
+    function prepare(storeInst, payload) {
+      var data = {};
+      if (!storeInst.displayName) {
+        throw new ReferenceError('Store provided does not have a name');
+      }
+      data[storeInst.displayName] = payload;
+      return this.serialize(data);
+    }
+
+    return prepare;
+  }();
+
+  // Instance type methods for injecting alt into your application as context
+
+  Alt.prototype.addActions = function () {
+    function addActions(name, ActionsClass) {
+      for (var _len9 = arguments.length, args = Array(_len9 > 2 ? _len9 - 2 : 0), _key9 = 2; _key9 < _len9; _key9++) {
+        args[_key9 - 2] = arguments[_key9];
+      }
+
+      this.actions[name] = Array.isArray(ActionsClass) ? this.generateActions.apply(this, ActionsClass) : this.createActions.apply(this, [ActionsClass].concat(args));
+    }
+
+    return addActions;
+  }();
+
+  Alt.prototype.addStore = function () {
+    function addStore(name, StoreModel) {
+      for (var _len10 = arguments.length, args = Array(_len10 > 2 ? _len10 - 2 : 0), _key10 = 2; _key10 < _len10; _key10++) {
+        args[_key10 - 2] = arguments[_key10];
+      }
+
+      this.createStore.apply(this, [StoreModel, name].concat(args));
+    }
+
+    return addStore;
+  }();
+
+  Alt.prototype.getActions = function () {
+    function getActions(name) {
+      return this.actions[name];
+    }
+
+    return getActions;
+  }();
+
+  Alt.prototype.getStore = function () {
+    function getStore(name) {
+      return this.stores[name];
+    }
+
+    return getStore;
+  }();
+
+  Alt.debug = function () {
+    function debug(name, alt, win) {
+      var key = 'alt.js.org';
+      var context = win;
+      if (!context && typeof window !== 'undefined') {
+        context = window;
+      }
+      if (typeof context !== 'undefined') {
+        context[key] = context[key] || [];
+        context[key].push({ name: name, alt: alt });
+      }
+      return alt;
+    }
+
+    return debug;
+  }();
+
+  return Alt;
+}();
+
+exports['default'] = Alt;
+module.exports = exports['default'];
+},{"./actions":1,"./functions":2,"./store":6,"./utils/AltUtils":7,"./utils/StateFunctions":8,"flux":25}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _functions = require('../functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+var _transmitter = require('transmitter');
+
+var _transmitter2 = _interopRequireDefault(_transmitter);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AltStore = function () {
+  function AltStore(alt, model, state, StoreModel) {
+    var _this = this;
+
+    _classCallCheck(this, AltStore);
+
+    var lifecycleEvents = model.lifecycleEvents;
+    this.transmitter = (0, _transmitter2['default'])();
+    this.lifecycle = function (event, x) {
+      if (lifecycleEvents[event]) lifecycleEvents[event].publish(x);
+    };
+    this.state = state;
+
+    this.alt = alt;
+    this.preventDefault = false;
+    this.displayName = model.displayName;
+    this.boundListeners = model.boundListeners;
+    this.StoreModel = StoreModel;
+    this.reduce = model.reduce || function (x) {
+      return x;
+    };
+    this.subscriptions = [];
+
+    var output = model.output || function (x) {
+      return x;
+    };
+
+    this.emitChange = function () {
+      return _this.transmitter.publish(output(_this.state));
+    };
+
+    var handleDispatch = function handleDispatch(f, payload) {
+      try {
+        return f();
+      } catch (e) {
+        if (model.handlesOwnErrors) {
+          _this.lifecycle('error', {
+            error: e,
+            payload: payload,
+            state: _this.state
+          });
+          return false;
+        }
+
+        throw e;
+      }
+    };
+
+    fn.assign(this, model.publicMethods);
+
+    // Register dispatcher
+    this.dispatchToken = alt.dispatcher.register(function (payload) {
+      _this.preventDefault = false;
+
+      _this.lifecycle('beforeEach', {
+        payload: payload,
+        state: _this.state
+      });
+
+      var actionHandlers = model.actionListeners[payload.action];
+
+      if (actionHandlers || model.otherwise) {
+        var result = void 0;
+
+        if (actionHandlers) {
+          result = handleDispatch(function () {
+            return actionHandlers.filter(Boolean).every(function (handler) {
+              return handler.call(model, payload.data, payload.action) !== false;
+            });
+          }, payload);
+        } else {
+          result = handleDispatch(function () {
+            return model.otherwise(payload.data, payload.action);
+          }, payload);
+        }
+
+        if (result !== false && !_this.preventDefault) _this.emitChange();
+      }
+
+      if (model.reduce) {
+        handleDispatch(function () {
+          var value = model.reduce(_this.state, payload);
+          if (value !== undefined) _this.state = value;
+        }, payload);
+        if (!_this.preventDefault) _this.emitChange();
+      }
+
+      _this.lifecycle('afterEach', {
+        payload: payload,
+        state: _this.state
+      });
+    });
+
+    this.lifecycle('init');
+  }
+
+  AltStore.prototype.listen = function () {
+    function listen(cb) {
+      var _this2 = this;
+
+      if (!fn.isFunction(cb)) throw new TypeError('listen expects a function');
+
+      var _transmitter$subscrib = this.transmitter.subscribe(cb);
+
+      var dispose = _transmitter$subscrib.dispose;
+
+      this.subscriptions.push({ cb: cb, dispose: dispose });
+      return function () {
+        _this2.lifecycle('unlisten');
+        dispose();
+      };
+    }
+
+    return listen;
+  }();
+
+  AltStore.prototype.unlisten = function () {
+    function unlisten(cb) {
+      this.lifecycle('unlisten');
+      this.subscriptions.filter(function (subscription) {
+        return subscription.cb === cb;
+      }).forEach(function (subscription) {
+        return subscription.dispose();
+      });
+    }
+
+    return unlisten;
+  }();
+
+  AltStore.prototype.getState = function () {
+    function getState() {
+      return this.StoreModel.config.getState.call(this, this.state);
+    }
+
+    return getState;
+  }();
+
+  return AltStore;
+}();
+
+exports['default'] = AltStore;
+module.exports = exports['default'];
+},{"../functions":2,"transmitter":39}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _transmitter = require('transmitter');
+
+var _transmitter2 = _interopRequireDefault(_transmitter);
+
+var _functions = require('../functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var StoreMixin = {
+  waitFor: function () {
+    function waitFor() {
+      for (var _len = arguments.length, sources = Array(_len), _key = 0; _key < _len; _key++) {
+        sources[_key] = arguments[_key];
+      }
+
+      if (!sources.length) {
+        throw new ReferenceError('Dispatch tokens not provided');
+      }
+
+      var sourcesArray = sources;
+      if (sources.length === 1) {
+        sourcesArray = Array.isArray(sources[0]) ? sources[0] : sources;
+      }
+
+      var tokens = sourcesArray.map(function (source) {
+        return source.dispatchToken || source;
+      });
+
+      this.dispatcher.waitFor(tokens);
+    }
+
+    return waitFor;
+  }(),
+  exportAsync: function () {
+    function exportAsync(asyncMethods) {
+      this.registerAsync(asyncMethods);
+    }
+
+    return exportAsync;
+  }(),
+  registerAsync: function () {
+    function registerAsync(asyncDef) {
+      var _this = this;
+
+      var loadCounter = 0;
+
+      var asyncMethods = fn.isFunction(asyncDef) ? asyncDef(this.alt) : asyncDef;
+
+      var toExport = Object.keys(asyncMethods).reduce(function (publicMethods, methodName) {
+        var desc = asyncMethods[methodName];
+        var spec = fn.isFunction(desc) ? desc(_this) : desc;
+
+        var validHandlers = ['success', 'error', 'loading'];
+        validHandlers.forEach(function (handler) {
+          if (spec[handler] && !spec[handler].id) {
+            throw new Error(String(handler) + ' handler must be an action function');
+          }
+        });
+
+        publicMethods[methodName] = function () {
+          for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+          }
+
+          var state = _this.getInstance().getState();
+          var value = spec.local && spec.local.apply(spec, [state].concat(args));
+          var shouldFetch = spec.shouldFetch ? spec.shouldFetch.apply(spec, [state].concat(args))
+          /*eslint-disable*/
+          : value == null;
+          /*eslint-enable*/
+          var intercept = spec.interceptResponse || function (x) {
+            return x;
+          };
+
+          var makeActionHandler = function () {
+            function makeActionHandler(action, isError) {
+              return function (x) {
+                var fire = function () {
+                  function fire() {
+                    loadCounter -= 1;
+                    action(intercept(x, action, args));
+                    if (isError) throw x;
+                    return x;
+                  }
+
+                  return fire;
+                }();
+                return _this.alt.trapAsync ? function () {
+                  return fire();
+                } : fire();
+              };
+            }
+
+            return makeActionHandler;
+          }();
+
+          // if we don't have it in cache then fetch it
+          if (shouldFetch) {
+            loadCounter += 1;
+            /* istanbul ignore else */
+            if (spec.loading) spec.loading(intercept(null, spec.loading, args));
+            return spec.remote.apply(spec, [state].concat(args)).then(makeActionHandler(spec.success), makeActionHandler(spec.error, 1));
+          }
+
+          // otherwise emit the change now
+          _this.emitChange();
+          return value;
+        };
+
+        return publicMethods;
+      }, {});
+
+      this.exportPublicMethods(toExport);
+      this.exportPublicMethods({
+        isLoading: function () {
+          function isLoading() {
+            return loadCounter > 0;
+          }
+
+          return isLoading;
+        }()
+      });
+    }
+
+    return registerAsync;
+  }(),
+  exportPublicMethods: function () {
+    function exportPublicMethods(methods) {
+      var _this2 = this;
+
+      fn.eachObject(function (methodName, value) {
+        if (!fn.isFunction(value)) {
+          throw new TypeError('exportPublicMethods expects a function');
+        }
+
+        _this2.publicMethods[methodName] = value;
+      }, [methods]);
+    }
+
+    return exportPublicMethods;
+  }(),
+  emitChange: function () {
+    function emitChange() {
+      this.getInstance().emitChange();
+    }
+
+    return emitChange;
+  }(),
+  on: function () {
+    function on(lifecycleEvent, handler) {
+      if (lifecycleEvent === 'error') this.handlesOwnErrors = true;
+      var bus = this.lifecycleEvents[lifecycleEvent] || (0, _transmitter2['default'])();
+      this.lifecycleEvents[lifecycleEvent] = bus;
+      return bus.subscribe(handler.bind(this));
+    }
+
+    return on;
+  }(),
+  bindAction: function () {
+    function bindAction(symbol, handler) {
+      if (!symbol) {
+        throw new ReferenceError('Invalid action reference passed in');
+      }
+      if (!fn.isFunction(handler)) {
+        throw new TypeError('bindAction expects a function');
+      }
+
+      // You can pass in the constant or the function itself
+      var key = symbol.id ? symbol.id : symbol;
+      this.actionListeners[key] = this.actionListeners[key] || [];
+      this.actionListeners[key].push(handler.bind(this));
+      this.boundListeners.push(key);
+    }
+
+    return bindAction;
+  }(),
+  bindActions: function () {
+    function bindActions(actions) {
+      var _this3 = this;
+
+      fn.eachObject(function (action, symbol) {
+        var matchFirstCharacter = /./;
+        var assumedEventHandler = action.replace(matchFirstCharacter, function (x) {
+          return 'on' + String(x[0].toUpperCase());
+        });
+
+        if (_this3[action] && _this3[assumedEventHandler]) {
+          // If you have both action and onAction
+          throw new ReferenceError('You have multiple action handlers bound to an action: ' + (String(action) + ' and ' + String(assumedEventHandler)));
+        }
+
+        var handler = _this3[action] || _this3[assumedEventHandler];
+        if (handler) {
+          _this3.bindAction(symbol, handler);
+        }
+      }, [actions]);
+    }
+
+    return bindActions;
+  }(),
+  bindListeners: function () {
+    function bindListeners(obj) {
+      var _this4 = this;
+
+      fn.eachObject(function (methodName, symbol) {
+        var listener = _this4[methodName];
+
+        if (!listener) {
+          throw new ReferenceError(String(methodName) + ' defined but does not exist in ' + String(_this4.displayName));
+        }
+
+        if (Array.isArray(symbol)) {
+          symbol.forEach(function (action) {
+            _this4.bindAction(action, listener);
+          });
+        } else {
+          _this4.bindAction(symbol, listener);
+        }
+      }, [obj]);
+    }
+
+    return bindListeners;
+  }()
+};
+
+exports['default'] = StoreMixin;
+module.exports = exports['default'];
+},{"../functions":2,"transmitter":39}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createStoreConfig = createStoreConfig;
+exports.transformStore = transformStore;
+exports.createStoreFromObject = createStoreFromObject;
+exports.createStoreFromClass = createStoreFromClass;
+
+var _AltUtils = require('../utils/AltUtils');
+
+var utils = _interopRequireWildcard(_AltUtils);
+
+var _functions = require('../functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+var _AltStore = require('./AltStore');
+
+var _AltStore2 = _interopRequireDefault(_AltStore);
+
+var _StoreMixin = require('./StoreMixin');
+
+var _StoreMixin2 = _interopRequireDefault(_StoreMixin);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function doSetState(store, storeInstance, state) {
+  if (!state) {
+    return;
+  }
+
+  var config = storeInstance.StoreModel.config;
+
+
+  var nextState = fn.isFunction(state) ? state(storeInstance.state) : state;
+
+  storeInstance.state = config.setState.call(store, storeInstance.state, nextState);
+
+  if (!store.alt.dispatcher.isDispatching()) {
+    store.emitChange();
+  }
+}
+
+function createPrototype(proto, alt, key, extras) {
+  return fn.assign(proto, _StoreMixin2['default'], {
+    displayName: key,
+    alt: alt,
+    dispatcher: alt.dispatcher,
+    preventDefault: function () {
+      function preventDefault() {
+        this.getInstance().preventDefault = true;
+      }
+
+      return preventDefault;
+    }(),
+
+    boundListeners: [],
+    lifecycleEvents: {},
+    actionListeners: {},
+    publicMethods: {},
+    handlesOwnErrors: false
+  }, extras);
+}
+
+function createStoreConfig(globalConfig, StoreModel) {
+  StoreModel.config = fn.assign({
+    getState: function () {
+      function getState(state) {
+        if (Array.isArray(state)) {
+          return state.slice();
+        } else if (fn.isMutableObject(state)) {
+          return fn.assign({}, state);
+        }
+
+        return state;
+      }
+
+      return getState;
+    }(),
+    setState: function () {
+      function setState(currentState, nextState) {
+        if (fn.isMutableObject(nextState)) {
+          return fn.assign(currentState, nextState);
+        }
+        return nextState;
+      }
+
+      return setState;
+    }()
+  }, globalConfig, StoreModel.config);
+}
+
+function transformStore(transforms, StoreModel) {
+  return transforms.reduce(function (Store, transform) {
+    return transform(Store);
+  }, StoreModel);
+}
+
+function createStoreFromObject(alt, StoreModel, key) {
+  var storeInstance = void 0;
+
+  var StoreProto = createPrototype({}, alt, key, fn.assign({
+    getInstance: function () {
+      function getInstance() {
+        return storeInstance;
+      }
+
+      return getInstance;
+    }(),
+    setState: function () {
+      function setState(nextState) {
+        doSetState(this, storeInstance, nextState);
+      }
+
+      return setState;
+    }()
+  }, StoreModel));
+
+  // bind the store listeners
+  /* istanbul ignore else */
+  if (StoreProto.bindListeners) {
+    _StoreMixin2['default'].bindListeners.call(StoreProto, StoreProto.bindListeners);
+  }
+  /* istanbul ignore else */
+  if (StoreProto.observe) {
+    _StoreMixin2['default'].bindListeners.call(StoreProto, StoreProto.observe(alt));
+  }
+
+  // bind the lifecycle events
+  /* istanbul ignore else */
+  if (StoreProto.lifecycle) {
+    fn.eachObject(function (eventName, event) {
+      _StoreMixin2['default'].on.call(StoreProto, eventName, event);
+    }, [StoreProto.lifecycle]);
+  }
+
+  // create the instance and fn.assign the public methods to the instance
+  storeInstance = fn.assign(new _AltStore2['default'](alt, StoreProto, StoreProto.state !== undefined ? StoreProto.state : {}, StoreModel), StoreProto.publicMethods, {
+    displayName: key,
+    config: StoreModel.config
+  });
+
+  return storeInstance;
+}
+
+function createStoreFromClass(alt, StoreModel, key) {
+  var storeInstance = void 0;
+  var config = StoreModel.config;
+
+  // Creating a class here so we don't overload the provided store's
+  // prototype with the mixin behaviour and I'm extending from StoreModel
+  // so we can inherit any extensions from the provided store.
+
+  var Store = function (_StoreModel) {
+    _inherits(Store, _StoreModel);
+
+    function Store() {
+      _classCallCheck(this, Store);
+
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return _possibleConstructorReturn(this, _StoreModel.call.apply(_StoreModel, [this].concat(args)));
+    }
+
+    return Store;
+  }(StoreModel);
+
+  createPrototype(Store.prototype, alt, key, {
+    type: 'AltStore',
+    getInstance: function () {
+      function getInstance() {
+        return storeInstance;
+      }
+
+      return getInstance;
+    }(),
+    setState: function () {
+      function setState(nextState) {
+        doSetState(this, storeInstance, nextState);
+      }
+
+      return setState;
+    }()
+  });
+
+  for (var _len = arguments.length, argsForClass = Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
+    argsForClass[_key - 3] = arguments[_key];
+  }
+
+  var store = new (Function.prototype.bind.apply(Store, [null].concat(argsForClass)))();
+
+  /* istanbul ignore next */
+  if (config.bindListeners) store.bindListeners(config.bindListeners);
+  /* istanbul ignore next */
+  if (config.datasource) store.registerAsync(config.datasource);
+
+  storeInstance = fn.assign(new _AltStore2['default'](alt, store, store.state !== undefined ? store.state : store, StoreModel), utils.getInternalMethods(StoreModel), config.publicMethods, { displayName: key });
+
+  return storeInstance;
+}
+},{"../functions":2,"../utils/AltUtils":7,"./AltStore":4,"./StoreMixin":5}],7:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.getInternalMethods = getInternalMethods;
+exports.getPrototypeChain = getPrototypeChain;
+exports.warn = warn;
+exports.uid = uid;
+exports.formatAsConstant = formatAsConstant;
+exports.dispatchIdentity = dispatchIdentity;
+exports.fsa = fsa;
+exports.dispatch = dispatch;
+
+var _functions = require('../functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+/*eslint-disable*/
+var builtIns = Object.getOwnPropertyNames(NoopClass);
+var builtInProto = Object.getOwnPropertyNames(NoopClass.prototype);
+/*eslint-enable*/
+
+function getInternalMethods(Obj, isProto) {
+  var excluded = isProto ? builtInProto : builtIns;
+  var obj = isProto ? Obj.prototype : Obj;
+  return Object.getOwnPropertyNames(obj).reduce(function (value, m) {
+    if (excluded.indexOf(m) !== -1) {
+      return value;
+    }
+
+    value[m] = obj[m];
+    return value;
+  }, {});
+}
+
+function getPrototypeChain(Obj) {
+  var methods = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+  return Obj === Function.prototype ? methods : getPrototypeChain(Object.getPrototypeOf(Obj), fn.assign(getInternalMethods(Obj, true), methods));
+}
+
+function warn(msg) {
+  /* istanbul ignore else */
+  /*eslint-disable*/
+  if (typeof console !== 'undefined') {
+    console.warn(new ReferenceError(msg));
+  }
+  /*eslint-enable*/
+}
+
+function uid(container, name) {
+  var count = 0;
+  var key = name;
+  while (Object.hasOwnProperty.call(container, key)) {
+    key = name + String(++count);
+  }
+  return key;
+}
+
+function formatAsConstant(name) {
+  return name.replace(/[a-z]([A-Z])/g, function (i) {
+    return String(i[0]) + '_' + String(i[1].toLowerCase());
+  }).toUpperCase();
+}
+
+function dispatchIdentity(x) {
+  if (x === undefined) return null;
+
+  for (var _len = arguments.length, a = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    a[_key - 1] = arguments[_key];
+  }
+
+  return a.length ? [x].concat(a) : x;
+}
+
+function fsa(id, type, payload, details) {
+  return {
+    type: type,
+    payload: payload,
+    meta: _extends({
+      dispatchId: id
+    }, details),
+
+    id: id,
+    action: type,
+    data: payload,
+    details: details
+  };
+}
+
+function dispatch(id, actionObj, payload, alt) {
+  var data = actionObj.dispatch(payload);
+  if (data === undefined) return null;
+
+  var type = actionObj.id;
+  var namespace = type;
+  var name = type;
+  var details = { id: type, namespace: namespace, name: name };
+
+  var dispatchLater = function dispatchLater(x) {
+    return alt.dispatch(type, x, details);
+  };
+
+  if (fn.isFunction(data)) return data(dispatchLater, alt);
+
+  // XXX standardize this
+  return alt.dispatcher.dispatch(fsa(id, type, data, details));
+}
+
+/* istanbul ignore next */
+function NoopClass() {}
+},{"../functions":2}],8:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setAppState = setAppState;
+exports.snapshot = snapshot;
+exports.saveInitialSnapshot = saveInitialSnapshot;
+exports.filterSnapshots = filterSnapshots;
+
+var _functions = require('../functions');
+
+var fn = _interopRequireWildcard(_functions);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+function setAppState(instance, data, onStore) {
+  var obj = instance.deserialize(data);
+  fn.eachObject(function (key, value) {
+    var store = instance.stores[key];
+    if (store) {
+      (function () {
+        var config = store.StoreModel.config;
+
+        var state = store.state;
+        if (config.onDeserialize) obj[key] = config.onDeserialize(value) || value;
+        if (fn.isMutableObject(state)) {
+          fn.eachObject(function (k) {
+            return delete state[k];
+          }, [state]);
+          fn.assign(state, obj[key]);
+        } else {
+          store.state = obj[key];
+        }
+        onStore(store, store.state);
+      })();
+    }
+  }, [obj]);
+}
+
+function snapshot(instance) {
+  var storeNames = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+
+  var stores = storeNames.length ? storeNames : Object.keys(instance.stores);
+  return stores.reduce(function (obj, storeHandle) {
+    var storeName = storeHandle.displayName || storeHandle;
+    var store = instance.stores[storeName];
+    var config = store.StoreModel.config;
+
+    store.lifecycle('snapshot');
+    var customSnapshot = config.onSerialize && config.onSerialize(store.state);
+    obj[storeName] = customSnapshot ? customSnapshot : store.getState();
+    return obj;
+  }, {});
+}
+
+function saveInitialSnapshot(instance, key) {
+  var state = instance.deserialize(instance.serialize(instance.stores[key].state));
+  instance._initSnapshot[key] = state;
+  instance._lastSnapshot[key] = state;
+}
+
+function filterSnapshots(instance, state, stores) {
+  return stores.reduce(function (obj, store) {
+    var storeName = store.displayName || store;
+    if (!state[storeName]) {
+      throw new ReferenceError(String(storeName) + ' is not a valid store');
+    }
+    obj[storeName] = state[storeName];
+    return obj;
+  }, {});
+}
+},{"../functions":2}],9:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -75,7 +1378,7 @@ var EventListener = {
 
 module.exports = EventListener;
 }).call(this,require('_process'))
-},{"./emptyFunction":6,"_process":18}],2:[function(require,module,exports){
+},{"./emptyFunction":14,"_process":30}],10:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -109,7 +1412,7 @@ var ExecutionEnvironment = {
 };
 
 module.exports = ExecutionEnvironment;
-},{}],3:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 /**
@@ -139,7 +1442,7 @@ function camelize(string) {
 }
 
 module.exports = camelize;
-},{}],4:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -177,7 +1480,7 @@ function camelizeStyleName(string) {
 }
 
 module.exports = camelizeStyleName;
-},{"./camelize":3}],5:[function(require,module,exports){
+},{"./camelize":11}],13:[function(require,module,exports){
 'use strict';
 
 /**
@@ -215,7 +1518,7 @@ function containsNode(outerNode, innerNode) {
 }
 
 module.exports = containsNode;
-},{"./isTextNode":14}],6:[function(require,module,exports){
+},{"./isTextNode":22}],14:[function(require,module,exports){
 "use strict";
 
 /**
@@ -252,7 +1555,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 };
 
 module.exports = emptyFunction;
-},{}],7:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -272,7 +1575,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = emptyObject;
 }).call(this,require('_process'))
-},{"_process":18}],8:[function(require,module,exports){
+},{"_process":30}],16:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -297,7 +1600,7 @@ function focusNode(node) {
 }
 
 module.exports = focusNode;
-},{}],9:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 /**
@@ -334,7 +1637,7 @@ function getActiveElement(doc) /*?DOMElement*/{
 }
 
 module.exports = getActiveElement;
-},{}],10:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 /**
@@ -365,7 +1668,7 @@ function hyphenate(string) {
 }
 
 module.exports = hyphenate;
-},{}],11:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -402,7 +1705,7 @@ function hyphenateStyleName(string) {
 }
 
 module.exports = hyphenateStyleName;
-},{"./hyphenate":10}],12:[function(require,module,exports){
+},{"./hyphenate":18}],20:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -458,7 +1761,7 @@ function invariant(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 }).call(this,require('_process'))
-},{"_process":18}],13:[function(require,module,exports){
+},{"_process":30}],21:[function(require,module,exports){
 'use strict';
 
 /**
@@ -481,7 +1784,7 @@ function isNode(object) {
 }
 
 module.exports = isNode;
-},{}],14:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 /**
@@ -504,7 +1807,7 @@ function isTextNode(object) {
 }
 
 module.exports = isTextNode;
-},{"./isNode":13}],15:[function(require,module,exports){
+},{"./isNode":21}],23:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -570,7 +1873,7 @@ function shallowEqual(objA, objB) {
 }
 
 module.exports = shallowEqual;
-},{}],16:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
@@ -635,7 +1938,312 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = warning;
 }).call(this,require('_process'))
-},{"./emptyFunction":6,"_process":18}],17:[function(require,module,exports){
+},{"./emptyFunction":14,"_process":30}],25:[function(require,module,exports){
+/**
+ * Copyright (c) 2014-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+module.exports.Dispatcher = require('./lib/Dispatcher');
+
+},{"./lib/Dispatcher":26}],26:[function(require,module,exports){
+(function (process){
+/**
+ * Copyright (c) 2014-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule Dispatcher
+ * 
+ * @preventMunge
+ */
+
+'use strict';
+
+exports.__esModule = true;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var invariant = require('fbjs/lib/invariant');
+
+var _prefix = 'ID_';
+
+/**
+ * Dispatcher is used to broadcast payloads to registered callbacks. This is
+ * different from generic pub-sub systems in two ways:
+ *
+ *   1) Callbacks are not subscribed to particular events. Every payload is
+ *      dispatched to every registered callback.
+ *   2) Callbacks can be deferred in whole or part until other callbacks have
+ *      been executed.
+ *
+ * For example, consider this hypothetical flight destination form, which
+ * selects a default city when a country is selected:
+ *
+ *   var flightDispatcher = new Dispatcher();
+ *
+ *   // Keeps track of which country is selected
+ *   var CountryStore = {country: null};
+ *
+ *   // Keeps track of which city is selected
+ *   var CityStore = {city: null};
+ *
+ *   // Keeps track of the base flight price of the selected city
+ *   var FlightPriceStore = {price: null}
+ *
+ * When a user changes the selected city, we dispatch the payload:
+ *
+ *   flightDispatcher.dispatch({
+ *     actionType: 'city-update',
+ *     selectedCity: 'paris'
+ *   });
+ *
+ * This payload is digested by `CityStore`:
+ *
+ *   flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'city-update') {
+ *       CityStore.city = payload.selectedCity;
+ *     }
+ *   });
+ *
+ * When the user selects a country, we dispatch the payload:
+ *
+ *   flightDispatcher.dispatch({
+ *     actionType: 'country-update',
+ *     selectedCountry: 'australia'
+ *   });
+ *
+ * This payload is digested by both stores:
+ *
+ *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'country-update') {
+ *       CountryStore.country = payload.selectedCountry;
+ *     }
+ *   });
+ *
+ * When the callback to update `CountryStore` is registered, we save a reference
+ * to the returned token. Using this token with `waitFor()`, we can guarantee
+ * that `CountryStore` is updated before the callback that updates `CityStore`
+ * needs to query its data.
+ *
+ *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'country-update') {
+ *       // `CountryStore.country` may not be updated.
+ *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+ *       // `CountryStore.country` is now guaranteed to be updated.
+ *
+ *       // Select the default city for the new country
+ *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+ *     }
+ *   });
+ *
+ * The usage of `waitFor()` can be chained, for example:
+ *
+ *   FlightPriceStore.dispatchToken =
+ *     flightDispatcher.register(function(payload) {
+ *       switch (payload.actionType) {
+ *         case 'country-update':
+ *         case 'city-update':
+ *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+ *           FlightPriceStore.price =
+ *             getFlightPriceStore(CountryStore.country, CityStore.city);
+ *           break;
+ *     }
+ *   });
+ *
+ * The `country-update` payload will be guaranteed to invoke the stores'
+ * registered callbacks in order: `CountryStore`, `CityStore`, then
+ * `FlightPriceStore`.
+ */
+
+var Dispatcher = (function () {
+  function Dispatcher() {
+    _classCallCheck(this, Dispatcher);
+
+    this._callbacks = {};
+    this._isDispatching = false;
+    this._isHandled = {};
+    this._isPending = {};
+    this._lastID = 1;
+  }
+
+  /**
+   * Registers a callback to be invoked with every dispatched payload. Returns
+   * a token that can be used with `waitFor()`.
+   */
+
+  Dispatcher.prototype.register = function register(callback) {
+    var id = _prefix + this._lastID++;
+    this._callbacks[id] = callback;
+    return id;
+  };
+
+  /**
+   * Removes a callback based on its token.
+   */
+
+  Dispatcher.prototype.unregister = function unregister(id) {
+    !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+    delete this._callbacks[id];
+  };
+
+  /**
+   * Waits for the callbacks specified to be invoked before continuing execution
+   * of the current callback. This method should only be used by a callback in
+   * response to a dispatched payload.
+   */
+
+  Dispatcher.prototype.waitFor = function waitFor(ids) {
+    !this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Must be invoked while dispatching.') : invariant(false) : undefined;
+    for (var ii = 0; ii < ids.length; ii++) {
+      var id = ids[ii];
+      if (this._isPending[id]) {
+        !this._isHandled[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): Circular dependency detected while ' + 'waiting for `%s`.', id) : invariant(false) : undefined;
+        continue;
+      }
+      !this._callbacks[id] ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id) : invariant(false) : undefined;
+      this._invokeCallback(id);
+    }
+  };
+
+  /**
+   * Dispatches a payload to all registered callbacks.
+   */
+
+  Dispatcher.prototype.dispatch = function dispatch(payload) {
+    !!this._isDispatching ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.') : invariant(false) : undefined;
+    this._startDispatching(payload);
+    try {
+      for (var id in this._callbacks) {
+        if (this._isPending[id]) {
+          continue;
+        }
+        this._invokeCallback(id);
+      }
+    } finally {
+      this._stopDispatching();
+    }
+  };
+
+  /**
+   * Is this Dispatcher currently dispatching.
+   */
+
+  Dispatcher.prototype.isDispatching = function isDispatching() {
+    return this._isDispatching;
+  };
+
+  /**
+   * Call the callback stored with the given id. Also do some internal
+   * bookkeeping.
+   *
+   * @internal
+   */
+
+  Dispatcher.prototype._invokeCallback = function _invokeCallback(id) {
+    this._isPending[id] = true;
+    this._callbacks[id](this._pendingPayload);
+    this._isHandled[id] = true;
+  };
+
+  /**
+   * Set up bookkeeping needed when dispatching.
+   *
+   * @internal
+   */
+
+  Dispatcher.prototype._startDispatching = function _startDispatching(payload) {
+    for (var id in this._callbacks) {
+      this._isPending[id] = false;
+      this._isHandled[id] = false;
+    }
+    this._pendingPayload = payload;
+    this._isDispatching = true;
+  };
+
+  /**
+   * Clear bookkeeping used for dispatching.
+   *
+   * @internal
+   */
+
+  Dispatcher.prototype._stopDispatching = function _stopDispatching() {
+    delete this._pendingPayload;
+    this._isDispatching = false;
+  };
+
+  return Dispatcher;
+})();
+
+module.exports = Dispatcher;
+}).call(this,require('_process'))
+},{"_process":30,"fbjs/lib/invariant":27}],27:[function(require,module,exports){
+(function (process){
+/**
+ * Copyright 2013-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule invariant
+ */
+
+"use strict";
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var invariant = function (condition, format, a, b, c, d, e, f) {
+  if (process.env.NODE_ENV !== 'production') {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  }
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error('Invariant Violation: ' + format.replace(/%s/g, function () {
+        return args[argIndex++];
+      }));
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+};
+
+module.exports = invariant;
+}).call(this,require('_process'))
+},{"_process":30}],28:[function(require,module,exports){
+module.exports = isPromise;
+
+function isPromise(obj) {
+  return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+}
+
+},{}],29:[function(require,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -727,7 +2335,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -913,7 +2521,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],19:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -976,7 +2584,7 @@ function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
 module.exports = checkPropTypes;
 
 }).call(this,require('_process'))
-},{"./lib/ReactPropTypesSecret":20,"_process":18,"fbjs/lib/invariant":12,"fbjs/lib/warning":16}],20:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":32,"_process":30,"fbjs/lib/invariant":20,"fbjs/lib/warning":24}],32:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -990,7 +2598,7 @@ var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
 
-},{}],21:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (process){
 /** @license React v16.2.0
  * react-dom.development.js
@@ -16388,7 +17996,7 @@ module.exports = reactDom;
 }
 
 }).call(this,require('_process'))
-},{"_process":18,"fbjs/lib/EventListener":1,"fbjs/lib/ExecutionEnvironment":2,"fbjs/lib/camelizeStyleName":4,"fbjs/lib/containsNode":5,"fbjs/lib/emptyFunction":6,"fbjs/lib/emptyObject":7,"fbjs/lib/focusNode":8,"fbjs/lib/getActiveElement":9,"fbjs/lib/hyphenateStyleName":11,"fbjs/lib/invariant":12,"fbjs/lib/shallowEqual":15,"fbjs/lib/warning":16,"object-assign":17,"prop-types/checkPropTypes":19,"react":26}],22:[function(require,module,exports){
+},{"_process":30,"fbjs/lib/EventListener":9,"fbjs/lib/ExecutionEnvironment":10,"fbjs/lib/camelizeStyleName":12,"fbjs/lib/containsNode":13,"fbjs/lib/emptyFunction":14,"fbjs/lib/emptyObject":15,"fbjs/lib/focusNode":16,"fbjs/lib/getActiveElement":17,"fbjs/lib/hyphenateStyleName":19,"fbjs/lib/invariant":20,"fbjs/lib/shallowEqual":23,"fbjs/lib/warning":24,"object-assign":29,"prop-types/checkPropTypes":31,"react":38}],34:[function(require,module,exports){
 /** @license React v16.2.0
  * react-dom.production.min.js
  *
@@ -16619,7 +18227,7 @@ var Sg={createPortal:Qg,findDOMNode:function(a){if(null==a)return null;if(1===a.
 E("40");return a._reactRootContainer?(Z.unbatchedUpdates(function(){Pg(null,null,a,!1,function(){a._reactRootContainer=null})}),!0):!1},unstable_createPortal:Qg,unstable_batchedUpdates:tc,unstable_deferredUpdates:Z.deferredUpdates,flushSync:Z.flushSync,__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{EventPluginHub:mb,EventPluginRegistry:Va,EventPropagators:Cb,ReactControlledComponent:qc,ReactDOMComponentTree:sb,ReactDOMEventListener:xd}};
 Z.injectIntoDevTools({findFiberByHostInstance:pb,bundleType:0,version:"16.2.0",rendererPackageName:"react-dom"});var Tg=Object.freeze({default:Sg}),Ug=Tg&&Sg||Tg;module.exports=Ug["default"]?Ug["default"]:Ug;
 
-},{"fbjs/lib/EventListener":1,"fbjs/lib/ExecutionEnvironment":2,"fbjs/lib/containsNode":5,"fbjs/lib/emptyFunction":6,"fbjs/lib/emptyObject":7,"fbjs/lib/focusNode":8,"fbjs/lib/getActiveElement":9,"fbjs/lib/shallowEqual":15,"object-assign":17,"react":26}],23:[function(require,module,exports){
+},{"fbjs/lib/EventListener":9,"fbjs/lib/ExecutionEnvironment":10,"fbjs/lib/containsNode":13,"fbjs/lib/emptyFunction":14,"fbjs/lib/emptyObject":15,"fbjs/lib/focusNode":16,"fbjs/lib/getActiveElement":17,"fbjs/lib/shallowEqual":23,"object-assign":29,"react":38}],35:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -16661,7 +18269,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react-dom.development.js":21,"./cjs/react-dom.production.min.js":22,"_process":18}],24:[function(require,module,exports){
+},{"./cjs/react-dom.development.js":33,"./cjs/react-dom.production.min.js":34,"_process":30}],36:[function(require,module,exports){
 (function (process){
 /** @license React v16.2.0
  * react.development.js
@@ -18022,7 +19630,7 @@ module.exports = react;
 }
 
 }).call(this,require('_process'))
-},{"_process":18,"fbjs/lib/emptyFunction":6,"fbjs/lib/emptyObject":7,"fbjs/lib/invariant":12,"fbjs/lib/warning":16,"object-assign":17,"prop-types/checkPropTypes":19}],25:[function(require,module,exports){
+},{"_process":30,"fbjs/lib/emptyFunction":14,"fbjs/lib/emptyObject":15,"fbjs/lib/invariant":20,"fbjs/lib/warning":24,"object-assign":29,"prop-types/checkPropTypes":31}],37:[function(require,module,exports){
 /** @license React v16.2.0
  * react.production.min.js
  *
@@ -18045,7 +19653,7 @@ var U={Children:{map:function(a,b,e){if(null==a)return a;var c=[];T(a,c,null,b,e
 d=a.key,g=a.ref,k=a._owner;if(null!=b){void 0!==b.ref&&(g=b.ref,k=G.current);void 0!==b.key&&(d=""+b.key);if(a.type&&a.type.defaultProps)var f=a.type.defaultProps;for(h in b)H.call(b,h)&&!I.hasOwnProperty(h)&&(c[h]=void 0===b[h]&&void 0!==f?f[h]:b[h])}var h=arguments.length-2;if(1===h)c.children=e;else if(1<h){f=Array(h);for(var l=0;l<h;l++)f[l]=arguments[l+2];c.children=f}return{$$typeof:r,type:a.type,key:d,ref:g,props:c,_owner:k}},createFactory:function(a){var b=J.bind(null,a);b.type=a;return b},
 isValidElement:K,version:"16.2.0",__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED:{ReactCurrentOwner:G,assign:m}},V=Object.freeze({default:U}),W=V&&U||V;module.exports=W["default"]?W["default"]:W;
 
-},{"fbjs/lib/emptyFunction":6,"fbjs/lib/emptyObject":7,"object-assign":17}],26:[function(require,module,exports){
+},{"fbjs/lib/emptyFunction":14,"fbjs/lib/emptyObject":15,"object-assign":29}],38:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -18056,7 +19664,105 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 }).call(this,require('_process'))
-},{"./cjs/react.development.js":24,"./cjs/react.production.min.js":25,"_process":18}],27:[function(require,module,exports){
+},{"./cjs/react.development.js":36,"./cjs/react.production.min.js":37,"_process":30}],39:[function(require,module,exports){
+"use strict";
+
+function transmitter() {
+  var subscriptions = [];
+  var nowDispatching = false;
+  var toUnsubscribe = {};
+
+  var unsubscribe = function unsubscribe(onChange) {
+    var id = subscriptions.indexOf(onChange);
+    if (id < 0) return;
+    if (nowDispatching) {
+      toUnsubscribe[id] = onChange;
+      return;
+    }
+    subscriptions.splice(id, 1);
+  };
+
+  var subscribe = function subscribe(onChange) {
+    var id = subscriptions.push(onChange);
+    var dispose = function dispose() {
+      return unsubscribe(onChange);
+    };
+    return { dispose: dispose };
+  };
+
+  var publish = function publish() {
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    nowDispatching = true;
+    try {
+      subscriptions.forEach(function (subscription, id) {
+        return toUnsubscribe[id] || subscription.apply(undefined, args);
+      });
+    } finally {
+      nowDispatching = false;
+      Object.keys(toUnsubscribe).forEach(function (id) {
+        return unsubscribe(toUnsubscribe[id]);
+      });
+      toUnsubscribe = {};
+    }
+  };
+
+  return {
+    publish: publish,
+    subscribe: subscribe,
+    $subscriptions: subscriptions
+  };
+}
+
+module.exports = transmitter;
+},{}],40:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var AbstractActions = /** @class */ (function () {
+    function AbstractActions() {
+    }
+    return AbstractActions;
+}());
+exports.AbstractActions = AbstractActions;
+
+},{}],41:[function(require,module,exports){
+"use strict";
+// There aren't too many actions for this app, so everything can be held here.
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var alt_1 = require("../alt");
+var AbstractActions_1 = require("./AbstractActions");
+var AppActionsClass = /** @class */ (function (_super) {
+    __extends(AppActionsClass, _super);
+    function AppActionsClass(config) {
+        var _this = _super.call(this) || this;
+        _this.generateActions("addToOutput", "clearOutput", "checkSchedule", "generateSchedule");
+        return _this;
+    }
+    return AppActionsClass;
+}(AbstractActions_1.AbstractActions));
+var AppActions = alt_1.alt.createActions(AppActionsClass);
+exports.AppActions = AppActions;
+
+},{"../alt":42,"./AbstractActions":40}],42:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var Alt = require("alt");
+var alt = new Alt();
+exports.alt = alt;
+
+},{"alt":3}],43:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18072,6 +19778,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var ReactDOM = require("react-dom");
 var init_1 = require("./init");
+require("./alt");
+require("./actions/AppActions");
+require("./stores/APICallerStore");
+require("./stores/OutputStore");
 var Frame_1 = require("./components/Frame");
 var MainApp = /** @class */ (function (_super) {
     __extends(MainApp, _super);
@@ -18088,7 +19798,7 @@ exports.MainApp = MainApp;
 init_1.init();
 ReactDOM.render(React.createElement(MainApp, null), document.getElementById("main"));
 
-},{"./components/Frame":30,"./init":31,"react":26,"react-dom":23}],28:[function(require,module,exports){
+},{"./actions/AppActions":41,"./alt":42,"./components/Frame":50,"./init":55,"./stores/APICallerStore":56,"./stores/OutputStore":58,"react":38,"react-dom":35}],44:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18102,64 +19812,124 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var APICallerStore_1 = require("../../stores/APICallerStore");
+var FileUploadFooter = /** @class */ (function (_super) {
+    __extends(FileUploadFooter, _super);
+    function FileUploadFooter(props) {
+        var _this = _super.call(this, props) || this;
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
+    }
+    FileUploadFooter.prototype.componentWillMount = function () {
+        this.setState(APICallerStore_1.APICallerStore.getState());
+    };
+    FileUploadFooter.prototype.componentDidMount = function () {
+        APICallerStore_1.APICallerStore.listen(this.onChange);
+    };
+    FileUploadFooter.prototype.componentWillUnmount = function () {
+        APICallerStore_1.APICallerStore.unlisten(this.onChange);
+    };
+    FileUploadFooter.prototype.onChange = function (state) {
+        this.setState(state);
+    };
+    FileUploadFooter.prototype.render = function () {
+        return (React.createElement("div", { className: "navbar fixed-bottom" },
+            "Time: ",
+            this.state.delay));
+    };
+    return FileUploadFooter;
+}(React.Component));
+exports.FileUploadFooter = FileUploadFooter;
+
+},{"../../stores/APICallerStore":56,"react":38}],45:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var GenerateScheduleInput_1 = require("./GenerateScheduleInput");
+var VerifyScheduleInput_1 = require("./VerifyScheduleInput");
+var FileUploadFrame = /** @class */ (function (_super) {
+    __extends(FileUploadFrame, _super);
+    function FileUploadFrame() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    FileUploadFrame.prototype.render = function () {
+        return (React.createElement("div", null,
+            React.createElement("nav", { className: "navbar navbar-expand-lg" },
+                React.createElement("ul", { className: "nav nav-pills", id: "mode-tabs", role: "mode-selection" },
+                    React.createElement("li", { className: "nav-item" },
+                        React.createElement("a", { className: "nav-link active", id: "check-tab", "data-toggle": "tab", href: "#check", role: "tab", "aria-controls": "check", "aria-selected": "true" }, "Check")),
+                    React.createElement("li", { className: "nav-item" },
+                        React.createElement("a", { className: "nav-link", id: "generate-tab", "data-toggle": "tab", href: "#generate", role: "tab", "aria-controls": "generate", "aria-selected": "false" }, "Generate")))),
+            React.createElement("div", { className: "tab-content" },
+                React.createElement("div", { className: "tab-pane fade show active", id: "check", role: "tabpanel", "aria-labelledby": "check-tab" },
+                    React.createElement(VerifyScheduleInput_1.VerifyScheduleInput, null)),
+                React.createElement("div", { className: "tab-pane fade", id: "generate", role: "tabpanel", "aria-labelledby": "generate-tab" },
+                    React.createElement(GenerateScheduleInput_1.GenerateScheduleInput, null)))));
+    };
+    return FileUploadFrame;
+}(React.Component));
+exports.FileUploadFrame = FileUploadFrame;
+
+},{"./GenerateScheduleInput":46,"./VerifyScheduleInput":48,"react":38}],46:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var AppActions_1 = require("../../actions/AppActions");
+var GenerateScheduleSubmitButton_1 = require("./GenerateScheduleSubmitButton");
 var GenerateScheduleInput = /** @class */ (function (_super) {
     __extends(GenerateScheduleInput, _super);
     function GenerateScheduleInput(props) {
         var _this = _super.call(this, props) || this;
-        _this.state = { text: "test" };
         _this.onSubmit = _this.onSubmit.bind(_this);
         return _this;
     }
     GenerateScheduleInput.prototype.onSubmit = function (e) {
-        var _this = this;
         e.preventDefault();
-        $.ajax({
-            url: "generateSchedule",
-            type: "POST",
-            data: new FormData($("#generate-schedule-id")[0]),
-            cache: false,
-            contentType: false,
-            processData: false,
-            // Custom XMLHttpRequest
-            xhr: function () {
-                var myXhr = $.ajaxSettings.xhr();
-                if (myXhr.upload) {
-                    // For handling the progress of the upload
-                    myXhr.upload.addEventListener("progress", function (event) {
-                        if (event.lengthComputable) {
-                            console.log(event.loaded, event.total);
-                        }
-                    }, false);
-                }
-                return myXhr;
-            },
-            success: function (data, status, xhr) {
-                _this.setState({ text: "JSON data response: " + JSON.stringify(data, null, 2) });
-            },
-            error: function (xhr, status, error) {
-                _this.setState({ text: "ERROR\t" + status + "\t" + error });
-            },
-        });
+        var generateScheduleForm = new FormData($("#generate-schedule-id")[0]);
+        AppActions_1.AppActions.generateSchedule(generateScheduleForm);
     };
     GenerateScheduleInput.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("form", { id: "generate-schedule-id", action: "/generateSchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                "Select courses to upload:",
-                React.createElement("input", { id: "vs-courses-input-id", type: "file", name: "courses" }),
-                React.createElement("br", null),
-                "Select people to upload:",
-                React.createElement("input", { id: "vs-people-input-id", type: "file", name: "people" }),
-                React.createElement("br", null),
-                "Select faculty to upload:",
-                React.createElement("input", { id: "vs-faculty-input-id", type: "file", name: "faculty" }),
-                React.createElement("input", { type: "submit", value: "Upload", name: "submit" })),
-            React.createElement("div", null, this.state.text)));
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-courses-input-id" },
+                        React.createElement("b", null, "Schedule")),
+                    React.createElement("input", { id: "vs-courses-input-id", className: "form-control-file", type: "file", name: "courses", required: true })),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-people-input-id" },
+                        React.createElement("b", null, "TA Preferences")),
+                    React.createElement("input", { id: "vs-people-input-id", className: "form-control-file", type: "file", name: "people", required: true })),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-faculty-input-id" },
+                        React.createElement("b", null, "Faculty Hours")),
+                    React.createElement("input", { id: "vs-faculty-input-id", className: "form-control-file", type: "file", name: "faculty", required: true })),
+                React.createElement(GenerateScheduleSubmitButton_1.GenerateScheduleSubmitButton, null))));
     };
     return GenerateScheduleInput;
 }(React.Component));
 exports.GenerateScheduleInput = GenerateScheduleInput;
 
-},{"react":26}],29:[function(require,module,exports){
+},{"../../actions/AppActions":41,"./GenerateScheduleSubmitButton":47,"react":38}],47:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18173,64 +19943,88 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var UploadFiles = /** @class */ (function (_super) {
-    __extends(UploadFiles, _super);
-    function UploadFiles(props) {
+var APICallerStore_1 = require("../../stores/APICallerStore");
+var GenerateScheduleSubmitButton = /** @class */ (function (_super) {
+    __extends(GenerateScheduleSubmitButton, _super);
+    function GenerateScheduleSubmitButton(props) {
         var _this = _super.call(this, props) || this;
-        _this.state = { text: "testeroni" };
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
+    }
+    GenerateScheduleSubmitButton.prototype.componentWillMount = function () {
+        this.setState(APICallerStore_1.APICallerStore.getState());
+    };
+    GenerateScheduleSubmitButton.prototype.componentDidMount = function () {
+        APICallerStore_1.APICallerStore.listen(this.onChange);
+    };
+    GenerateScheduleSubmitButton.prototype.componentWillUnmount = function () {
+        APICallerStore_1.APICallerStore.unlisten(this.onChange);
+    };
+    GenerateScheduleSubmitButton.prototype.onChange = function (state) {
+        this.setState(state);
+    };
+    GenerateScheduleSubmitButton.prototype.render = function () {
+        if (this.state.loading) {
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit", disabled: true });
+        }
+        else {
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit" });
+        }
+    };
+    return GenerateScheduleSubmitButton;
+}(React.Component));
+exports.GenerateScheduleSubmitButton = GenerateScheduleSubmitButton;
+
+},{"../../stores/APICallerStore":56,"react":38}],48:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var AppActions_1 = require("../../actions/AppActions");
+var VerifyScheduleSubmitButton_1 = require("./VerifyScheduleSubmitButton");
+var VerifyScheduleInput = /** @class */ (function (_super) {
+    __extends(VerifyScheduleInput, _super);
+    function VerifyScheduleInput(props) {
+        var _this = _super.call(this, props) || this;
         _this.onSubmit = _this.onSubmit.bind(_this);
         return _this;
     }
-    UploadFiles.prototype.onSubmit = function (e) {
-        var _this = this;
+    VerifyScheduleInput.prototype.onSubmit = function (e) {
         e.preventDefault();
-        $.ajax({
-            url: "verifySchedule",
-            type: "POST",
-            data: new FormData($("#verify-schedule-id")[0]),
-            cache: false,
-            contentType: false,
-            processData: false,
-            // Custom XMLHttpRequest
-            xhr: function () {
-                var myXhr = $.ajaxSettings.xhr();
-                if (myXhr.upload) {
-                    // For handling the progress of the upload
-                    myXhr.upload.addEventListener("progress", function (event) {
-                        if (event.lengthComputable) {
-                            console.log(event.loaded, event.total);
-                        }
-                    }, false);
-                }
-                return myXhr;
-            },
-            success: function (data, status, xhr) {
-                _this.setState({ text: "JSON data response: " + JSON.stringify(data, null, 2) });
-            },
-            error: function (xhr, status, error) {
-                _this.setState({ text: "ERROR\t" + status + "\t" + error });
-            },
-        });
+        var verifyScheduleForm = new FormData($("#verify-schedule-id")[0]);
+        AppActions_1.AppActions.checkSchedule(verifyScheduleForm);
     };
-    UploadFiles.prototype.render = function () {
+    VerifyScheduleInput.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("form", { id: "verify-schedule-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                "Select courses to upload:",
-                React.createElement("input", { id: "vs-courses-input-id", type: "file", name: "courses" }),
-                React.createElement("br", null),
-                "Select people to upload:",
-                React.createElement("input", { id: "vs-people-input-id", type: "file", name: "people" }),
-                React.createElement("br", null),
-                "Select faculty to upload:",
-                React.createElement("input", { id: "vs-faculty-input-id", type: "file", name: "faculty" }),
-                React.createElement("input", { type: "submit", value: "Upload", name: "submit" })),
-            React.createElement("div", null, this.state.text)));
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-courses-input-id" },
+                        React.createElement("b", null, "Schedule")),
+                    React.createElement("input", { id: "vs-courses-input-id", className: "form-control-file", type: "file", name: "courses", required: true })),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-people-input-id" },
+                        React.createElement("b", null, "TA Preferences")),
+                    React.createElement("input", { id: "vs-people-input-id", className: "form-control-file", type: "file", name: "people", required: true })),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-faculty-input-id" },
+                        React.createElement("b", null, "Faculty Hours")),
+                    React.createElement("input", { id: "vs-faculty-input-id", className: "form-control-file", type: "file", name: "faculty", required: true })),
+                React.createElement(VerifyScheduleSubmitButton_1.VerifyScheduleSubmitButton, null))));
     };
-    return UploadFiles;
+    return VerifyScheduleInput;
 }(React.Component));
-exports.UploadFiles = UploadFiles;
+exports.VerifyScheduleInput = VerifyScheduleInput;
 
-},{"react":26}],30:[function(require,module,exports){
+},{"../../actions/AppActions":41,"./VerifyScheduleSubmitButton":49,"react":38}],49:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -18244,25 +20038,241 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var UploadFiles_1 = require("./FileUpload/UploadFiles");
-var GenerateScheduleInput_1 = require("./FileUpload/GenerateScheduleInput");
+var APICallerStore_1 = require("../../stores/APICallerStore");
+var VerifyScheduleSubmitButton = /** @class */ (function (_super) {
+    __extends(VerifyScheduleSubmitButton, _super);
+    function VerifyScheduleSubmitButton(props) {
+        var _this = _super.call(this, props) || this;
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
+    }
+    VerifyScheduleSubmitButton.prototype.componentWillMount = function () {
+        this.setState(APICallerStore_1.APICallerStore.getState());
+    };
+    VerifyScheduleSubmitButton.prototype.componentDidMount = function () {
+        APICallerStore_1.APICallerStore.listen(this.onChange);
+    };
+    VerifyScheduleSubmitButton.prototype.componentWillUnmount = function () {
+        APICallerStore_1.APICallerStore.unlisten(this.onChange);
+    };
+    VerifyScheduleSubmitButton.prototype.onChange = function (state) {
+        this.setState(state);
+    };
+    VerifyScheduleSubmitButton.prototype.render = function () {
+        if (this.state.loading) {
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit", disabled: true });
+        }
+        else {
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit" });
+        }
+    };
+    return VerifyScheduleSubmitButton;
+}(React.Component));
+exports.VerifyScheduleSubmitButton = VerifyScheduleSubmitButton;
+
+},{"../../stores/APICallerStore":56,"react":38}],50:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var Navbar_1 = require("./Navbar/Navbar");
+var FileUploadFooter_1 = require("./FileUpload/FileUploadFooter");
+var FileUploadFrame_1 = require("./FileUpload/FileUploadFrame");
+var OutputFrame_1 = require("./Output/OutputFrame");
+var AboutInfo_1 = require("./Modals/AboutInfo");
 var Frame = /** @class */ (function (_super) {
     __extends(Frame, _super);
     function Frame() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     Frame.prototype.render = function () {
-        return (React.createElement("div", null,
-            "Test Component",
-            React.createElement(UploadFiles_1.UploadFiles, null),
-            React.createElement("br", null),
-            React.createElement(GenerateScheduleInput_1.GenerateScheduleInput, null)));
+        return (React.createElement("div", { className: "container-fluid" },
+            React.createElement("div", { className: "row fill-screen" },
+                React.createElement("div", { className: "col-sm-4 file-upload-frame" },
+                    React.createElement(FileUploadFrame_1.FileUploadFrame, null),
+                    React.createElement(FileUploadFooter_1.FileUploadFooter, null)),
+                React.createElement("div", { className: "col-sm-8 output-frame" },
+                    React.createElement(OutputFrame_1.OutputFrame, null))),
+            React.createElement(AboutInfo_1.AboutInfo, null),
+            React.createElement(Navbar_1.Navbar, null)));
     };
     return Frame;
 }(React.Component));
 exports.Frame = Frame;
 
-},{"./FileUpload/GenerateScheduleInput":28,"./FileUpload/UploadFiles":29,"react":26}],31:[function(require,module,exports){
+},{"./FileUpload/FileUploadFooter":44,"./FileUpload/FileUploadFrame":45,"./Modals/AboutInfo":51,"./Navbar/Navbar":52,"./Output/OutputFrame":53,"react":38}],51:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var AboutInfo = /** @class */ (function (_super) {
+    __extends(AboutInfo, _super);
+    function AboutInfo(props) {
+        return _super.call(this, props) || this;
+    }
+    AboutInfo.prototype.render = function () {
+        return (React.createElement("div", { className: "modal fade", id: "about-info-modal", tabIndex: -1, role: "dialog", "aria-labelledby": "exampleModalLabel", "aria-hidden": "true" },
+            React.createElement("div", { className: "modal-dialog", role: "document" },
+                React.createElement("div", { className: "modal-content" },
+                    React.createElement("div", { className: "modal-header" },
+                        React.createElement("h5", { className: "modal-title", id: "aboutInfoTitle" }, "Info"),
+                        React.createElement("button", { type: "button", className: "close", "data-dismiss": "modal", "aria-label": "Close" },
+                            React.createElement("span", { "aria-hidden": "true" }, "\u00D7"))),
+                    React.createElement("div", { className: "modal-body" }, "To be written.")))));
+    };
+    return AboutInfo;
+}(React.Component));
+exports.AboutInfo = AboutInfo;
+
+},{"react":38}],52:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var AppActions_1 = require("../../actions/AppActions");
+var Navbar = /** @class */ (function (_super) {
+    __extends(Navbar, _super);
+    function Navbar(props) {
+        return _super.call(this, props) || this;
+    }
+    Navbar.prototype.render = function () {
+        return (React.createElement("div", { className: "fixed-top transparent-navbar" },
+            React.createElement("div", { className: "row" },
+                React.createElement("div", { className: "col-sm-3 offset-sm-9" },
+                    React.createElement("div", { className: "float-right clickable" },
+                        React.createElement("button", { type: "button", className: "btn btn-primary-transparent", "data-toggle": "modal", "data-target": "#about-info-modal" },
+                            React.createElement("i", { className: "fas fa-question" })),
+                        React.createElement("button", { type: "button", className: "btn btn-primary-transparent", onClick: AppActions_1.AppActions.clearOutput },
+                            React.createElement("i", { className: "fas fa-times" })))))));
+    };
+    return Navbar;
+}(React.Component));
+exports.Navbar = Navbar;
+
+},{"../../actions/AppActions":41,"react":38}],53:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var OutputStore_1 = require("../../stores/OutputStore");
+var OutputOverlay_1 = require("./OutputOverlay");
+var OutputFrame = /** @class */ (function (_super) {
+    __extends(OutputFrame, _super);
+    function OutputFrame(props) {
+        var _this = _super.call(this, props) || this;
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
+    }
+    OutputFrame.prototype.componentWillMount = function () {
+        this.setState(OutputStore_1.OutputStore.getState());
+    };
+    OutputFrame.prototype.componentDidMount = function () {
+        OutputStore_1.OutputStore.listen(this.onChange);
+    };
+    OutputFrame.prototype.componentWillUnmount = function () {
+        OutputStore_1.OutputStore.unlisten(this.onChange);
+    };
+    OutputFrame.prototype.onChange = function (state) {
+        this.setState(state);
+        var outputDiv = document.getElementById("output-log-id");
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    };
+    OutputFrame.prototype.render = function () {
+        return (React.createElement("div", null,
+            React.createElement("div", { id: "output-log-id", className: "scrollable" },
+                React.createElement(OutputOverlay_1.OutputOverlay, null),
+                this.state.logs.map(function (log, index) {
+                    return React.createElement("div", { key: index }, log);
+                }))));
+    };
+    return OutputFrame;
+}(React.Component));
+exports.OutputFrame = OutputFrame;
+
+},{"../../stores/OutputStore":58,"./OutputOverlay":54,"react":38}],54:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var APICallerStore_1 = require("../../stores/APICallerStore");
+var OutputOverlay = /** @class */ (function (_super) {
+    __extends(OutputOverlay, _super);
+    function OutputOverlay(props) {
+        var _this = _super.call(this, props) || this;
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
+    }
+    OutputOverlay.prototype.componentWillMount = function () {
+        this.setState(APICallerStore_1.APICallerStore.getState());
+    };
+    OutputOverlay.prototype.componentDidMount = function () {
+        APICallerStore_1.APICallerStore.listen(this.onChange);
+    };
+    OutputOverlay.prototype.componentWillUnmount = function () {
+        APICallerStore_1.APICallerStore.unlisten(this.onChange);
+    };
+    OutputOverlay.prototype.onChange = function (state) {
+        this.setState(state);
+    };
+    OutputOverlay.prototype.render = function () {
+        if (this.state.loading) {
+            return (React.createElement("div", { className: "output-overlay-spinner" },
+                React.createElement("div", { className: "loader" })));
+        }
+        else {
+            return null;
+        }
+    };
+    return OutputOverlay;
+}(React.Component));
+exports.OutputOverlay = OutputOverlay;
+
+},{"../../stores/APICallerStore":56,"react":38}],55:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Exported bootstrap function for initializing the app.
@@ -18287,4 +20297,161 @@ function setupCsrf() {
     });
 }
 
-},{}]},{},[27]);
+},{}],56:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var alt_1 = require("../alt");
+var AbstractStore_1 = require("./AbstractStore");
+var AppActions_1 = require("../actions/AppActions");
+var APICallerStoreClass = /** @class */ (function (_super) {
+    __extends(APICallerStoreClass, _super);
+    function APICallerStoreClass() {
+        var _this = _super.call(this) || this;
+        _this.loading = false;
+        _this.delay = "";
+        _this.bindAction(AppActions_1.AppActions.checkSchedule, _this.onCheckSchedule);
+        _this.bindAction(AppActions_1.AppActions.generateSchedule, _this.onGenerateSchedule);
+        return _this;
+    }
+    APICallerStoreClass.prototype.onCheckSchedule = function () {
+        var _this = this;
+        if (this.loading) {
+            return;
+        }
+        this.loading = true;
+        this.delay = "";
+        var start = new Date().getTime();
+        $.ajax({
+            url: "verifySchedule",
+            type: "POST",
+            data: new FormData($("#verify-schedule-id")[0]),
+            cache: false,
+            contentType: false,
+            processData: false,
+            // Custom XMLHttpRequest
+            xhr: function () {
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) {
+                    // For handling the progress of the upload
+                    myXhr.upload.addEventListener("progress", function (event) {
+                        if (event.lengthComputable) {
+                            console.log(event.loaded, event.total);
+                        }
+                    }, false);
+                }
+                return myXhr;
+            },
+            success: function (data, status, xhr) {
+                AppActions_1.AppActions.addToOutput("JSON data response: " + JSON.stringify(data, null, 2));
+                var time = new Date().getTime() - start;
+                _this.setState({ loading: false, delay: time.toString() + "ms" });
+            },
+            error: function (xhr, status, error) {
+                AppActions_1.AppActions.addToOutput("ERROR\t" + status + "\t" + error);
+                var time = new Date().getTime() - start;
+                _this.setState({ loading: false, delay: time.toString() + "ms" });
+            },
+        });
+    };
+    APICallerStoreClass.prototype.onGenerateSchedule = function (generateScheduleForm) {
+        var _this = this;
+        if (this.loading) {
+            return;
+        }
+        this.loading = true;
+        this.delay = "";
+        var start = new Date().getTime();
+        $.ajax({
+            url: "generateSchedule",
+            type: "POST",
+            data: generateScheduleForm,
+            cache: false,
+            contentType: false,
+            processData: false,
+            // Custom XMLHttpRequest
+            xhr: function () {
+                var myXhr = $.ajaxSettings.xhr();
+                if (myXhr.upload) {
+                    // For handling the progress of the upload
+                    myXhr.upload.addEventListener("progress", function (event) {
+                        if (event.lengthComputable) {
+                            console.log(event.loaded, event.total);
+                        }
+                    }, false);
+                }
+                return myXhr;
+            },
+            success: function (data, status, xhr) {
+                AppActions_1.AppActions.addToOutput("JSON data response: " + JSON.stringify(data, null, 2));
+                var time = new Date().getTime() - start;
+                _this.setState({ loading: false, delay: time + "ms" });
+            },
+            error: function (xhr, status, error) {
+                AppActions_1.AppActions.addToOutput("ERROR\t" + status + "\t" + error);
+                var time = new Date().getTime() - start;
+                _this.setState({ loading: false, delay: time + "ms" });
+            },
+        });
+    };
+    return APICallerStoreClass;
+}(AbstractStore_1.AbstractStoreModel));
+var APICallerStore = alt_1.alt.createStore(APICallerStoreClass, "APICallerStore");
+exports.APICallerStore = APICallerStore;
+
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}],57:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var AbstractStoreModel = /** @class */ (function () {
+    function AbstractStoreModel() {
+    }
+    return AbstractStoreModel;
+}());
+exports.AbstractStoreModel = AbstractStoreModel;
+
+},{}],58:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var alt_1 = require("../alt");
+var AbstractStore_1 = require("./AbstractStore");
+var AppActions_1 = require("../actions/AppActions");
+var OutputStoreClass = /** @class */ (function (_super) {
+    __extends(OutputStoreClass, _super);
+    function OutputStoreClass() {
+        var _this = _super.call(this) || this;
+        _this.logs = [];
+        _this.bindAction(AppActions_1.AppActions.addToOutput, _this.onAddToOutput);
+        _this.bindAction(AppActions_1.AppActions.clearOutput, _this.onClearOutput);
+        return _this;
+    }
+    OutputStoreClass.prototype.onAddToOutput = function (log) {
+        this.logs.push(log);
+    };
+    OutputStoreClass.prototype.onClearOutput = function () {
+        this.logs = [];
+    };
+    return OutputStoreClass;
+}(AbstractStore_1.AbstractStoreModel));
+var OutputStore = alt_1.alt.createStore(OutputStoreClass, "OutputStore");
+exports.OutputStore = OutputStore;
+
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}]},{},[43]);

@@ -2,6 +2,10 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { init } from "./init";
+import "./alt";
+import "./actions/AppActions";
+import "./stores/APICallerStore";
+import "./stores/OutputStore";
 
 import { Frame } from "./components/Frame";
 
