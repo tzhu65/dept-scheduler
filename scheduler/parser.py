@@ -6,6 +6,13 @@ from .person import Conflict
 from .course import Course
 from .parserConstants import *
 
+
+class MissingHeaders(Exception):
+    def __init__(self, message, headers):
+        super().__init__(message)
+        self.headers = headers
+
+
 def sanitizeName(name):
     sanitized = name
     if ',' in name:
@@ -13,6 +20,7 @@ def sanitizeName(name):
         sanitizedList = nameParts[1] , ' ' ,nameParts[0]
         sanitized = ''.join(sanitizedList)
     return sanitized
+
 
 def sanitizeList(text):
     text = text.replace(';', ',')
@@ -52,12 +60,43 @@ def parsePeopleFromPath(path):
 
 
 def parsePeople(file):
+    # Expected headers
+    expectedHeaders = {
+        RETURNING,
+        CATEGORY_LABS,
+        CATEGORY_TEACHING,
+        CATEGORY_ASSISTING,
+        CATEGORY_RECITATION,
+        CATEGORY_MHC,
+        NAME,
+        FULLY_SUPPORTED,
+        SUPPORTING_PROFESSOR,
+        YEAR_IN_SCHOOL,
+        PURE_OR_APPLIED,
+        QUALIFYING_EXAMS,
+        TEACHING_PREF,
+        LAB_PREF,
+        ASSISTING_PREF,
+        RECITATION_PREF,
+        DAY_PREF,
+        TIME_CONFLICT,
+        COMPUTER_SKILLS,
+        HOURS_COMPLETED,
+    }
+
     people = []
     fields = {}
     reader = csv.reader(file)
     headers = next(reader)
     for index, field in enumerate(headers):
         fields[field] = index
+        expectedHeaders.discard(field)
+
+    # Check if all expected headers are present
+    if len(expectedHeaders) != 0:
+        raise MissingHeaders("Expected headers.", expectedHeaders)
+
+    # Loop through all the people
     for row in reader:
         # if has a datetime and are returning next semester, then we create person object
         if row[0] and row[fields[RETURNING]] != 'No':
@@ -121,6 +160,18 @@ def parseCoursesFromPath(path):
 
 
 def parseCourses(file):
+    expectedHeaders = {
+        'Days',
+        'Teach(12)',
+        'Recitation(3)',
+        'Assist(6)',
+        'Class',
+        'Sec',
+        'Start Time',
+        'End Time',
+        'Instructor',
+        'Category',
+    }
     courses = []
     fields = {}
     reader = csv.reader(file)
@@ -128,6 +179,12 @@ def parseCourses(file):
     headers = next(reader)
     for i, field in enumerate(headers):
         fields[field] = i
+        expectedHeaders.discard(field)
+
+    # Check if all expected headers are present
+    if len(expectedHeaders) != 0:
+        raise MissingHeaders("Expected headers.", expectedHeaders)
+
     for row in reader:
         if row[0]:
 
@@ -170,6 +227,11 @@ def parseFacultyHoursFromPath(path):
         return parseFacultyHours(file)
 
 def parseFacultyHours(file):
+    expectedHeaders = {
+        'Professor Name',
+        'Fall',
+        'Spring',
+    }
     #currently hardcoded for fall
     fields = {}
     fallFacultyLoadDict = {}
@@ -178,6 +240,12 @@ def parseFacultyHours(file):
     headers = next(reader)
     for i, field in enumerate(headers):
         fields[field] = i
+        expectedHeaders.discard(field)
+
+    # Check if all expected headers are present
+    if len(expectedHeaders) != 0:
+        raise MissingHeaders("Expected headers.", expectedHeaders)
+
     for row in reader:
         if row[0]:
             professorName = sanitizeName(row[fields['Professor Name']].strip())
