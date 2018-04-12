@@ -1,11 +1,11 @@
 from io import TextIOWrapper
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 
 from .forms import VerifySchedule, GenerateSchedule
-from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath, parseFacultyHours, parseFacultyHoursFromPath
+from .parser import parseCourses, parseCoursesFromPath, parsePeople, parsePeopleFromPath, parseFacultyHours, parseFacultyHoursFromPath, MissingHeaders
 from .checker import check
 from .generate import generate
 
@@ -19,64 +19,120 @@ def index(request):
 def verifySchedule(request):
     if request.method == 'POST':
         form = VerifySchedule(request.POST, request.FILES)
+        errors = []
+        courses = []
+        people = []
+        facultyHours = []
         if form.is_valid():
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
             faculty = form.cleaned_data['faculty']
+
             # Have to do a separate case for when it's a tmp file and when it's already in memory
-            if courses and isinstance(courses, TemporaryUploadedFile):
-                courses = parseCoursesFromPath(courses.temporary_file_path())
-            elif courses and isinstance(courses, InMemoryUploadedFile):
-                f = TextIOWrapper(courses.file, encoding=request.encoding)
-                courses = parseCourses(f)
+            try:
+                if courses and isinstance(courses, TemporaryUploadedFile):
+                    courses = parseCoursesFromPath(courses.temporary_file_path())
+                elif courses and isinstance(courses, InMemoryUploadedFile):
+                    f = TextIOWrapper(courses.file, encoding=request.encoding)
+                    courses = parseCourses(f)
+            except MissingHeaders as e:
+                if len(e.headers) > 5:
+                    errors.append("Missing too many headers in the schedule spreadsheet")
+                else:
+                    errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
 
-            if people and isinstance(people, TemporaryUploadedFile):
-                people = parsePeopleFromPath(people.temporary_file_path())
-            elif people and isinstance(people, InMemoryUploadedFile):
-                f = TextIOWrapper(people.file, encoding=request.encoding)
-                people = parsePeople(f)
+            try:
+                if people and isinstance(people, TemporaryUploadedFile):
+                    people = parsePeopleFromPath(people.temporary_file_path())
+                elif people and isinstance(people, InMemoryUploadedFile):
+                    f = TextIOWrapper(people.file, encoding=request.encoding)
+                    people = parsePeople(f)
+            except MissingHeaders as e:
+                if len(e.headers) > 5:
+                    errors.append("Missing too many headers in the TA preferences spreadsheet")
+                else:
+                    errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
 
-            if faculty and isinstance(faculty, TemporaryUploadedFile):
-                facultyHours = parseFacultyHoursFromPath(faculty.temporary_file_path())
-            elif faculty and isinstance(faculty, InMemoryUploadedFile):
-                f = TextIOWrapper(faculty.file, encoding=request.encoding)
-                facultyHours = parseFacultyHours(f)
-            check(courses, people, facultyHours[0])
+            try:
+                if faculty and isinstance(faculty, TemporaryUploadedFile):
+                    facultyHours = parseFacultyHoursFromPath(faculty.temporary_file_path())
+                elif faculty and isinstance(faculty, InMemoryUploadedFile):
+                    f = TextIOWrapper(faculty.file, encoding=request.encoding)
+                    facultyHours = parseFacultyHours(f)
+            except MissingHeaders as e:
+                if len(e.headers) > 5:
+                    errors.append("Missing too many headers in the faculty hours spreadsheet")
+                else:
+                    errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
         else:
+            errors.append("Invalid form submission")
             print(form.errors)
-        return HttpResponse("hi")
+
+        # Check if there were any parsing errors
+        if len(errors) > 0:
+            return JsonResponse({"errors": errors})
+        else:
+            check(courses, people, facultyHours[0])
+            return HttpResponse("checked the schedule")
     raise Http404()
 
 
 def generateSchedule(request):
     if request.method == 'POST':
         form = GenerateSchedule(request.POST, request.FILES)
+        errors = []
+        courses = []
+        people = []
+        faculty = []
         if form.is_valid():
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
             faculty = form.cleaned_data['faculty']
 
             # Have to do a separate case for when it's a tmp file and when it's already in memory
-            if courses and isinstance(courses, TemporaryUploadedFile):
-                courses = parseCoursesFromPath(courses.temporary_file_path())
-            elif courses and isinstance(courses, InMemoryUploadedFile):
-                f = TextIOWrapper(courses.file, encoding=request.encoding)
-                courses = parseCourses(f)
+            try:
+                if courses and isinstance(courses, TemporaryUploadedFile):
+                    courses = parseCoursesFromPath(courses.temporary_file_path())
+                elif courses and isinstance(courses, InMemoryUploadedFile):
+                    f = TextIOWrapper(courses.file, encoding=request.encoding)
+                    courses = parseCourses(f)
+            except MissingHeaders as e:
+                if len(e.headers) > 5:
+                    errors.append("Missing too many headers in the schedule spreadsheet")
+                else:
+                    errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
 
-            if people and isinstance(people, TemporaryUploadedFile):
-                people = parsePeopleFromPath(people.temporary_file_path())
-            elif people and isinstance(people, InMemoryUploadedFile):
-                f = TextIOWrapper(people.file, encoding=request.encoding)
-                people = parsePeople(f)
+            try:
+                if people and isinstance(people, TemporaryUploadedFile):
+                    people = parsePeopleFromPath(people.temporary_file_path())
+                elif people and isinstance(people, InMemoryUploadedFile):
+                    f = TextIOWrapper(people.file, encoding=request.encoding)
+                    people = parsePeople(f)
+            except MissingHeaders as e:
+                if len(e.headers) > 5:
+                    errors.append("Missing too many TA preferences in the TA preferences spreadsheet")
+                else:
+                    errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
 
-            if faculty and isinstance(faculty, TemporaryUploadedFile):
-                faculty = parseFacultyHoursFromPath(faculty.temporary_file_path())
-            elif faculty and isinstance(faculty, InMemoryUploadedFile):
-                f = TextIOWrapper(faculty.file, encoding=request.encoding)
-                faculty = parseFacultyHours(f)
-
-            generate(courses, people, faculty)
+            try:
+                if faculty and isinstance(faculty, TemporaryUploadedFile):
+                    faculty = parseFacultyHoursFromPath(faculty.temporary_file_path())
+                elif faculty and isinstance(faculty, InMemoryUploadedFile):
+                    f = TextIOWrapper(faculty.file, encoding=request.encoding)
+                    faculty = parseFacultyHours(f)
+            except MissingHeaders as e:
+                if len(e.headers) > 5:
+                    errors.append("Missing too many headers in the faculty hours spreadsheet")
+                else:
+                    errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
         else:
+            errors.append("Invalid form submission")
             print(form.errors)
-        return HttpResponse("hi")
+
+        # Check if there were any parsing errors
+        if len(errors) > 0:
+            return JsonResponse({"errors": errors})
+        else:
+            generate(courses, people, faculty)
+            return HttpResponse("generated a schedule")
     raise Http404()
