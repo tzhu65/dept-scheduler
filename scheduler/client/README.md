@@ -5,7 +5,7 @@ This is the client project code the TA scheduler project in COMP-523.
 Some of the core technology used includes:
 * Typescript for all of the javascript codebase helped organize the code
 * React for structuring the view
-* Redux manages the state of the page
+* Alt.js manages the state of the page
 * Jest for running tests on the library
 
 ## Setup

@@ -2,9 +2,9 @@ import * as React from "react";
 
 import { AppActions } from "../../actions/AppActions";
 
-import { GenerateScheduleSubmitButton } from "./GenerateScheduleSubmitButton";
+import { VerifyScheduleSubmitButton } from "./VerifyScheduleSubmitButton";
 
-export class GenerateScheduleInput extends React.Component<null, null> {
+export class VerifyScheduleInput extends React.Component<null, null> {
 
   constructor(props: any) {
     super(props);
@@ -13,16 +13,16 @@ export class GenerateScheduleInput extends React.Component<null, null> {
 
   public onSubmit(e: any) {
     e.preventDefault();
-    const generateScheduleForm = new FormData(($("#generate-schedule-id")[0] as HTMLFormElement));
-    AppActions.generateSchedule(generateScheduleForm);
+    const verifyScheduleForm = new FormData(($("#verify-schedule-id")[0] as HTMLFormElement));
+    AppActions.checkSchedule(verifyScheduleForm);
   }
 
   public render() {
     return (
       <div>
         <form
-          id="generate-schedule-id"
-          action="/generateSchedule"
+          id="verify-schedule-id"
+          action="/verifySchedule"
           method="post"
           encType="multipart/form-data"
           onSubmit={this.onSubmit}
@@ -42,7 +42,7 @@ export class GenerateScheduleInput extends React.Component<null, null> {
             <input id="vs-faculty-input-id" className="form-control-file" type="file" name="faculty" required={true}/>
           </div>
 
-          <GenerateScheduleSubmitButton />
+          <VerifyScheduleSubmitButton />
 
         </form>
       </div>

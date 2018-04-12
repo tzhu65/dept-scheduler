@@ -1,1 +1,60 @@
-@import "./skeleton";
+.fill-screen {
+  height: 100vh;
+}
+
+.scrollable {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.file-upload-frame {
+  border-right: 2px solid black;
+  background-color: #BFDCE3
+}
+
+.output-frame {
+  background-color: #4ABDAC;
+  padding: 0 !important;
+}
+
+.output-overlay-spinner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.output-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.transparent-navbar {
+  background: transparent;
+  pointer-events: none;
+}
+
+.clickable {
+  pointer-events: auto;
+}
+
+.btn-primary-transparent {
+  background: transparent;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.btn-primary-transparent:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary-transparent:active {
+  background: rgba(100, 100, 100, 0.3);
+}
+
+i::before{
+    background: transparent;
+}

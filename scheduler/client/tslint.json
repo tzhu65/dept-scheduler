@@ -11,6 +11,7 @@
      * Any rules specified here will override those from the base config we are extending.
      */
     "curly": true,
+    "jsx-no-multiline-js": false,
     "no-var-requires": false,
     "object-literal-sort-keys": false,
     "ordered-imports": false
