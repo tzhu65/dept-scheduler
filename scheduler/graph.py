@@ -1,7 +1,6 @@
 import copy
 import numpy as np
 import math
-import random
 
 
 from .checker import validateComputerSkill, validateQualifyingExam, checkClassTimes, checkHoursConstraint
@@ -9,8 +8,12 @@ from .checker import validateComputerSkill, validateQualifyingExam, checkClassTi
 
 class WeightAssigner:
     def __init__(self):
-        self.seniority = 1
-        self.preference = 1
+        self.seniority = 1.0
+        self.preference = 1.9
+        self.category_pref = 1.2
+
+        self.undefined_category_pref = 3
+        self.undefined_seniority = 5
 
     def personWeight(self, person, course):
         """
@@ -27,29 +30,45 @@ class WeightAssigner:
 
         # Determine preference
         prefs = []
+        categoryPref = ''
         if course.category == 'teach':
             prefs = person.teachingPrefs
+            categoryPref = person.categoryPrefs["Teaching"]
         elif course.category == 'assist':
             prefs = person.assistingPrefs
+            categoryPref = person.categoryPrefs["Assisting"]
         elif course.category == 'lab':
             prefs = person.labPrefs
+            categoryPref = person.categoryPrefs["Labs"]
         elif course.category == 'recitation':
             prefs = person.recitationPrefs
+            categoryPref = person.categoryPrefs["Recitation"]
+
+        if categoryPref == '':
+            categoryPrefIndex = self.undefined_category_pref
+        else:
+            categoryPrefIndex = int(categoryPref)
+
+        categoryPrefIndex = (1.0/5) * categoryPrefIndex
 
         try:
-            prefIndex = prefs.index(course.courseNumber)
+            prefIndex = prefs.index(course.courseNumber) + 1
         except ValueError:
-            prefIndex = -1
+            prefIndex = 100
 
         # Grab the seniority
-        seniority = person.yearInSchool
+        if person.yearInSchool == 0:
+            seniority = self.undefined_seniority
+        else:
+            seniority = (1 / 6.0) * person.yearInSchool
 
         # Check if the instructor is the person's sponsor
         # sponsor = person.supportingProfessor == course.instructor
 
         # Use those three categories to determine the weight of the edge
-        weight = prefIndex * seniority
-
+        weight = (self.preference * prefIndex) * (self.seniority * seniority) * (self.category_pref * categoryPrefIndex)
+        if weight <= 0:
+            print('bad weight', weight)
         return weight
 
     def professorWeight(self, professor, course):
@@ -298,61 +317,130 @@ class Graph:
                         elif rows[index] == 1 and cols[rowIndex] == 1:
                             m1[index][rowIndex] += minVal # add to intersections
 
-            m4 = {} # mapping from row to col
+            # m4 = {} # mapping from row to col
+            #
+            # for index, row in enumerate(m1):
+            #     if np.count_nonzero(row == 0) == 1:
+            #         m4[index] = row.tolist().index(0)
+            # # print("map: ", m4)
 
-            for index, row in enumerate(m1):
-                if np.count_nonzero(row == 0) == 1:
-                    m4[index] = row.tolist().index(0)
-            # print("map: ", m4)
 
             print('*** BEGINNING CHOOSING ZEROES ***')
 
-            while len(m4.keys()) < n:
-                keySize = len(m4.keys())
-                for index, row in enumerate(m1):
-                    if index in m4.keys():
-                        continue
-                    indices = set([i for i, x in enumerate(row) if x == 0])
-                    # print("indices before remove ", indices)
-                    for i in m4.values():
-                        indices.discard(i)
-                    # print("indices after remove ", indices)
-                    if len(indices) == 1:
-                        m4[index] = indices.pop()
+            rowZeros = []   # Number of zeros in each row
+            colZeros = []   # Number of zeros in each column
+            for row in m1:
+                rowCount = 0
+                for value in row:
+                    if value == 0:
+                        rowCount += 1
+                rowZeros.append(rowCount)
+            for col in m1.transpose():
+                colCount = 0
+                for value in col:
+                    if value == 0:
+                        colCount += 1
+                colZeros.append(colCount)
 
-                # print("***stuck, will now choose arbitrary***")
+            solution = {}
 
-                # if no new info was added in an entire iteration,
-                # do the same thing but don't require len(indices == 1)
-                if keySize == len(m4.keys()): 
-                    for index, row in enumerate(m1):
-                        if index in m4.keys():
-                            continue
-                        indices = set([i for i, x in enumerate(row) if x == 0])
-                        # print("indices before remove ", indices)
-                        for i in m4.values():
-                            indices.discard(i)
-                        # print("indices after remove ", indices)
-                        try: 
-                            m4[index] = indices.pop() # choose a random one doesn't matter
-                        except KeyError as e:
-                            print("ALGORITHM YIELDS NO RESULTS")
-                            print("ERR: ", e)
-                            return
+            while len(solution.keys()) < n:
 
-                # print("map: ", m4)
+                # Get the minimum positive value
+                rowPositives = [x for x in rowZeros if x > 0]
+                colPositives = [x for x in colZeros if x > 0]
+                if len(rowPositives) == 0 and len(colPositives) == 0:
+                    print('Done iwht this shiz')
+                    print(sorted(solution.keys()))
+                    print(len(self.people))
 
-            print(m1)
+                    # Remove either rows or columns that were padded
+                    if len(self.people) < n:
+                        for i in range(len(self.people), n):
+                            solution.pop(i, None)
+                    elif len(self.courses) < n:
+                        for k, v in solution.items():
+                            if v >= len(self.courses):
+                                solution.pop(k)
+                    return solution
 
-            # if a full row is inf, cut it now
-            # TODO: to same for courses (columns)
-            if len(self.people) < n:
-                for i in range(len(self.people), n):
-                    m4.pop(i, None)
+                minRow = min(rowPositives) if len(rowPositives) > 0 else n + 1
+                minCol = min(colPositives) if len(colPositives) > 0 else n + 1
 
-            print('*** FINISHED GENERATING SCHEDULE ***')
+                if minRow < minCol:
+                    rIndex = rowZeros.index(minRow)
+                    # print(rIndex)
+                    for index, val in enumerate(m1[rIndex]):    # Get the index of the first 0
+                        if val == 0:
+                            solution[rIndex] = index    # Map the row to a column
+                            break
+                    rowZeros[rIndex] = 0
 
-            return m4
+                    # Iterate through that row
+                    for index, val in enumerate(m1[rIndex]):
+                        if val == 0:
+                            col[index] -= 1
+                else:
+                    cIndex = colZeros.index(minCol)
+                    # print(cIndex)
+                    for index, val in enumerate(m1.transpose()[cIndex]):  # Get the index of the first 0
+                        if val == 0:
+                            solution[index] = cIndex  # Map the row to a column
+
+                            break
+                    colZeros[cIndex] = 0
+
+                    # Iterate through that column
+                    for index, val in enumerate(m1.transpose()[cIndex]):
+                        if val == 0:
+                            row[index] -= 1
+
+            # while len(m4.keys()) < n:
+            #     keySize = len(m4.keys())
+            #     for index, row in enumerate(m1):
+            #         if index in m4.keys():
+            #             continue
+            #         indices = set([i for i, x in enumerate(row) if x == 0])
+            #         # print("indices before remove ", indices)
+            #         for i in m4.values():
+            #             indices.discard(i)
+            #         # print("indices after remove ", indices)
+            #         if len(indices) == 1:
+            #             m4[index] = indices.pop()
+            #
+            #     # print("***stuck, will now choose arbitrary***")
+            #
+            #     # if no new info was added in an entire iteration,
+            #     # do the same thing but don't require len(indices == 1)
+            #     if keySize == len(m4.keys()):
+            #         for index, row in enumerate(m1):
+            #             if index in m4.keys():
+            #                 continue
+            #             indices = set([i for i, x in enumerate(row) if x == 0])
+            #             # print("indices before remove ", indices)
+            #             for i in m4.values():
+            #                 indices.discard(i)
+            #             # print("indices after remove ", indices)
+            #             try:
+            #                 m4[index] = indices.pop() # choose a random one doesn't matter
+            #             except KeyError as e:
+            #                 print("ALGORITHM YIELDS NO RESULTS")
+            #                 print("ERR: ", e)
+            #                 return
+            #
+            #     # print("map: ", m4)
+            #
+            # print(m1)
+            #
+            # # if a full row is inf, cut it now
+            # # TODO: to same for courses (columns)
+            # if len(self.people) < n:
+            #     for i in range(len(self.people), n):
+            #         m4.pop(i, None)
+            #
+            # print('*** FINISHED GENERATING SCHEDULE ***')
+            #
+            # return m4
 
     def printSchedule(self, schedule):
         print('%30s' % 'INSTRUCTOR' +  
