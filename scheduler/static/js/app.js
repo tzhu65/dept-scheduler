@@ -20352,12 +20352,15 @@ var APICallerStoreClass = /** @class */ (function (_super) {
                 return myXhr;
             },
             success: function (data, status, xhr) {
-                AppActions_1.AppActions.addToOutput("JSON data response: " + JSON.stringify(data, null, 2));
+                AppActions_1.AppActions.addToOutput("Finished checking the schedule...");
+                data.errors.map(function (e) {
+                    AppActions_1.AppActions.addToOutput(e);
+                });
                 var time = new Date().getTime() - start;
                 _this.setState({ loading: false, delay: time.toString() + "ms" });
             },
             error: function (xhr, status, error) {
-                AppActions_1.AppActions.addToOutput("ERROR\t" + status + "\t" + error);
+                AppActions_1.AppActions.addToOutput("ERROR\t" + status + "\t" + JSON.stringify(error, null, 2));
                 var time = new Date().getTime() - start;
                 _this.setState({ loading: false, delay: time.toString() + "ms" });
             },

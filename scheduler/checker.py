@@ -100,6 +100,7 @@ def checkFacultyHours(courses, facultyHours, errors):
         else:
             #error
             print("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
+            errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
 
 def checkTimeOverlap(courseA, courseB):
@@ -149,3 +150,4 @@ def check(courses, people, facultyHours):
 
     print("Invalid courses are: " + str(courseNames))
     print(errors)
+    return errors

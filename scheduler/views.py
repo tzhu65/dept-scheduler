@@ -72,8 +72,11 @@ def verifySchedule(request):
         if len(errors) > 0:
             return JsonResponse({"errors": errors})
         else:
-            check(courses, people, facultyHours[0])
-            return HttpResponse("checked the schedule")
+            checkerErrors = check(courses, people, facultyHours[0])
+            if len(checkerErrors) > 0:
+                return JsonResponse({"errors": checkerErrors})
+            else:
+                return HttpResponse("checked the schedule")
     raise Http404()
 
 

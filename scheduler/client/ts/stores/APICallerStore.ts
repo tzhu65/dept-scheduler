@@ -52,12 +52,15 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
       },
 
       success: (data: any, status: string, xhr: JQuery.jqXHR) => {
-        AppActions.addToOutput(`JSON data response: ${JSON.stringify(data, null, 2)}`);
+        AppActions.addToOutput("Finished checking the schedule...");
+        data.errors.map((e: string) => {
+          AppActions.addToOutput(e);
+        });
         const time = new Date().getTime() - start;
         this.setState({loading: false, delay: time.toString() + "ms"});
       },
       error: (xhr: JQuery.jqXHR, status: string, error: string) => {
-        AppActions.addToOutput(`ERROR\t${status}\t${error}`);
+        AppActions.addToOutput(`ERROR\t${status}\t${JSON.stringify(error, null, 2)}`);
         const time = new Date().getTime() - start;
         this.setState({loading: false, delay: time.toString() + "ms"});
       },
