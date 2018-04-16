@@ -200,9 +200,10 @@ class Graph:
 
             # EXAMPLE 1
             # Expected output: map:  {0: 0, 2: 2, 1: 1}
-            # m1[0][0] = 250 
+
+            # m1[0][0] = 250
             # m1[0][1] = 450
-            # m1[0][2] = 350 
+            # m1[0][2] = 350
             # m1[1][0] = 400
             # m1[1][1] = 400
             # m1[1][2] = 350
@@ -317,130 +318,85 @@ class Graph:
                         elif rows[index] == 1 and cols[rowIndex] == 1:
                             m1[index][rowIndex] += minVal # add to intersections
 
-            # m4 = {} # mapping from row to col
-            #
-            # for index, row in enumerate(m1):
-            #     if np.count_nonzero(row == 0) == 1:
-            #         m4[index] = row.tolist().index(0)
-            # # print("map: ", m4)
-
-
             print('*** BEGINNING CHOOSING ZEROES ***')
 
-            rowZeros = []   # Number of zeros in each row
-            colZeros = []   # Number of zeros in each column
-            for row in m1:
+            # Number of zeros in each row, index->number
+            rowZeros = []
+            for index, row in enumerate(m1):
                 rowCount = 0
                 for value in row:
                     if value == 0:
                         rowCount += 1
                 rowZeros.append(rowCount)
-            for col in m1.transpose():
+
+            # Number of zeros in each column, index->number
+            colZeros = []
+            for index, col in enumerate(m1.transpose()):
                 colCount = 0
                 for value in col:
                     if value == 0:
                         colCount += 1
                 colZeros.append(colCount)
 
+            # Grab the positive numbers in rowZeros and colZeros
+            rowPositives = [x for x in rowZeros if x > 0]
+            colPositives = [x for x in colZeros if x > 0]
             solution = {}
 
-            while len(solution.keys()) < n:
+            while len(rowPositives) > 0 and len(colPositives) > 0:
 
-                # Get the minimum positive value
+                # Get the positive numbers in rowZeros and colZeros at the start of each iteration
                 rowPositives = [x for x in rowZeros if x > 0]
                 colPositives = [x for x in colZeros if x > 0]
+
+                # Break out if there are no more zeros to select
                 if len(rowPositives) == 0 and len(colPositives) == 0:
-                    print('Done iwht this shiz')
-                    print(sorted(solution.keys()))
-                    print(len(self.people))
+                    break
 
-                    # Remove either rows or columns that were padded
-                    if len(self.people) < n:
-                        for i in range(len(self.people), n):
-                            solution.pop(i, None)
-                    elif len(self.courses) < n:
-                        for k, v in solution.items():
-                            if v >= len(self.courses):
-                                solution.pop(k)
-                    return solution
-
+                # Get the minimum positive number from rowZeros and colZeros
                 minRow = min(rowPositives) if len(rowPositives) > 0 else n + 1
                 minCol = min(colPositives) if len(colPositives) > 0 else n + 1
 
-                if minRow < minCol:
+                # Determine row or column order
+                if minRow <= minCol:
                     rIndex = rowZeros.index(minRow)
-                    # print(rIndex)
-                    for index, val in enumerate(m1[rIndex]):    # Get the index of the first 0
-                        if val == 0:
+                    # Use the first unused 0 of that row in the solution
+                    for index, val in enumerate(m1[rIndex]):
+                        if val == 0 and index not in solution.values():
                             solution[rIndex] = index    # Map the row to a column
+                            colZeros[index] = 0     # Set the column as being used
                             break
-                    rowZeros[rIndex] = 0
+                    rowZeros[rIndex] = 0    # Set the row as being used
 
-                    # Iterate through that row
+                    # Iterate through that row and decrement the column zero counts
                     for index, val in enumerate(m1[rIndex]):
                         if val == 0:
-                            col[index] -= 1
+                            colZeros[index] -= 1
                 else:
                     cIndex = colZeros.index(minCol)
-                    # print(cIndex)
-                    for index, val in enumerate(m1.transpose()[cIndex]):  # Get the index of the first 0
-                        if val == 0:
+                    # Use the first unused 0 of that column in the solution
+                    for index, val in enumerate(m1.transpose()[cIndex]):
+                        if val == 0 and index not in solution.keys():
                             solution[index] = cIndex  # Map the row to a column
-
+                            rowZeros[index] = 0     # Set the row as being used
                             break
-                    colZeros[cIndex] = 0
+                    colZeros[cIndex] = 0    # Set the column as being used
 
-                    # Iterate through that column
+                    # Iterate through that column and decrement the row zero counts
                     for index, val in enumerate(m1.transpose()[cIndex]):
                         if val == 0:
-                            row[index] -= 1
+                            rowZeros[index] -= 1
 
-            # while len(m4.keys()) < n:
-            #     keySize = len(m4.keys())
-            #     for index, row in enumerate(m1):
-            #         if index in m4.keys():
-            #             continue
-            #         indices = set([i for i, x in enumerate(row) if x == 0])
-            #         # print("indices before remove ", indices)
-            #         for i in m4.values():
-            #             indices.discard(i)
-            #         # print("indices after remove ", indices)
-            #         if len(indices) == 1:
-            #             m4[index] = indices.pop()
-            #
-            #     # print("***stuck, will now choose arbitrary***")
-            #
-            #     # if no new info was added in an entire iteration,
-            #     # do the same thing but don't require len(indices == 1)
-            #     if keySize == len(m4.keys()):
-            #         for index, row in enumerate(m1):
-            #             if index in m4.keys():
-            #                 continue
-            #             indices = set([i for i, x in enumerate(row) if x == 0])
-            #             # print("indices before remove ", indices)
-            #             for i in m4.values():
-            #                 indices.discard(i)
-            #             # print("indices after remove ", indices)
-            #             try:
-            #                 m4[index] = indices.pop() # choose a random one doesn't matter
-            #             except KeyError as e:
-            #                 print("ALGORITHM YIELDS NO RESULTS")
-            #                 print("ERR: ", e)
-            #                 return
-            #
-            #     # print("map: ", m4)
-            #
-            # print(m1)
-            #
-            # # if a full row is inf, cut it now
-            # # TODO: to same for courses (columns)
-            # if len(self.people) < n:
-            #     for i in range(len(self.people), n):
-            #         m4.pop(i, None)
-            #
-            # print('*** FINISHED GENERATING SCHEDULE ***')
-            #
-            # return m4
+            # Remove either rows or columns that were padded
+            if len(self.people) < n:
+                for i in range(len(self.people), n):
+                    solution.pop(i, None)
+            elif len(self.courses) < n:
+                for k, v in solution.items():
+                    if v >= len(self.courses):
+                        solution.pop(k)
+            print(solution)
+            return solution
 
     def printSchedule(self, schedule):
         print('%30s' % 'INSTRUCTOR' +  
