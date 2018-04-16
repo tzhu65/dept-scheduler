@@ -161,12 +161,19 @@ def parseCoursesFromPath(path):
 
 def parseCourses(file):
     expectedHeaders = {
+        'Class',
+        'Sec',
+        'Class #',
         'Days',
+        'Bldg'
+        'Rm',
+        'Rm Cap',
+        'Enroll Cap',
+        'Assisting Assignment'
         'Teach(12)',
         'Recitation(3)',
         'Assist(6)',
-        'Class',
-        'Sec',
+        'Lab(6)',
         'Start Time',
         'End Time',
         'Instructor',
