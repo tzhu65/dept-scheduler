@@ -165,19 +165,17 @@ def parseCourses(file):
         'Sec',
         'Class #',
         'Days',
-        'Bldg'
+        'Bldg',
         'Rm',
         'Rm Cap',
         'Enroll Cap',
-        'Assisting Assignment'
+        'Assisting Assignment',
         'Teach(12)',
         'Recitation(3)',
         'Assist(6)',
-        'Lab(6)',
         'Start Time',
         'End Time',
-        'Instructor',
-        'Category',
+        'Instructor'
     }
     courses = []
     fields = {}
@@ -203,19 +201,33 @@ def parseCourses(file):
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
             #This needs to be cleaned up to make better code & also generic
             positions = {}
+            instructorToHoursVal = {}
             hoursValue = 0
             if row[fields["Teach(12)"]] and int(row[fields["Teach(12)"]]) > 0:
                 positions["teach"] = {"hours": 12, "amount": int(row[fields["Teach(12)"]])}
                 hoursValue = 12
+                instructorToHoursVal[row[fields['Instructor']].strip()] = hoursValue
             elif row[fields["Recitation(3)"]] and int(row[fields["Recitation(3)"]]) > 0:
                 positions["recitation"] = {"hours": 3, "amount": int(row[fields["Recitation(3)"]])}
                 hoursValue = 3
+                delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
+                for assistant in delimAssistants:
+                    instructorToHoursVal[assistant] = hoursValue
             elif row[fields["Assist(6)"]] and int(row[fields["Assist(6)"]]) > 0:
                 positions["assist"] = {"hours": 6, "amount": int(row[fields["Assist(6)"]])}
                 hoursValue = 6
+                delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
+                for assistant in delimAssistants:
+                    instructorToHoursVal[assistant] = hoursValue
             elif row[fields["Lab(6)"]] and int(row[fields["Lab(6)"]]) > 0:
                 positions["lab"] = {"hours": 6, "amount": int(row[fields["Lab(6)"]])}
                 hoursValue = 6
+                delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
+                for assistant in delimAssistants:
+                    instructorToHoursVal[assistant] = hoursValue
+            if len(positions) == 0:
+                #Just one instructor
+                instructorToHoursVal[row[fields['Instructor']].strip()] = 0
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
@@ -223,8 +235,8 @@ def parseCourses(file):
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
                             row[fields['Instructor']].strip(),  # instructor
-                            row[fields['Category']],
-                            hoursValue
+                            hoursValue,
+                            instructorToHoursVal
                             )
             courses.append(course)
     return courses
