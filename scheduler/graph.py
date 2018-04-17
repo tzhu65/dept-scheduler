@@ -192,74 +192,20 @@ class Graph:
         print('COURSES:', len(self.courses))
         print('EDGES:', len(self.edges))
 
-    def generateSchedule(self):
-            n = max(len(self.courses), len(self.people)) # size of matrix
+    def generateHungarianMatrix(self):
+        n = max(len(self.courses), len(self.people))
+        m1 = [[0 for x in range(n)] for y in range(n)]
+        for row in range(0, len(self.people)):
+            for col in range(0, len(self.courses)):
+                if col in self.people[row].edges.keys():
+                    m1[row][col] = self.people[row].edges[col].weight
+                else:
+                    m1[row][col] = math.inf
+        print('*** M1 GENERATED ***')
+        return m1
 
-            # initial input
-            m1 = [[0 for x in range(n)] for y in range(n)] 
-
-            # EXAMPLE 1
-            # Expected output: map:  {0: 0, 2: 2, 1: 1}
-
-            # m1[0][0] = 250
-            # m1[0][1] = 450
-            # m1[0][2] = 350
-            # m1[1][0] = 400
-            # m1[1][1] = 400
-            # m1[1][2] = 350
-            # m1[2][0] = 200
-            # m1[2][1] = 500
-            # m1[2][2] = 250
-
-            # EXAMPLE 2
-            # Expected output: {0: 2, 1: 1, 2: 0, 3: 3}
-
-            # m1[0][0] = 82
-            # m1[0][1] = 83
-            # m1[0][2] = 69
-            # m1[0][3] = 92
-            # m1[1][0] = 77
-            # m1[1][1] = 37
-            # m1[1][2] = 49
-            # m1[1][3] = 92
-            # m1[2][0] = 11
-            # m1[2][1] = 69
-            # m1[2][2] = 5
-            # m1[2][3] = 86
-            # m1[3][0] = 8
-            # m1[3][1] = 9
-            # m1[3][2] = 98
-            # m1[3][3] = 23
-
-            # EXAMPLE 3
-            # Expected output: {2: 1, 0: 0, 1: 3, 3: 2}
-
-            # m1[0][0] = 20
-            # m1[0][1] = 25
-            # m1[0][2] = 22
-            # m1[0][3] = 28
-            # m1[1][0] = 15
-            # m1[1][1] = 18
-            # m1[1][2] = 23
-            # m1[1][3] = 17
-            # m1[2][0] = 19
-            # m1[2][1] = 17
-            # m1[2][2] = 21
-            # m1[2][3] = 24
-            # m1[3][0] = 25
-            # m1[3][1] = 23
-            # m1[3][2] = 24
-            # m1[3][3] = 24
-
-            for row in range(0, len(self.people)):
-                for col in range(0, len(self.courses)):
-                    if col in self.people[row].edges.keys():
-                        m1[row][col] = self.people[row].edges[col].weight
-                    else:
-                        m1[row][col] = math.inf
-
-            print('*** M1 GENERATED ***')            
-            
+    def generateSchedule(self, m1, removePadding=True):
+            n = len(m1)
             m1 = np.array(m1)
             m1Copy = np.array(m1) # copy of initial input
 
@@ -388,14 +334,14 @@ class Graph:
                             rowZeros[index] -= 1
 
             # Remove either rows or columns that were padded
-            if len(self.people) < n:
-                for i in range(len(self.people), n):
-                    solution.pop(i, None)
-            elif len(self.courses) < n:
-                for k, v in solution.items():
-                    if v >= len(self.courses):
-                        solution.pop(k)
-            print(solution)
+            if removePadding:
+                if len(self.people) < n:
+                    for i in range(len(self.people), n):
+                        solution.pop(i, None)
+                elif len(self.courses) < n:
+                    for k, v in list(solution.items()):
+                        if v >= len(self.courses):
+                            solution.pop(k)
             return solution
 
     def printSchedule(self, schedule):
