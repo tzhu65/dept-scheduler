@@ -14,12 +14,20 @@ class MissingHeaders(Exception):
 
 
 def sanitizeName(name):
+    #Expect either 'Last, First' or 'First Last' as input
+    expectValueToBeOne = 0
     sanitized = name
     if ',' in name:
         nameParts = name.split(',')
         sanitizedList = nameParts[1] , ' ' ,nameParts[0]
         sanitized = ''.join(sanitizedList)
-    return sanitized
+        expectValueToBeOne = 1
+    elif ' ' in name:
+        expectValueToBeOne = 1
+
+    if expectValueToBeOne!=1:
+        raise ImproperNameFormat("Improper name format, Expect either 'Last, First' or 'First Last' as input ")
+    return sanitized.lower()
 
 
 def sanitizeList(text):
@@ -224,10 +232,11 @@ def parseCourses(file):
                 hoursValue = 6
                 delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
                 for assistant in delimAssistants:
+                    assistant = sanitizeName(assistant).lower()
                     instructorToHoursVal[assistant] = hoursValue
             if len(positions) == 0:
                 #Just one instructor
-                instructorToHoursVal[row[fields['Instructor']].strip()] = 0
+                instructorToHoursVal[row[fields['Instructor']].strip().lower()] = 0
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
@@ -267,7 +276,7 @@ def parseFacultyHours(file):
 
     for row in reader:
         if row[0]:
-            professorName = sanitizeName(row[fields['Professor Name']].strip())
+            professorName = sanitizeName(row[fields['Professor Name']]).strip().lower()
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
             print(professorName,fallFacultyLoadDict[professorName],springFacultyLoadDict[professorName])

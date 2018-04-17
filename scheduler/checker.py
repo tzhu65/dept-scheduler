@@ -44,7 +44,8 @@ def checkIfClassIsPreferredClass(person, course, errors):
         return True
 
 def checkHoursConstraint(person, course, errors):
-    avaliableHours = MAX_HOURS-person.hoursCompleted-person.hoursBoughtOut-course.hoursValue
+    courseHoursValue = course.instructorToHoursVal[person.name]
+    avaliableHours = MAX_HOURS-person.hoursCompleted-person.hoursBoughtOut-courseHoursValue
     if avaliableHours < 0:
         #error
         appendError(person,course,"Instructor has passed their allowed hours for this semester", errors)
@@ -52,6 +53,7 @@ def checkHoursConstraint(person, course, errors):
     else:
         return True
         print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
+        person.hoursCompleted = person.hoursCompleted - courseHoursValue
 
 
 # Check to make sure that no person has classes on MWF and TR
@@ -91,7 +93,7 @@ def checkFacultyHours(courses, facultyHours, errors):
     for faculty in facultyHours:
         courseCount = 0
         for course in courses:
-            sanitizedName = sanitizeName(course.instructor)
+            sanitizedName = sanitizeName(course.instructor).strip()
             if sanitizedName.lower() == faculty.lower():
                 courseCount+=1
         if courseCount == int(facultyHours[faculty]):
@@ -129,12 +131,26 @@ def check(courses, people, facultyHours):
     personCourses = {}      # Dict of mapping a person to their courses
     errors = []     # List of errors
 
+
     checkFacultyHours(courses, facultyHours, errors)
+
+    #addition for linda
+    peopleList = {}
+    for person in people:
+        peopleList[sanitizeName(person.name).lower()] = 1
+
+    for course in courses:
+        sanitizeInstrName = sanitizeName(course.instructor.lower()).strip()
+        #print("\t",sanitizeInstrName)
+        #print ("\t",sanitizeInstrName not in facultyHours)
+        #print("\t",sanitizeInstrName not in peopleList)
+        if sanitizeInstrName not in facultyHours and sanitizeInstrName not in peopleList:
+            print ("%s is assigned to teach but is not even on the list1" % sanitizeInstrName)
 
     for person in people:
         for course in courses:
             # Found a course that person is teaching
-            if person.name == course.instructor:
+            if (person.name.lower() == course.instructor.lower() and person.name not in facultyHours) or (person.name in course.instructorToHoursVal):
                 # if course is valid remove it from the coursenameList
                 if validate(person, course, personCourses, errors):
                     # We need course list to be empty at end, so if course is assigned correctly, remove it from list
@@ -146,6 +162,14 @@ def check(courses, people, facultyHours):
                 c = personCourses.get(person.name, [])
                 c.append(course)
                 personCourses[person.name] = c
+    for course in courses:
+        if course.instructor in facultyHours:
+            try:
+                courseNames.remove(course.courseNumber)
+            except KeyError:
+                continue
 
-    print("Invalid courses are: " + str(courseNames))
+    #print("Invalid courses are: " + str(courseNames) +"\n")
+    print (facultyHours)
+    print (peopleList)
     print(errors)
