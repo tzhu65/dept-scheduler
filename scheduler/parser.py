@@ -12,6 +12,9 @@ class MissingHeaders(Exception):
         super().__init__(message)
         self.headers = headers
 
+class ImproperNameFormat(Exception):
+    def __init__(self, message):
+        super().__init__(message)
 
 def sanitizeName(name):
     #Expect either 'Last, First' or 'First Last' as input
@@ -27,7 +30,7 @@ def sanitizeName(name):
 
     if expectValueToBeOne!=1:
         raise ImproperNameFormat("Improper name format, Expect either 'Last, First' or 'First Last' as input ")
-    return sanitized.lower()
+    return sanitized.lower().strip()
 
 
 def sanitizeList(text):
@@ -122,7 +125,7 @@ def parsePeople(file):
             name = sanitizeName(row[fields[NAME]])
             fullySupported = row[fields[FULLY_SUPPORTED]]
             if fullySupported == 'Yes':
-                supportingProfessor = fields[SUPPORTING_PROFESSOR]
+                supportingProfessor = sanitizeName(fields[SUPPORTING_PROFESSOR])
             else:
                 supportingProfessor = "N/A"
             yearInSchool = int(row[fields[YEAR_IN_SCHOOL]]) if row[fields[YEAR_IN_SCHOOL]] != '' else 0
@@ -146,7 +149,6 @@ def parsePeople(file):
                 hoursCompleted = int(hoursCompleted)
 
             # Convert computer skills to a number
-            SKILLS = {'weak': 1, 'ok': 2, 'strong': 3}
             if computerSkills in SKILLS:
                 computerSkills = SKILLS[computerSkills]
             else:
@@ -208,35 +210,30 @@ def parseCourses(file):
             days = row[fields['Days']].strip()
             days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
             #This needs to be cleaned up to make better code & also generic
+            # Dictionary of the open positions (i.e. {teach: 1, recitation: 2})
             positions = {}
+            #Dictionary of instructor name to an assigned hours value for the course
             instructorToHoursVal = {}
             hoursValue = 0
             if row[fields["Teach(12)"]] and int(row[fields["Teach(12)"]]) > 0:
                 positions["teach"] = {"hours": 12, "amount": int(row[fields["Teach(12)"]])}
                 hoursValue = 12
-                instructorToHoursVal[row[fields['Instructor']].strip()] = hoursValue
-            elif row[fields["Recitation(3)"]] and int(row[fields["Recitation(3)"]]) > 0:
+                addInstructorToHoursVal(instructorToHoursVal,row[fields['Instructor']],hoursValue)
+            if row[fields["Recitation(3)"]] and int(row[fields["Recitation(3)"]]) > 0:
                 positions["recitation"] = {"hours": 3, "amount": int(row[fields["Recitation(3)"]])}
                 hoursValue = 3
-                delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
-                for assistant in delimAssistants:
-                    instructorToHoursVal[assistant] = hoursValue
-            elif row[fields["Assist(6)"]] and int(row[fields["Assist(6)"]]) > 0:
+                addInstructorToHoursVal(instructorToHoursVal,row[fields['Assisting Assignment']],hoursValue)
+            if row[fields["Assist(6)"]] and int(row[fields["Assist(6)"]]) > 0:
                 positions["assist"] = {"hours": 6, "amount": int(row[fields["Assist(6)"]])}
                 hoursValue = 6
-                delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
-                for assistant in delimAssistants:
-                    instructorToHoursVal[assistant] = hoursValue
-            elif row[fields["Lab(6)"]] and int(row[fields["Lab(6)"]]) > 0:
+                addInstructorToHoursVal(instructorToHoursVal,row[fields['Assisting Assignment']],hoursValue)
+            if row[fields["Lab(6)"]] and int(row[fields["Lab(6)"]]) > 0:
                 positions["lab"] = {"hours": 6, "amount": int(row[fields["Lab(6)"]])}
                 hoursValue = 6
-                delimAssistants = row[fields['Assisting Assignment']].strip().split(';')
-                for assistant in delimAssistants:
-                    assistant = sanitizeName(assistant).lower()
-                    instructorToHoursVal[assistant] = hoursValue
+                addInstructorToHoursVal(instructorToHoursVal,row[fields['Assisting Assignment']],hoursValue)
             if len(positions) == 0:
                 #Just one instructor
-                instructorToHoursVal[row[fields['Instructor']].strip().lower()] = 0
+                addInstructorToHoursVal(instructorToHoursVal,row[fields['Instructor']],0)
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
@@ -249,6 +246,15 @@ def parseCourses(file):
                             )
             courses.append(course)
     return courses
+
+def addInstructorToHoursVal(dictRep, lineOfInstr, hoursVal):
+    delimVal = getListOfDelimWord(lineOfInstr, ';')
+    for val in delimVal:
+        dictRep[sanitizeName(val)] = hoursVal
+
+def getListOfDelimWord(word, delimVal):
+    delimList = word.split(delimVal)
+    return delimList
 
 def parseFacultyHoursFromPath(path):
     with open(path, newline='') as file:
