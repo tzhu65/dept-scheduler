@@ -20,6 +20,7 @@ def sanitizeName(name):
     #Expect either 'Last, First' or 'First Last' as input
     expectValueToBeOne = 0
     sanitized = name
+    #print (name)
     if ',' in name:
         nameParts = name.split(',')
         sanitizedList = nameParts[1] , ' ' ,nameParts[0]
@@ -28,8 +29,8 @@ def sanitizeName(name):
     elif ' ' in name:
         expectValueToBeOne = 1
 
-    if expectValueToBeOne!=1:
-        raise ImproperNameFormat("Improper name format, Expect either 'Last, First' or 'First Last' as input ")
+    #if expectValueToBeOne!=1:
+    #    raise ImproperNameFormat("Improper name format, Expect either 'Last, First' or 'First Last' as input ")
     return sanitized.lower().strip()
 
 
@@ -125,7 +126,10 @@ def parsePeople(file):
             name = sanitizeName(row[fields[NAME]])
             fullySupported = row[fields[FULLY_SUPPORTED]]
             if fullySupported == 'Yes':
-                supportingProfessor = sanitizeName(fields[SUPPORTING_PROFESSOR])
+                #NEEDS TO BE different this is a band-aid
+                if isinstance(fields[SUPPORTING_PROFESSOR], str):
+                    supportingProfessor = sanitizeName(strRep)
+
             else:
                 supportingProfessor = "N/A"
             yearInSchool = int(row[fields[YEAR_IN_SCHOOL]]) if row[fields[YEAR_IN_SCHOOL]] != '' else 0
@@ -215,32 +219,44 @@ def parseCourses(file):
             #Dictionary of instructor name to an assigned hours value for the course
             instructorToHoursVal = {}
             hoursValue = 0
-            if row[fields["Teach(12)"]] and int(row[fields["Teach(12)"]]) > 0:
-                positions["teach"] = {"hours": 12, "amount": int(row[fields["Teach(12)"]])}
-                hoursValue = 12
-                addInstructorToHoursVal(instructorToHoursVal,row[fields['Instructor']],hoursValue)
-            if row[fields["Recitation(3)"]] and int(row[fields["Recitation(3)"]]) > 0:
-                positions["recitation"] = {"hours": 3, "amount": int(row[fields["Recitation(3)"]])}
-                hoursValue = 3
-                addInstructorToHoursVal(instructorToHoursVal,row[fields['Assisting Assignment']],hoursValue)
-            if row[fields["Assist(6)"]] and int(row[fields["Assist(6)"]]) > 0:
-                positions["assist"] = {"hours": 6, "amount": int(row[fields["Assist(6)"]])}
-                hoursValue = 6
-                addInstructorToHoursVal(instructorToHoursVal,row[fields['Assisting Assignment']],hoursValue)
-            if row[fields["Lab(6)"]] and int(row[fields["Lab(6)"]]) > 0:
-                positions["lab"] = {"hours": 6, "amount": int(row[fields["Lab(6)"]])}
-                hoursValue = 6
-                addInstructorToHoursVal(instructorToHoursVal,row[fields['Assisting Assignment']],hoursValue)
-            if len(positions) == 0:
-                #Just one instructor
-                addInstructorToHoursVal(instructorToHoursVal,row[fields['Instructor']],0)
+
+            #Values for the row
+            teachVal = int(row[fields["Teach(12)"]]) if row[fields["Teach(12)"]] else 0
+            recitationVal = int(row[fields["Recitation(3)"]]) if row[fields["Recitation(3)"]] else 0
+            assistVal = int(row[fields["Assist(6)"]]) if row[fields["Assist(6)"]] else 0
+            labVal = int(row[fields["Lab(6)"]]) if row[fields["Lab(6)"]] else 0
+            instructor = row[fields['Instructor']] if row[fields['Instructor']] else ""
+            assistant = row[fields['Assisting Assignment']] if row[fields['Assisting Assignment']]  else ""
+            if instructor!="" and (teachVal+recitationVal+assistVal+labVal)==0:
+                #Only an instructor no graduate students
+                addInstructorToHoursVal(instructorToHoursVal,instructor,0)
+            elif instructor!="" and teachVal==1:
+                #An Graduate student instructing a course
+                addInstructorToHoursVal(instructorToHoursVal, instructor, 12)
+                if recitationVal>0:
+                    addInstructorToHoursVal(instructorToHoursVal,assistant,3)
+                elif assistVal>0:
+                    addInstructorToHoursVal(instructorToHoursVal,assistant,6)
+                elif labVal>0:
+                    addInstructorToHoursVal(instructorToHoursVal,assistant,6)
+            elif instructor!="" and assistant=="":
+                if recitationVal>0:
+                    addInstructorToHoursVal(instructorToHoursVal,instructor,3)
+                elif assistVal>0:
+                    addInstructorToHoursVal(instructorToHoursVal,instructor,6)
+                elif labVal>0:
+                    addInstructorToHoursVal(instructorToHoursVal,instructor,6)
+            positions["teach"] = {"hours": 12, "amount": teachVal}
+            positions["recitation"] = {"hours": 3, "amount": recitationVal}
+            positions["assist"] = {"hours": 6, "amount": assistVal}
+            positions["lab"] = {"hours": 6, "amount": labVal}
             course = Course(row[fields['Class']].strip(),  # course number
                             row[fields['Sec']].strip(),  # section
                             days,  # days
                             positions,
                             parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
                             parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
-                            row[fields['Instructor']].strip(),  # instructor
+                            sanitizeName(row[fields['Instructor']]),  # instructor
                             hoursValue,
                             instructorToHoursVal
                             )
@@ -282,10 +298,10 @@ def parseFacultyHours(file):
 
     for row in reader:
         if row[0]:
-            professorName = sanitizeName(row[fields['Professor Name']]).strip().lower()
+            professorName = sanitizeName(row[fields['Professor Name']])
             fallFacultyLoadDict[professorName] = row[fields['Fall']].strip()
             springFacultyLoadDict[professorName] = row[fields['Spring']].strip()
-            print(professorName,fallFacultyLoadDict[professorName],springFacultyLoadDict[professorName])
+            #print(professorName,fallFacultyLoadDict[professorName],springFacultyLoadDict[professorName])
     return fallFacultyLoadDict, springFacultyLoadDict
 
 # if __name__ == '__main__':

@@ -9,6 +9,8 @@ def printError(person, course, message):
 def appendError(person, course, message, errors):
     errors.append("ERR: %s, %s. %s" % (person.name, course.courseNumber, message))
 
+def appendErrorNoCourse(person, message, errors):
+    errors.append("ERR: %s. %s" % (person.name, message))
 
 def validateComputerSkill(person, course, errors):
     # if course is not a lab then return true cuz comp skills not needed
@@ -37,11 +39,28 @@ def validateQualifyingExam(person, course, errors):
 
 
 def checkIfClassIsPreferredClass(person, course, errors):
-    if not any(course.courseNumber in val for val in person.teachingPrefs):
-        appendError(person, course, "Instructor did not list course as one of their preferences", errors)
-        return False
-    else:
-        return True
+    hoursVal = course.instructorToHoursVal[person.name]
+    if hoursVal==12:
+        #TEACHING
+        if not any(course.courseNumber in val for val in person.teachingPrefs):
+            appendError(person, course, "Instructor did not list course as one of their teaching preferences", errors)
+            return False
+    elif hoursVal==3:
+        #Recitation
+        if not any(course.courseNumber in val for val in person.recitationPrefs):
+            appendError(person, course, "Instructor did not list course as one of their recitation preferences", errors)
+            return False
+    elif hoursVal==6 and ('L' in course.courseNumber):
+        #Lab
+        if not any(course.courseNumber in val for val in person.labPrefs):
+            appendError(person, course, "Instructor did not list course as one of their lab preferences", errors)
+            return False
+    elif hoursVal==6:
+        #Assist
+        if not any(course.courseNumber in val for val in person.assistingPrefs):
+            appendError(person, course, "Instructor did not list course as one of their assisting preferences", errors)
+            return False
+    return True
 
 def checkHoursConstraint(person, course, errors):
     courseHoursValue = course.instructorToHoursVal[person.name]
@@ -89,20 +108,14 @@ def checkClassTimes(person, course, courses, errors):
     return True
 
 def checkFacultyHours(courses, facultyHours, errors):
-    #Faculty correct course check
+     #Faculty correct course check
     for faculty in facultyHours:
         courseCount = 0
         for course in courses:
-            sanitizedName = sanitizeName(course.instructor).strip()
-            if sanitizedName.lower() == faculty.lower():
+            if course.instructor == faculty:
                 courseCount+=1
-        if courseCount == int(facultyHours[faculty]):
-            #Expected Nothing is wrong
-            print("%s is enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
-        else:
-            #error
-            print("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
-
+        if courseCount != int(facultyHours[faculty]):
+            errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
 def checkTimeOverlap(courseA, courseB):
     latestStart = max(courseA.startTime, courseB.startTime)
@@ -111,7 +124,6 @@ def checkTimeOverlap(courseA, courseB):
 
 
 def validate(person, course, personCourses, errors):
-    print("Performing validations")
     # Ensure sufficient computer skills
     # Ensure sufficient qualification exams passed
     # Ensure course is one of person's preferences
@@ -123,6 +135,15 @@ def validate(person, course, personCourses, errors):
         checkIfClassIsPreferredClass(person, course, errors) and \
         checkHoursConstraint(person, course, errors)
 
+def checkIfAssignmentsAreValid(people, courses, facultyHours,errors):
+    #addition for linda
+    peopleList = {}
+    for person in people:
+        peopleList[person.name] = 1
+
+    for course in courses:
+        if course.instructor not in facultyHours and course.instructor not in peopleList:
+            errors.append("ERR: %s is assigned to a course but not on the list of faculty or graduate students" % course.instructor)
 
 def check(courses, people, facultyHours):
     # Make set of courseNames that will be used to ensure every course is assigned
@@ -133,28 +154,15 @@ def check(courses, people, facultyHours):
 
 
     checkFacultyHours(courses, facultyHours, errors)
-
-    #addition for linda
-    peopleList = {}
-    for person in people:
-        peopleList[sanitizeName(person.name).lower()] = 1
-
-    for course in courses:
-        sanitizeInstrName = sanitizeName(course.instructor.lower()).strip()
-        #print("\t",sanitizeInstrName)
-        #print ("\t",sanitizeInstrName not in facultyHours)
-        #print("\t",sanitizeInstrName not in peopleList)
-        if sanitizeInstrName not in facultyHours and sanitizeInstrName not in peopleList:
-            print ("%s is assigned to teach but is not even on the list1" % sanitizeInstrName)
+    checkIfAssignmentsAreValid(people,courses,facultyHours,errors)
 
     for person in people:
         for course in courses:
             # Found a course that person is teaching
-            if (person.name.lower() == course.instructor.lower() and person.name not in facultyHours) or (person.name in course.instructorToHoursVal):
+            if (person.name in course.instructorToHoursVal):
                 # if course is valid remove it from the coursenameList
                 if validate(person, course, personCourses, errors):
                     # We need course list to be empty at end, so if course is assigned correctly, remove it from list
-
                     try:
                         courseNames.remove(course.courseNumber)
                     except KeyError:
@@ -170,6 +178,6 @@ def check(courses, people, facultyHours):
                 continue
 
     #print("Invalid courses are: " + str(courseNames) +"\n")
-    print (facultyHours)
-    print (peopleList)
+    #print (facultyHours)
+    #print (peopleList)
     print(errors)
