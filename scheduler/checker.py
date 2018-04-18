@@ -117,6 +117,7 @@ def checkFacultyHours(courses, facultyHours, errors):
         if courseCount != int(facultyHours[faculty]):
             errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
+      
 def checkTimeOverlap(courseA, courseB):
     latestStart = max(courseA.startTime, courseB.startTime)
     earliestEnd = min(courseA.endTime, courseB.endTime)
@@ -181,3 +182,4 @@ def check(courses, people, facultyHours):
     #print (facultyHours)
     #print (peopleList)
     print(errors)
+    return errors
