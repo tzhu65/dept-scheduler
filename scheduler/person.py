@@ -3,18 +3,6 @@ from datetime import datetime
 
 class Person:
 
-    def toString(self):
-        str = ("name={%s}, fullySupported={%s}, supportingProfessor={%s},yearInSchool={%s}, pureOrApplied={%s}, qualifyingExams={%s}"
-               ", teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
-               ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}, hoursBoughtOut={%s}" % (
-                   self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied, self.qualifyingExams,
-                   self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted, self.hoursBoughtOut))
-        conflictStr = "\n"
-        for conflict in self.conflicts:
-            conflictStr += conflict.toString() + "\n"
-        print(str, conflictStr)
-
     def __init__(self,
                  name,
                  fullySupported,
@@ -47,20 +35,31 @@ class Person:
         self.hoursCompleted = hoursCompleted
         self.hoursBoughtOut = hoursBoughtOut
 
+    def __str__(self):
+        str = ("name={%s}, fullySupported={%s}, supportingProfessor={%s}, yearInSchool={%s}, pureOrApplied={%s}"
+               ", qualifyingExams={%s}, teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
+               ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}, hoursBoughtOut={%s}" % (
+                   self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied,
+                   self.qualifyingExams, self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
+                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted, self.hoursBoughtOut))
+        conflictStr = "\n"
+        for conflict in self.conflicts:
+            conflictStr += conflict + "\n"
+        return str + conflictStr
 
-class Conflict:
 
-    def toString(self):
-        if hasattr(self, "day"):
-            return ("class={%s}, day={%s}, start={%s}, end={%s}" % (
-                self.classNumber, self.day, self.startTime, self.endTime))
-        else:
-            return ""
+class PersonalConflict:
 
-    def __init__(self,
-                 classNumber, day, startTime, endTime):
+    def __init__(self, classNumber, day, startTime, endTime):
         if datetime.strptime(startTime, "%H:%M") < datetime.strptime(endTime, "%H:%M"):
             self.classNumber = classNumber
             self.day = day
             self.startTime = datetime.strptime(startTime, "%H:%M").time()
             self.endTime = datetime.strptime(endTime, "%H:%M").time()
+
+    def __str__(self):
+        if hasattr(self, "day"):
+            return ("class={%s}, day={%s}, start={%s}, end={%s}" % (
+                self.classNumber, self.day, self.startTime, self.endTime))
+        else:
+            return ""
