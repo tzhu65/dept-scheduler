@@ -74,6 +74,11 @@ def checkHoursConstraint(person, course, errors):
         print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
         person.hoursCompleted = person.hoursCompleted - courseHoursValue
 
+def checkSchedulerHoursConstraint(person, course, errors):
+    courseHoursValue = course.hoursValue
+    availableHours = MAX_HOURS - person.hoursCompleted - person.hoursBoughtOut - courseHoursValue
+    return availableHours >= 0
+
 
 # Check to make sure that no person has classes on MWF and TR
 def checkClassDaysOfTheWeek(person, course, courses, errors):
