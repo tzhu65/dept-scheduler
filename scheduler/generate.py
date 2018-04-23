@@ -7,8 +7,10 @@ def generate(courses, people, faculty):
     # Keep looping until all courses are matched or no more people can be matched
     wa = WeightAssigner()
     g = Graph(people, faculty, courses, wa)
+    m1 = g.generateHungarianMatrix()
     g.printGraph()
-    schedule = g.generateSchedule2()
+    schedule = g.generateSchedule(m1)
+    g.printSchedule(schedule)
 
 
 
