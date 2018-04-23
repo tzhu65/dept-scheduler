@@ -149,6 +149,7 @@ class Graph:
                 for i in range(c.positions[t]["amount"]):
                     # Deep copy this node and set the category
                     course = copy.deepcopy(c)
+                    course.positions = {t: {"amount": 1, "hours": c.positions[t]["hours"]}}
                     course.category = t
                     course.hoursValue = c.positions[t]["hours"]
                     if not isinstance(course.hoursValue, int):
@@ -201,7 +202,8 @@ class Graph:
                 if row < len(self.people) and col in self.people[row].edges.keys():
                     m1[row][col] = self.people[row].edges[col].weight
                 else:
-                    m1[row][col] = sys.float_info.max
+                    # m1[row][col] = sys.float_info.max
+                    m1[row][col] = 5000.0
         print('*** M1 GENERATED ***')
         return m1
 
@@ -215,8 +217,6 @@ class Graph:
         for personIndex, courseIndex in schedule:
             if personIndex < len(self.people) and courseIndex < len(self.courses):
                 scheduleDict[personIndex] = courseIndex
-
-        print(scheduleDict)
         return scheduleDict
 
 
