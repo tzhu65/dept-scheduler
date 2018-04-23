@@ -304,89 +304,92 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
     next(reader)
     headers = next(reader)
     fields = mapHeaders(headers, expectedHeaders)
+    with open('persons.csv', 'w') as csvfile:
+        filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        filewriter.writerow(headers)
+        for row in reader:
+            filewriter.writerow(row)
+            if row[0]:
 
-    for row in reader:
-        if row[0]:
+                # Skip a row if its length isn't long enough
+                if len(row) == 1:
+                    continue
 
-            # Skip a row if its length isn't long enough
-            if len(row) == 1:
-                continue
+                days = row[fields[ParserScheduleHeaders.DAYS]].strip()
+                days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
+                # This needs to be cleaned up to make better code and also generic
+                # Dictionary of the open positions (i.e. {teach: 1, recitation: 2})
+                positions = {}
+                # Dictionary of instructor name to an assigned hours value for the course
+                instructorToHoursVal = {}
+                hoursValue = 0
 
-            days = row[fields[ParserScheduleHeaders.DAYS]].strip()
-            days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
-            # This needs to be cleaned up to make better code and also generic
-            # Dictionary of the open positions (i.e. {teach: 1, recitation: 2})
-            positions = {}
-            # Dictionary of instructor name to an assigned hours value for the course
-            instructorToHoursVal = {}
-            hoursValue = 0
+                # Values for the row
+                teachVal = int(row[fields[ParserScheduleHeaders.TEACH_COUNT]]) if \
+                    row[fields[ParserScheduleHeaders.TEACH_COUNT]] else 0
+                recitationVal = int(row[fields[ParserScheduleHeaders.RECITATION_COUNT]]) if \
+                    row[fields[ParserScheduleHeaders.RECITATION_COUNT]] else 0
+                assistVal = int(row[fields[ParserScheduleHeaders.ASSIST_COUNT]]) if \
+                    row[fields[ParserScheduleHeaders.ASSIST_COUNT]] else 0
+                labVal = int(row[fields[ParserScheduleHeaders.LAB_COUNT]]) if \
+                    row[fields[ParserScheduleHeaders.LAB_COUNT]] else 0
+                instructor = row[fields[ParserScheduleHeaders.INSTRUCTOR]] if \
+                    row[fields[ParserScheduleHeaders.INSTRUCTOR]] else ""
+                assistant = row[fields[ParserScheduleHeaders.ASSISTING_ASSIGNMENT]] if \
+                    row[fields[ParserScheduleHeaders.ASSISTING_ASSIGNMENT]] else ""
 
-            # Values for the row
-            teachVal = int(row[fields[ParserScheduleHeaders.TEACH_COUNT]]) if \
-                row[fields[ParserScheduleHeaders.TEACH_COUNT]] else 0
-            recitationVal = int(row[fields[ParserScheduleHeaders.RECITATION_COUNT]]) if \
-                row[fields[ParserScheduleHeaders.RECITATION_COUNT]] else 0
-            assistVal = int(row[fields[ParserScheduleHeaders.ASSIST_COUNT]]) if \
-                row[fields[ParserScheduleHeaders.ASSIST_COUNT]] else 0
-            labVal = int(row[fields[ParserScheduleHeaders.LAB_COUNT]]) if \
-                row[fields[ParserScheduleHeaders.LAB_COUNT]] else 0
-            instructor = row[fields[ParserScheduleHeaders.INSTRUCTOR]] if \
-                row[fields[ParserScheduleHeaders.INSTRUCTOR]] else ""
-            assistant = row[fields[ParserScheduleHeaders.ASSISTING_ASSIGNMENT]] if \
-                row[fields[ParserScheduleHeaders.ASSISTING_ASSIGNMENT]] else ""
+                if instructor != "" and (teachVal+recitationVal+assistVal+labVal) == 0:
+                    # Only an instructor and no graduate students
+                    addInstructorToHoursVal(instructorToHoursVal, instructor, 0)
+                elif instructor != "" and teachVal == 1:
+                    # A graduate student instructing a course
+                    addInstructorToHoursVal(instructorToHoursVal, instructor, 12)
+                    if recitationVal > 0:
+                        addInstructorToHoursVal(instructorToHoursVal, assistant, 3)
+                    elif assistVal > 0:
+                        addInstructorToHoursVal(instructorToHoursVal, assistant, 6)
+                    elif labVal > 0:
+                        addInstructorToHoursVal(instructorToHoursVal, assistant, 6)
+                elif instructor != "" and assistant == "":
+                    if recitationVal > 0:
+                        addInstructorToHoursVal(instructorToHoursVal, instructor, 3)
+                    elif assistVal > 0:
+                        addInstructorToHoursVal(instructorToHoursVal, instructor, 6)
+                    elif labVal > 0:
+                        addInstructorToHoursVal(instructorToHoursVal, instructor, 6)
 
-            if instructor != "" and (teachVal+recitationVal+assistVal+labVal) == 0:
-                # Only an instructor and no graduate students
-                addInstructorToHoursVal(instructorToHoursVal, instructor, 0)
-            elif instructor != "" and teachVal == 1:
-                # A graduate student instructing a course
-                addInstructorToHoursVal(instructorToHoursVal, instructor, 12)
-                if recitationVal > 0:
-                    addInstructorToHoursVal(instructorToHoursVal, assistant, 3)
-                elif assistVal > 0:
-                    addInstructorToHoursVal(instructorToHoursVal, assistant, 6)
-                elif labVal > 0:
-                    addInstructorToHoursVal(instructorToHoursVal, assistant, 6)
-            elif instructor != "" and assistant == "":
-                if recitationVal > 0:
-                    addInstructorToHoursVal(instructorToHoursVal, instructor, 3)
-                elif assistVal > 0:
-                    addInstructorToHoursVal(instructorToHoursVal, instructor, 6)
-                elif labVal > 0:
-                    addInstructorToHoursVal(instructorToHoursVal, instructor, 6)
+                # Standardize the keys for positions
+                positions[ParserConstants.POSITION_TEACH] = {"hours": 12, "amount": teachVal}
+                positions[ParserConstants.POSITION_RECITATION] = {"hours": 3, "amount": recitationVal}
+                positions[ParserConstants.POSITION_ASSIST] = {"hours": 6, "amount": assistVal}
+                positions[ParserConstants.POSITION_LAB] = {"hours": 6, "amount": labVal}
 
-            # Standardize the keys for positions
-            positions[ParserConstants.POSITION_TEACH] = {"hours": 12, "amount": teachVal}
-            positions[ParserConstants.POSITION_RECITATION] = {"hours": 3, "amount": recitationVal}
-            positions[ParserConstants.POSITION_ASSIST] = {"hours": 6, "amount": assistVal}
-            positions[ParserConstants.POSITION_LAB] = {"hours": 6, "amount": labVal}
+                try:
+                    instructorName = sanitizeName(row[fields[ParserScheduleHeaders.INSTRUCTOR]])
+                except ImproperNameFormat:
+                    instructorName = ''
 
-            try:
-                instructorName = sanitizeName(row[fields[ParserScheduleHeaders.INSTRUCTOR]])
-            except ImproperNameFormat:
-                instructorName = ''
+                try:
+                    startTime = parseTime(row[fields[ParserScheduleHeaders.START_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
+                except ImproperTimeFormat:
+                    startTime = 'N/A'
 
-            try:
-                startTime = parseTime(row[fields[ParserScheduleHeaders.START_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
-            except ImproperTimeFormat:
-                startTime = 'N/A'
+                try:
+                    endTime = parseTime(row[fields[ParserScheduleHeaders.END_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
+                except ImproperTimeFormat:
+                    endTime = 'N/A'
 
-            try:
-                endTime = parseTime(row[fields[ParserScheduleHeaders.END_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
-            except ImproperTimeFormat:
-                endTime = 'N/A'
-
-            course = Course(row[fields[ParserScheduleHeaders.CLASS]].strip(),  # Course number
-                            row[fields[ParserScheduleHeaders.SECTION]].strip(),  # Section
-                            days,
-                            positions,
-                            startTime,
-                            endTime,
-                            instructorName,
-                            hoursValue,
-                            instructorToHoursVal
-                            )
-            courses.append(course)
+                course = Course(row[fields[ParserScheduleHeaders.CLASS]].strip(),  # Course number
+                                row[fields[ParserScheduleHeaders.SECTION]].strip(),  # Section
+                                days,
+                                positions,
+                                startTime,
+                                endTime,
+                                instructorName,
+                                hoursValue,
+                                instructorToHoursVal
+                                )
+                courses.append(course)
 
     return courses
 

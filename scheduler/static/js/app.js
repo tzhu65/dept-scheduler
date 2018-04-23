@@ -19798,7 +19798,33 @@ exports.MainApp = MainApp;
 init_1.init();
 ReactDOM.render(React.createElement(MainApp, null), document.getElementById("main"));
 
-},{"./actions/AppActions":41,"./alt":42,"./components/Frame":50,"./init":55,"./stores/APICallerStore":56,"./stores/OutputStore":58,"react":38,"react-dom":35}],44:[function(require,module,exports){
+},{"./actions/AppActions":41,"./alt":42,"./components/Frame":51,"./init":56,"./stores/APICallerStore":57,"./stores/OutputStore":59,"react":38,"react-dom":35}],44:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var DownloadScheduleButton = /** @class */ (function (_super) {
+    __extends(DownloadScheduleButton, _super);
+    function DownloadScheduleButton() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DownloadScheduleButton.prototype.render = function () {
+        return (React.createElement("a", { id: "download-schedule-btn-id", className: "btn btn-primary disabled", href: "#", role: "button" }, "Download"));
+    };
+    return DownloadScheduleButton;
+}(React.Component));
+exports.DownloadScheduleButton = DownloadScheduleButton;
+
+},{"react":38}],45:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19841,7 +19867,7 @@ var FileUploadFooter = /** @class */ (function (_super) {
 }(React.Component));
 exports.FileUploadFooter = FileUploadFooter;
 
-},{"../../stores/APICallerStore":56,"react":38}],45:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],46:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19855,6 +19881,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
+var DownloadScheduleButton_1 = require("./DownloadScheduleButton");
 var GenerateScheduleInput_1 = require("./GenerateScheduleInput");
 var VerifyScheduleInput_1 = require("./VerifyScheduleInput");
 var FileUploadFrame = /** @class */ (function (_super) {
@@ -19874,13 +19901,14 @@ var FileUploadFrame = /** @class */ (function (_super) {
                 React.createElement("div", { className: "tab-pane fade show active", id: "check", role: "tabpanel", "aria-labelledby": "check-tab" },
                     React.createElement(VerifyScheduleInput_1.VerifyScheduleInput, null)),
                 React.createElement("div", { className: "tab-pane fade", id: "generate", role: "tabpanel", "aria-labelledby": "generate-tab" },
-                    React.createElement(GenerateScheduleInput_1.GenerateScheduleInput, null)))));
+                    React.createElement(GenerateScheduleInput_1.GenerateScheduleInput, null),
+                    React.createElement(DownloadScheduleButton_1.DownloadScheduleButton, null)))));
     };
     return FileUploadFrame;
 }(React.Component));
 exports.FileUploadFrame = FileUploadFrame;
 
-},{"./GenerateScheduleInput":46,"./VerifyScheduleInput":48,"react":38}],46:[function(require,module,exports){
+},{"./DownloadScheduleButton":44,"./GenerateScheduleInput":47,"./VerifyScheduleInput":49,"react":38}],47:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19929,7 +19957,7 @@ var GenerateScheduleInput = /** @class */ (function (_super) {
 }(React.Component));
 exports.GenerateScheduleInput = GenerateScheduleInput;
 
-},{"../../actions/AppActions":41,"./GenerateScheduleSubmitButton":47,"react":38}],47:[function(require,module,exports){
+},{"../../actions/AppActions":41,"./GenerateScheduleSubmitButton":48,"react":38}],48:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19975,7 +20003,7 @@ var GenerateScheduleSubmitButton = /** @class */ (function (_super) {
 }(React.Component));
 exports.GenerateScheduleSubmitButton = GenerateScheduleSubmitButton;
 
-},{"../../stores/APICallerStore":56,"react":38}],48:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],49:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20024,7 +20052,7 @@ var VerifyScheduleInput = /** @class */ (function (_super) {
 }(React.Component));
 exports.VerifyScheduleInput = VerifyScheduleInput;
 
-},{"../../actions/AppActions":41,"./VerifyScheduleSubmitButton":49,"react":38}],49:[function(require,module,exports){
+},{"../../actions/AppActions":41,"./VerifyScheduleSubmitButton":50,"react":38}],50:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20070,7 +20098,7 @@ var VerifyScheduleSubmitButton = /** @class */ (function (_super) {
 }(React.Component));
 exports.VerifyScheduleSubmitButton = VerifyScheduleSubmitButton;
 
-},{"../../stores/APICallerStore":56,"react":38}],50:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],51:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20109,7 +20137,7 @@ var Frame = /** @class */ (function (_super) {
 }(React.Component));
 exports.Frame = Frame;
 
-},{"./FileUpload/FileUploadFooter":44,"./FileUpload/FileUploadFrame":45,"./Modals/AboutInfo":51,"./Navbar/Navbar":52,"./Output/OutputFrame":53,"react":38}],51:[function(require,module,exports){
+},{"./FileUpload/FileUploadFooter":45,"./FileUpload/FileUploadFrame":46,"./Modals/AboutInfo":52,"./Navbar/Navbar":53,"./Output/OutputFrame":54,"react":38}],52:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20142,7 +20170,7 @@ var AboutInfo = /** @class */ (function (_super) {
 }(React.Component));
 exports.AboutInfo = AboutInfo;
 
-},{"react":38}],52:[function(require,module,exports){
+},{"react":38}],53:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20176,7 +20204,7 @@ var Navbar = /** @class */ (function (_super) {
 }(React.Component));
 exports.Navbar = Navbar;
 
-},{"../../actions/AppActions":41,"react":38}],53:[function(require,module,exports){
+},{"../../actions/AppActions":41,"react":38}],54:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20225,7 +20253,7 @@ var OutputFrame = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputFrame = OutputFrame;
 
-},{"../../stores/OutputStore":58,"./OutputOverlay":54,"react":38}],54:[function(require,module,exports){
+},{"../../stores/OutputStore":59,"./OutputOverlay":55,"react":38}],55:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20272,7 +20300,7 @@ var OutputOverlay = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputOverlay = OutputOverlay;
 
-},{"../../stores/APICallerStore":56,"react":38}],55:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],56:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Exported bootstrap function for initializing the app.
@@ -20297,7 +20325,7 @@ function setupCsrf() {
     });
 }
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20374,6 +20402,8 @@ var APICallerStoreClass = /** @class */ (function (_super) {
         this.loading = true;
         this.delay = "";
         var start = new Date().getTime();
+        var downloadButton = $("#download-schedule-btn-id");
+        downloadButton.addClass("disabled");
         $.ajax({
             url: "generateSchedule",
             type: "POST",
@@ -20398,6 +20428,12 @@ var APICallerStoreClass = /** @class */ (function (_super) {
                 AppActions_1.AppActions.addToOutput("JSON data response: " + JSON.stringify(data, null, 2));
                 var time = new Date().getTime() - start;
                 _this.setState({ loading: false, delay: time + "ms" });
+                var csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(data);
+                downloadButton.removeClass("disabled");
+                downloadButton.attr({
+                    "href": csvData,
+                    "download": "schedule.csv"
+                });
             },
             error: function (xhr, status, error) {
                 AppActions_1.AppActions.addToOutput("ERROR\t" + status + "\t" + error);
@@ -20411,7 +20447,7 @@ var APICallerStoreClass = /** @class */ (function (_super) {
 var APICallerStore = alt_1.alt.createStore(APICallerStoreClass, "APICallerStore");
 exports.APICallerStore = APICallerStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}],57:[function(require,module,exports){
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}],58:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var AbstractStoreModel = /** @class */ (function () {
@@ -20421,7 +20457,7 @@ var AbstractStoreModel = /** @class */ (function () {
 }());
 exports.AbstractStoreModel = AbstractStoreModel;
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20457,4 +20493,4 @@ var OutputStoreClass = /** @class */ (function (_super) {
 var OutputStore = alt_1.alt.createStore(OutputStoreClass, "OutputStore");
 exports.OutputStore = OutputStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}]},{},[43]);
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}]},{},[43]);

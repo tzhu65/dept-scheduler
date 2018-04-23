@@ -149,6 +149,7 @@ class Graph:
                 for i in range(c.positions[t]["amount"]):
                     # Deep copy this node and set the category
                     course = copy.deepcopy(c)
+                    course.positions = {t: {"amount": 1, "hours": c.positions[t]["hours"]}}
                     course.category = t
                     course.hoursValue = c.positions[t]["hours"]
                     if not isinstance(course.hoursValue, int):
@@ -201,7 +202,8 @@ class Graph:
                 if row < len(self.people) and col in self.people[row].edges.keys():
                     m1[row][col] = self.people[row].edges[col].weight
                 else:
-                    m1[row][col] = sys.float_info.max
+                    # m1[row][col] = sys.float_info.max
+                    m1[row][col] = 5000.0
         print('*** M1 GENERATED ***')
         return m1
 
@@ -215,26 +217,34 @@ class Graph:
         for personIndex, courseIndex in schedule:
             if personIndex < len(self.people) and courseIndex < len(self.courses):
                 scheduleDict[personIndex] = courseIndex
-
-        print(scheduleDict)
         return scheduleDict
 
 
     def printSchedule(self, schedule):
-        print('%30s' % 'INSTRUCTOR' +  
+        print('%30s' % 'INSTRUCTOR' +
                 '%6s' % 'CSE' +
                 '%6s' % ' SEC' +
                 ' CATEGORY\n')
         for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
             pIndex = i[0]
             cIndex = i[1]
-            print('%30s' % self.people[pIndex].data.name + 
-                    ": " + 
-                    '%5s' % self.courses[cIndex].data.courseNumber + 
+            print('%30s' % self.people[pIndex].data.name +
+                    ": " +
+                    '%5s' % self.courses[cIndex].data.courseNumber +
                     ", " +
                     '%5s' % self.courses[cIndex].data.section +
                     ", " +
                     self.courses[cIndex].data.category)
+
+    def classInSchedule(self,schedule,cse,sec):
+        for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
+            pIndex = i[0]
+            cIndices = i[1]
+            for cIndex in cIndices:
+                if cse == self.courses[cIndex].data.courseNumber and sec == self.courses[cIndex].data.section:
+                    tup = (self.people[pIndex].data.name,self.courses[cIndex].data.courseNumber,self.courses[cIndex].data.section,self.courses[cIndex].data.category)
+                    return tup
+        return None
 
 #max of vertical vs horizontal at index row col
 def hvMax(m1, rowIndex, colIndex):
@@ -262,7 +272,7 @@ def clearNeighbors(m2, m3, rowIndex, colIndex):
             for index, val in enumerate(m2):
                 if m2[index][colIndex] > 0:
                     m2[index][colIndex] = 0 # clear neighbor
-                m3[index][colIndex] = 1 # draw line    
+                m3[index][colIndex] = 1 # draw line
         else:
             for index, val in enumerate(m2):
                 if m2[rowIndex][index] < 0:

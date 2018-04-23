@@ -74,6 +74,8 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
     this.loading = true;
     this.delay = "";
     const start = new Date().getTime();
+    let downloadButton = $("#download-schedule-btn-id");
+    downloadButton.addClass("disabled");
     $.ajax({
       url: "generateSchedule",
       type: "POST",
@@ -100,6 +102,13 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
         AppActions.addToOutput(`JSON data response: ${JSON.stringify(data, null, 2)}`);
         const time = new Date().getTime() - start;
         this.setState({loading: false, delay: time + "ms"});
+
+        let csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(data);
+        downloadButton.removeClass("disabled");
+        downloadButton.attr({
+            "href": csvData,
+            "download": "schedule.csv"
+        });
       },
       error: (xhr: JQuery.jqXHR, status: string, error: string) => {
         AppActions.addToOutput(`ERROR\t${status}\t${error}`);
