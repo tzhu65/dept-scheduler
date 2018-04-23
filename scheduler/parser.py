@@ -196,71 +196,75 @@ def parseCourses(file):
     reader = csv.reader(file)
     next(reader)
     headers = next(reader)
-    for i, field in enumerate(headers):
-        fields[field] = i
-        expectedHeaders.discard(field)
+    with open('persons.csv', 'w') as csvfile:
+        filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+        filewriter.writerow(headers)
+        for i, field in enumerate(headers):
+            fields[field] = i
+            expectedHeaders.discard(field)
 
-    # Check if all expected headers are present
-    if len(expectedHeaders) != 0:
-        raise MissingHeaders("Expected headers.", expectedHeaders)
+        # Check if all expected headers are present
+        if len(expectedHeaders) != 0:
+            raise MissingHeaders("Expected headers.", expectedHeaders)
 
-    for row in reader:
-        if row[0]:
+        for row in reader:
+            filewriter.writerow(row)
+            if row[0]:
 
-            # Skip a row if it's length isn't long enough
-            if len(row) == 1:
-                continue
+                # Skip a row if it's length isn't long enough
+                if len(row) == 1:
+                    continue
 
-            days = row[fields['Days']].strip()
-            days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
-            #This needs to be cleaned up to make better code & also generic
-            # Dictionary of the open positions (i.e. {teach: 1, recitation: 2})
-            positions = {}
-            #Dictionary of instructor name to an assigned hours value for the course
-            instructorToHoursVal = {}
-            hoursValue = 0
+                days = row[fields['Days']].strip()
+                days = [day for day in days if days not in ['TBA', 'TBD', 'HONORS THESIS']]
+                #This needs to be cleaned up to make better code & also generic
+                # Dictionary of the open positions (i.e. {teach: 1, recitation: 2})
+                positions = {}
+                #Dictionary of instructor name to an assigned hours value for the course
+                instructorToHoursVal = {}
+                hoursValue = 0
 
-            #Values for the row
-            teachVal = int(row[fields["Teach(12)"]]) if row[fields["Teach(12)"]] else 0
-            recitationVal = int(row[fields["Recitation(3)"]]) if row[fields["Recitation(3)"]] else 0
-            assistVal = int(row[fields["Assist(6)"]]) if row[fields["Assist(6)"]] else 0
-            labVal = int(row[fields["Lab(6)"]]) if row[fields["Lab(6)"]] else 0
-            instructor = row[fields['Instructor']] if row[fields['Instructor']] else ""
-            assistant = row[fields['Assisting Assignment']] if row[fields['Assisting Assignment']]  else ""
-            if instructor!="" and (teachVal+recitationVal+assistVal+labVal)==0:
-                #Only an instructor no graduate students
-                addInstructorToHoursVal(instructorToHoursVal,instructor,0)
-            elif instructor!="" and teachVal==1:
-                #An Graduate student instructing a course
-                addInstructorToHoursVal(instructorToHoursVal, instructor, 12)
-                if recitationVal>0:
-                    addInstructorToHoursVal(instructorToHoursVal,assistant,3)
-                elif assistVal>0:
-                    addInstructorToHoursVal(instructorToHoursVal,assistant,6)
-                elif labVal>0:
-                    addInstructorToHoursVal(instructorToHoursVal,assistant,6)
-            elif instructor!="" and assistant=="":
-                if recitationVal>0:
-                    addInstructorToHoursVal(instructorToHoursVal,instructor,3)
-                elif assistVal>0:
-                    addInstructorToHoursVal(instructorToHoursVal,instructor,6)
-                elif labVal>0:
-                    addInstructorToHoursVal(instructorToHoursVal,instructor,6)
-            positions["teach"] = {"hours": 12, "amount": teachVal}
-            positions["recitation"] = {"hours": 3, "amount": recitationVal}
-            positions["assist"] = {"hours": 6, "amount": assistVal}
-            positions["lab"] = {"hours": 6, "amount": labVal}
-            course = Course(row[fields['Class']].strip(),  # course number
-                            row[fields['Sec']].strip(),  # section
-                            days,  # days
-                            positions,
-                            parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
-                            parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
-                            sanitizeName(row[fields['Instructor']]),  # instructor
-                            hoursValue,
-                            instructorToHoursVal
-                            )
-            courses.append(course)
+                #Values for the row
+                teachVal = int(row[fields["Teach(12)"]]) if row[fields["Teach(12)"]] else 0
+                recitationVal = int(row[fields["Recitation(3)"]]) if row[fields["Recitation(3)"]] else 0
+                assistVal = int(row[fields["Assist(6)"]]) if row[fields["Assist(6)"]] else 0
+                labVal = int(row[fields["Lab(6)"]]) if row[fields["Lab(6)"]] else 0
+                instructor = row[fields['Instructor']] if row[fields['Instructor']] else ""
+                assistant = row[fields['Assisting Assignment']] if row[fields['Assisting Assignment']]  else ""
+                if instructor!="" and (teachVal+recitationVal+assistVal+labVal)==0:
+                    #Only an instructor no graduate students
+                    addInstructorToHoursVal(instructorToHoursVal,instructor,0)
+                elif instructor!="" and teachVal==1:
+                    #An Graduate student instructing a course
+                    addInstructorToHoursVal(instructorToHoursVal, instructor, 12)
+                    if recitationVal>0:
+                        addInstructorToHoursVal(instructorToHoursVal,assistant,3)
+                    elif assistVal>0:
+                        addInstructorToHoursVal(instructorToHoursVal,assistant,6)
+                    elif labVal>0:
+                        addInstructorToHoursVal(instructorToHoursVal,assistant,6)
+                elif instructor!="" and assistant=="":
+                    if recitationVal>0:
+                        addInstructorToHoursVal(instructorToHoursVal,instructor,3)
+                    elif assistVal>0:
+                        addInstructorToHoursVal(instructorToHoursVal,instructor,6)
+                    elif labVal>0:
+                        addInstructorToHoursVal(instructorToHoursVal,instructor,6)
+                positions["teach"] = {"hours": 12, "amount": teachVal}
+                positions["recitation"] = {"hours": 3, "amount": recitationVal}
+                positions["assist"] = {"hours": 6, "amount": assistVal}
+                positions["lab"] = {"hours": 6, "amount": labVal}
+                course = Course(row[fields['Class']].strip(),  # course number
+                                row[fields['Sec']].strip(),  # section
+                                days,  # days
+                                positions,
+                                parseTime(row[fields['Start Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # start time
+                                parseTime(row[fields['End Time']].strip(), ['%I:%M %p', '%I:%M%p']),  # end time
+                                sanitizeName(row[fields['Instructor']]),  # instructor
+                                hoursValue,
+                                instructorToHoursVal
+                                )
+                courses.append(course)
     return courses
 
 def addInstructorToHoursVal(dictRep, lineOfInstr, hoursVal):

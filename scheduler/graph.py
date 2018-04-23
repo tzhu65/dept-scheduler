@@ -196,7 +196,7 @@ class Graph:
             n = max(len(self.courses), len(self.people)) # size of matrix
 
             # initial input
-            m1 = [[0 for x in range(n)] for y in range(n)] 
+            m1 = [[0 for x in range(n)] for y in range(n)]
 
             # EXAMPLE 1
             # Expected output: map:  {0: 0, 2: 2, 1: 1}
@@ -258,8 +258,8 @@ class Graph:
                     else:
                         m1[row][col] = math.inf
 
-            print('*** M1 GENERATED ***')            
-            
+            print('*** M1 GENERATED ***')
+
             m1 = np.array(m1)
             m1Copy = np.array(m1) # copy of initial input
 
@@ -273,22 +273,22 @@ class Graph:
                 for index, value in enumerate(col):
                     col[index] -= m
 
-            m2 = np.array([[0 for x in range(n)] for y in range(n)]) 
+            m2 = np.array([[0 for x in range(n)] for y in range(n)])
             m3 = np.array([[0 for x in range(n)] for y in range(n)])
 
             lines = 0
             rows = [0] * n
             cols = [0] * n
-            
+
             while lines < n:
                 # loop on zeroes from the input array, and store the max num of zeroes
-                for rowIndex, row in enumerate(m1): 
+                for rowIndex, row in enumerate(m1):
                     for colIndex, col in enumerate(row):
                         if m1[rowIndex][colIndex] == 0:
                             m2[rowIndex][colIndex] = hvMax(m1, rowIndex, colIndex)
 
                 # loop on m2 elements, clear neighbors and draw the lines
-                for rowIndex, row in enumerate(m1): 
+                for rowIndex, row in enumerate(m1):
                     for colIndex, col in enumerate(row):
                         if abs(m2[rowIndex][colIndex]) > 0:
                             clearNeighbors(m2, m3, rowIndex, colIndex)
@@ -399,20 +399,30 @@ class Graph:
             return solution
 
     def printSchedule(self, schedule):
-        print('%30s' % 'INSTRUCTOR' +  
+        print('%30s' % 'INSTRUCTOR' +
                 '%6s' % 'CSE' +
                 '%6s' % ' SEC' +
                 ' CATEGORY\n')
         for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
             pIndex = i[0]
             cIndex = i[1]
-            print('%30s' % self.people[pIndex].data.name + 
-                    ": " + 
-                    '%5s' % self.courses[cIndex].data.courseNumber + 
+            print('%30s' % self.people[pIndex].data.name +
+                    ": " +
+                    '%5s' % self.courses[cIndex].data.courseNumber +
                     ", " +
                     '%5s' % self.courses[cIndex].data.section +
                     ", " +
                     self.courses[cIndex].data.category)
+
+    def classInSchedule(self,schedule,cse,sec):
+        for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
+            pIndex = i[0]
+            cIndex = i[1]
+            if cse == self.courses[cIndex].data.courseNumber and sec == self.courses[cIndex].data.section:
+                tup = (self.people[pIndex].data.name,self.courses[cIndex].data.courseNumber,self.courses[cIndex].data.section,self.courses[cIndex].data.category)
+                return tup
+
+        return None
 
 #max of vertical vs horizontal at index row col
 def hvMax(m1, rowIndex, colIndex):
@@ -440,7 +450,7 @@ def clearNeighbors(m2, m3, rowIndex, colIndex):
             for index, val in enumerate(m2):
                 if m2[index][colIndex] > 0:
                     m2[index][colIndex] = 0 # clear neighbor
-                m3[index][colIndex] = 1 # draw line    
+                m3[index][colIndex] = 1 # draw line
         else:
             for index, val in enumerate(m2):
                 if m2[rowIndex][index] < 0:
