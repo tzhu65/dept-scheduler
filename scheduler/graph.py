@@ -1,10 +1,10 @@
 import copy
 import numpy as np
 import math
-from .hungarian import Hungarian
-
+import sys
 
 from .checker import validateComputerSkill, validateQualifyingExam, checkClassTimes, checkSchedulerHoursConstraint
+from .hungarian import Hungarian
 
 
 class WeightAssigner:
@@ -196,170 +196,29 @@ class Graph:
     def generateHungarianMatrix(self):
         n = max(len(self.courses), len(self.people))
         m1 = [[0 for x in range(n)] for y in range(n)]
-        for row in range(0, len(self.people)):
-            for col in range(0, len(self.courses)):
-                if col in self.people[row].edges.keys():
+        for row in range(0, n):
+            for col in range(0, n):
+                if row < len(self.people) and col in self.people[row].edges.keys():
                     m1[row][col] = self.people[row].edges[col].weight
                 else:
-                    m1[row][col] = math.inf
+                    m1[row][col] = sys.float_info.max
         print('*** M1 GENERATED ***')
         return m1
 
-    def generateSchedule(self, m1, removePadding=True):
-            n = len(m1)
-            m1 = np.array(m1)
-            m1Copy = np.array(m1) # copy of initial input
-
-            for row in m1:
-                m = min(row)
-                for index, value in enumerate(row):
-                    row[index] -= m
-
-            for col in m1.transpose():
-                m = min(col)
-                for index, value in enumerate(col):
-                    col[index] -= m
-
-            m2 = np.array([[0 for x in range(n)] for y in range(n)])
-            m3 = np.array([[0 for x in range(n)] for y in range(n)])
-
-            lines = 0
-            rows = [0] * n
-            cols = [0] * n
-
-            while lines < n:
-                # loop on zeroes from the input array, and store the max num of zeroes
-                for rowIndex, row in enumerate(m1):
-                    for colIndex, col in enumerate(row):
-                        if m1[rowIndex][colIndex] == 0:
-                            m2[rowIndex][colIndex] = hvMax(m1, rowIndex, colIndex)
-
-                # loop on m2 elements, clear neighbors and draw the lines
-                for rowIndex, row in enumerate(m1):
-                    for colIndex, col in enumerate(row):
-                        if abs(m2[rowIndex][colIndex]) > 0:
-                            clearNeighbors(m2, m3, rowIndex, colIndex)
-
-                for index, row in enumerate(m3):
-                    if np.count_nonzero(row == 1) == n:
-                        lines = lines + 1
-                        rows[index] = 1
-                for index, col in enumerate(m3.transpose()):
-                    if np.count_nonzero(col == 1) == n:
-                        lines = lines + 1
-                        cols[index] = 1
-
-                if (lines >= n):
-                    break
-
-                minVal = math.inf
-                for index, row in enumerate(m3):
-                    for rowIndex, value in enumerate(row):
-                        if value == 0: # uncovered
-                            minVal = min(minVal, m1[index][rowIndex])
-
-                for index, row in enumerate(m3):
-                    for rowIndex, value in enumerate(row):
-                        if value == 0: # uncovered
-                            m1[index][rowIndex] -= minVal # subtract from each uncovered
-                        elif rows[index] == 1 and cols[rowIndex] == 1:
-                            m1[index][rowIndex] += minVal # add to intersections
-
-            print('*** BEGINNING CHOOSING ZEROES ***')
-
-            # Number of zeros in each row, index->number
-            rowZeros = []
-            for index, row in enumerate(m1):
-                rowCount = 0
-                for value in row:
-                    if value == 0:
-                        rowCount += 1
-                rowZeros.append(rowCount)
-
-            # Number of zeros in each column, index->number
-            colZeros = []
-            for index, col in enumerate(m1.transpose()):
-                colCount = 0
-                for value in col:
-                    if value == 0:
-                        colCount += 1
-                colZeros.append(colCount)
-
-            # Grab the positive numbers in rowZeros and colZeros
-            rowPositives = [x for x in rowZeros if x > 0]
-            colPositives = [x for x in colZeros if x > 0]
-            solution = {}
-
-            while len(rowPositives) > 0 and len(colPositives) > 0:
-
-                # Get the positive numbers in rowZeros and colZeros at the start of each iteration
-                rowPositives = [x for x in rowZeros if x > 0]
-                colPositives = [x for x in colZeros if x > 0]
-
-                # Break out if there are no more zeros to select
-                if len(rowPositives) == 0 and len(colPositives) == 0:
-                    break
-
-                # Get the minimum positive number from rowZeros and colZeros
-                minRow = min(rowPositives) if len(rowPositives) > 0 else n + 1
-                minCol = min(colPositives) if len(colPositives) > 0 else n + 1
-
-                # Determine row or column order
-                if minRow <= minCol:
-                    rIndex = rowZeros.index(minRow)
-                    # Use the first unused 0 of that row in the solution
-                    for index, val in enumerate(m1[rIndex]):
-                        if val == 0 and index not in solution.values():
-                            solution[rIndex] = index    # Map the row to a column
-                            colZeros[index] = 0     # Set the column as being used
-                            break
-                    rowZeros[rIndex] = 0    # Set the row as being used
-
-                    # Iterate through that row and decrement the column zero counts
-                    for index, val in enumerate(m1[rIndex]):
-                        if val == 0:
-                            colZeros[index] -= 1
-                else:
-                    cIndex = colZeros.index(minCol)
-                    # Use the first unused 0 of that column in the solution
-                    for index, val in enumerate(m1.transpose()[cIndex]):
-                        if val == 0 and index not in solution.keys():
-                            solution[index] = cIndex  # Map the row to a column
-                            rowZeros[index] = 0     # Set the row as being used
-                            break
-                    colZeros[cIndex] = 0    # Set the column as being used
-
-                    # Iterate through that column and decrement the row zero counts
-                    for index, val in enumerate(m1.transpose()[cIndex]):
-                        if val == 0:
-                            rowZeros[index] -= 1
-
-            # Remove either rows or columns that were padded
-            if removePadding:
-                if len(self.people) < n:
-                    for i in range(len(self.people), n):
-                        solution.pop(i, None)
-                elif len(self.courses) < n:
-                    for k, v in list(solution.items()):
-                        if v >= len(self.courses):
-                            solution.pop(k)
-            return solution
-
-    def generateSchedule2(self):
-        n = 7#max(len(self.courses), len(self.people)) # size of matrix
-
-        m1 = [[0 for x in range(n)] for y in range(n)]
-
-        for row in range(0, n):#len(self.people)):
-            for col in range(0, n):#len(self.courses)):
-                if col in self.people[row].edges.keys():
-                    m1[row][col] = self.people[row].edges[col].weight
-                else:
-                    m1[row][col] = math.inf
-
-        print('*** M1 GENERATED ***')
-
+    def generateSchedule(self, m1):
         hungarian = Hungarian(m1)
+        hungarian.calculate()
+        schedule = hungarian.get_results()
+
+        # Convert the list of tuples into a dictionary
+        scheduleDict = {}
+        for personIndex, courseIndex in schedule:
+            if personIndex < len(self.people) and courseIndex < len(self.courses):
+                scheduleDict[personIndex] = courseIndex
+
+        print(scheduleDict)
+        return scheduleDict
+
 
     def printSchedule(self, schedule):
         print('%30s' % 'INSTRUCTOR' +

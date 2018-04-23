@@ -7,12 +7,26 @@ def generate(courses, people, faculty):
     # Keep looping until all courses are matched or no more people can be matched
     wa = WeightAssigner()
     g = Graph(people, faculty, courses, wa)
-    print('-----this pringitn rn-------------')
+    m1 = g.generateHungarianMatrix()
     g.printGraph()
-    schedule = g.generateSchedule2()
-    # g.printSchedule(schedule)
+    schedule = g.generateSchedule(m1)
+    g.printSchedule(schedule)
     readFromScheduleCSV(g,schedule)
 
+# def createScheduleCSV(headers):
+#     for header in headers:
+#         # print('header is ' , header)
+#
+#         with open('newschedule.csv', 'w') as csvfile:
+#             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+#             for header in headers:
+#                 filewriter.writerow(header)
+
+#
+# def courseInSchedule(cse,sec,schedule):
+#     for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
+#         pIndex = i[0]
+#         cIndex = i[1]
 def readFromScheduleCSV(g,schedule):
     print(type(schedule))
     print(schedule)
@@ -47,9 +61,3 @@ def createScheduleCSV(headers):
             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             for header in headers:
                 filewriter.writerow(header)
-
-#
-# def courseInSchedule(cse,sec,schedule):
-#     for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
-#         pIndex = i[0]
-#         cIndex = i[1]
