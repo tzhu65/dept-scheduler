@@ -4,23 +4,13 @@ import csv
 
 def generate(courses, people, faculty):
 
-    # Initial pass
+    # Keep looping until all courses are matched or no more people can be matched
     wa = WeightAssigner()
     g = Graph(people, faculty, courses, wa)
     g.printGraph()
-    schedule = g.generateSchedule()
-
-    # Recalculate the hours of the students
-    peopleCopy = []
-    for p in people:
-        peopleCopy.append(copy.deepcopy(p))
-
-    for pIndex, cIndex in schedule.items():
-        p = peopleCopy[pIndex]
-
-        print(pIndex, cIndex)
+    schedule = g.generateSchedule2()
+    print(pIndex, cIndex)
     g.printSchedule(schedule)
-
     readFromScheduleCSV(g,schedule)
 
 def readFromScheduleCSV(g,schedule):
