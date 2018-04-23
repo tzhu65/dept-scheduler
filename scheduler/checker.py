@@ -75,6 +75,11 @@ def checkHoursConstraint(person, course, errors):
         print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
         person.hoursCompleted = person.hoursCompleted - courseHoursValue
 
+def checkSchedulerHoursConstraint(person, course, errors):
+    courseHoursValue = course.hoursValue
+    availableHours = MAX_HOURS - person.hoursCompleted - person.hoursBoughtOut - courseHoursValue
+    return availableHours >= 0
+
 
 def checkSchedulerHoursConstraint(person, course, errors):
     courseHoursValue = course.hoursValue#instructorToHoursVal[person.name]
