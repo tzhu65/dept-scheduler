@@ -3,7 +3,7 @@ import numpy as np
 import math
 from .hungarian import Hungarian
 
-from .checker import validateComputerSkill, validateQualifyingExam, checkClassTimes, checkHoursConstraint
+from .checker import validateComputerSkill, validateQualifyingExam, checkClassTimes, checkSchedulerHoursConstraint
 
 
 class WeightAssigner:
@@ -110,7 +110,7 @@ def validPersonCourseEdge(person, course, errors):
         return False
 
     # Check if the person has enough teaching hours
-    if not checkHoursConstraint(person, course, errors):
+    if not checkSchedulerHoursConstraint(person, course, errors):
         return False
 
     # Check if the class needs a computer science background
