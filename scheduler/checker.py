@@ -63,7 +63,7 @@ def checkIfClassIsPreferredClass(person, course, errors):
     return True
 
 def checkHoursConstraint(person, course, errors):
-    courseHoursValue = course.instructorToHoursVal[person.name]
+    courseHoursValue = course.hoursValue#instructorToHoursVal[person.name]
     avaliableHours = MAX_HOURS-person.hoursCompleted-person.hoursBoughtOut-courseHoursValue
     if avaliableHours < 0:
         #error

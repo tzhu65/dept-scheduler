@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 import math
-
+from .hungarian import Hungarian
 
 from .checker import validateComputerSkill, validateQualifyingExam, checkClassTimes, checkHoursConstraint
 
@@ -397,6 +397,22 @@ class Graph:
                         solution.pop(k)
             print(solution)
             return solution
+
+    def generateSchedule2(self):
+        n = 7#max(len(self.courses), len(self.people)) # size of matrix
+
+        m1 = [[0 for x in range(n)] for y in range(n)] 
+
+        for row in range(0, n):#len(self.people)):
+            for col in range(0, n):#len(self.courses)):
+                if col in self.people[row].edges.keys():
+                    m1[row][col] = self.people[row].edges[col].weight
+                else:
+                    m1[row][col] = math.inf
+
+        print('*** M1 GENERATED ***')   
+
+        hungarian = Hungarian(m1)
 
     def printSchedule(self, schedule):
         print('%30s' % 'INSTRUCTOR' +  
