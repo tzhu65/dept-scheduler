@@ -8,15 +8,15 @@ def generate(courses, people, faculty):
     wa = WeightAssigner()
     g = Graph(people, faculty, courses, wa)
     g.printGraph()
-    schedule = g.generateSchedule()
+    schedule = g.generateSchedule2()
 
     # Recalculate the hours of the students
-    peopleCopy = []
-    for p in people:
-        peopleCopy.append(copy.deepcopy(p))
+    # peopleCopy = []
+    # for p in people:
+    #     peopleCopy.append(copy.deepcopy(p))
 
-    for pIndex, cIndex in schedule.items():
-        p = peopleCopy[pIndex]
+    # for pIndex, cIndex in schedule.items():
+    #     p = peopleCopy[pIndex]
 
-        print(pIndex, cIndex)
-    g.printSchedule(schedule)
+    #     print(pIndex, cIndex)
+    # g.printSchedule(schedule)
