@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { DownloadScheduleButton } from "./DownloadScheduleButton";
 import { GenerateScheduleInput } from "./GenerateScheduleInput";
 import { VerifyScheduleInput } from "./VerifyScheduleInput";
 
@@ -45,6 +46,7 @@ export class FileUploadFrame extends React.Component<null, null> {
           </div>
           <div className="tab-pane fade" id="generate" role="tabpanel" aria-labelledby="generate-tab">
             <GenerateScheduleInput />
+            <DownloadScheduleButton />
           </div>
         </div>
 

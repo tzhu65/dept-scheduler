@@ -221,20 +221,30 @@ class Graph:
 
 
     def printSchedule(self, schedule):
-        print('%30s' % 'INSTRUCTOR' +  
+        print('%30s' % 'INSTRUCTOR' +
                 '%6s' % 'CSE' +
                 '%6s' % ' SEC' +
                 ' CATEGORY\n')
         for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
             pIndex = i[0]
             cIndex = i[1]
-            print('%30s' % self.people[pIndex].data.name + 
-                    ": " + 
-                    '%5s' % self.courses[cIndex].data.courseNumber + 
+            print('%30s' % self.people[pIndex].data.name +
+                    ": " +
+                    '%5s' % self.courses[cIndex].data.courseNumber +
                     ", " +
                     '%5s' % self.courses[cIndex].data.section +
                     ", " +
                     self.courses[cIndex].data.category)
+
+    def classInSchedule(self,schedule,cse,sec):
+        for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
+            pIndex = i[0]
+            cIndices = i[1]
+            for cIndex in cIndices:
+                if cse == self.courses[cIndex].data.courseNumber and sec == self.courses[cIndex].data.section:
+                    tup = (self.people[pIndex].data.name,self.courses[cIndex].data.courseNumber,self.courses[cIndex].data.section,self.courses[cIndex].data.category)
+                    return tup
+        return None
 
 #max of vertical vs horizontal at index row col
 def hvMax(m1, rowIndex, colIndex):
@@ -262,7 +272,7 @@ def clearNeighbors(m2, m3, rowIndex, colIndex):
             for index, val in enumerate(m2):
                 if m2[index][colIndex] > 0:
                     m2[index][colIndex] = 0 # clear neighbor
-                m3[index][colIndex] = 1 # draw line    
+                m3[index][colIndex] = 1 # draw line
         else:
             for index, val in enumerate(m2):
                 if m2[rowIndex][index] < 0:

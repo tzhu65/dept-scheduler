@@ -1,3 +1,4 @@
+import csv
 from io import TextIOWrapper
 
 from django.http import HttpResponse, Http404, JsonResponse
@@ -136,6 +137,17 @@ def generateSchedule(request):
         if len(errors) > 0:
             return JsonResponse({"errors": errors})
         else:
-            generate(courses, people, faculty)
-            return HttpResponse("generated a schedule")
+            csvFilePath = generate(courses, people, faculty)[0]
+
+            # Create the HttpResponse object with the appropriate CSV header.
+            response = HttpResponse(content_type='application/download')
+            response['Content-Disposition'] = 'attachment; filename="%s"' % csvFilePath
+
+            writer = csv.writer(response)
+            with open(csvFilePath, 'r', newline='') as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    writer.writerow(row)
+            return response
+            # return HttpResponse("generated a schedule")
     raise Http404()

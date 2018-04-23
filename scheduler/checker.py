@@ -64,7 +64,7 @@ def checkIfClassIsPreferredClass(person, course, errors):
 
 
 def checkHoursConstraint(person, course, errors):
-    courseHoursValue = course.instructorToHoursVal[person.name]
+    courseHoursValue = course.hoursValue
     avaliableHours = MAX_HOURS-person.hoursCompleted-person.hoursBoughtOut-courseHoursValue
     if avaliableHours < 0:
         #error
@@ -136,7 +136,7 @@ def checkFacultyHours(courses, facultyHours, errors):
         if courseCount != int(facultyHours[faculty]):
             errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
-      
+
 def checkTimeOverlap(courseA, courseB):
     latestStart = max(courseA.startTime, courseB.startTime)
     earliestEnd = min(courseA.endTime, courseB.endTime)
