@@ -7,10 +7,10 @@ def generate(courses, people, faculty):
     # Keep looping until all courses are matched or no more people can be matched
     wa = WeightAssigner()
     g = Graph(people, faculty, courses, wa)
+    print('-----this pringitn rn-------------')
     g.printGraph()
     schedule = g.generateSchedule2()
-    print(pIndex, cIndex)
-    g.printSchedule(schedule)
+    # g.printSchedule(schedule)
     readFromScheduleCSV(g,schedule)
 
 def readFromScheduleCSV(g,schedule):
