@@ -370,7 +370,8 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
                     instructorName = ''
 
                 try:
-                    startTime = parseTime(row[fields[ParserScheduleHeaders.START_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
+                    startTime = parseTime(row[fields[ParserScheduleHeaders.START_TIME]].strip(),
+                                          ['%I:%M %p', '%I:%M%p'])
                 except ImproperTimeFormat:
                     startTime = 'N/A'
 
