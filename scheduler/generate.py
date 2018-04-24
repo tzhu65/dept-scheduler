@@ -14,9 +14,10 @@ def generate(courses, people, faculty):
     facultyCopy = [copy.deepcopy(p) for p in faculty]
     coursesCopy = [copy.deepcopy(c) for c in courses]
 
-    courseMapper = {}
+    courseMapper = {}   # Map the index generated in the schedule to the actual course
     for i in range(len(coursesCopy)):
-        courseMapper[i] = i     # Initially the one to one mapping
+        courseMapper[i] = i
+    usedCourses = set()     # Courses that have already been matched
 
     while coursesMatched < len(fullGraph.courses):
 
@@ -26,7 +27,6 @@ def generate(courses, people, faculty):
         g.printGraph()
         m1 = g.generateHungarianMatrix()
         schedule = g.generateSchedule(m1)
-        usedCourses = set()
 
         # Break if no more assignments can be made
         if len(schedule) == 0:
@@ -73,10 +73,6 @@ def generate(courses, people, faculty):
 
     printSchedule(fullGraph, completedSchedule)
     csvFilePath = readFromScheduleCSV(fullGraph, completedSchedule)
-    values = set()
-    for i in completedSchedule.values():
-        for v in i:
-            values.add(v)
     return csvFilePath, completedSchedule
 
 def printSchedule(graph, schedule):
