@@ -19798,7 +19798,7 @@ exports.MainApp = MainApp;
 init_1.init();
 ReactDOM.render(React.createElement(MainApp, null), document.getElementById("main"));
 
-},{"./actions/AppActions":41,"./alt":42,"./components/Frame":51,"./init":56,"./stores/APICallerStore":57,"./stores/OutputStore":59,"react":38,"react-dom":35}],44:[function(require,module,exports){
+},{"./actions/AppActions":41,"./alt":42,"./components/Frame":50,"./init":55,"./stores/APICallerStore":56,"./stores/OutputStore":58,"react":38,"react-dom":35}],44:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19825,6 +19825,109 @@ var DownloadScheduleButton = /** @class */ (function (_super) {
 exports.DownloadScheduleButton = DownloadScheduleButton;
 
 },{"react":38}],45:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var AppActions_1 = require("../../actions/AppActions");
+var DownloadScheduleButton_1 = require("./DownloadScheduleButton");
+var FileInputSubmitButton_1 = require("./FileInputSubmitButton");
+var FileUploadMode_1 = require("./FileUploadMode");
+var FileInputForm = /** @class */ (function (_super) {
+    __extends(FileInputForm, _super);
+    function FileInputForm() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    FileInputForm.prototype.onSubmit = function (e) {
+        e.preventDefault();
+        var fileInputForm = new FormData($("#file-input-id")[0]);
+        var mode = $("#file-input-id input:radio:checked").val();
+        if (mode === "check") {
+            AppActions_1.AppActions.checkSchedule(fileInputForm);
+        }
+        else if (mode === "generate") {
+            AppActions_1.AppActions.generateSchedule(fileInputForm);
+        }
+    };
+    FileInputForm.prototype.render = function () {
+        return (React.createElement("div", null,
+            React.createElement("form", { id: "file-input-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
+                React.createElement(FileUploadMode_1.FileUploadMode, null),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-courses-input-id" },
+                        React.createElement("b", null, "Schedule")),
+                    React.createElement("input", { id: "vs-courses-input-id", className: "form-control-file", type: "file", name: "courses", required: true })),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-people-input-id" },
+                        React.createElement("b", null, "TA Preferences")),
+                    React.createElement("input", { id: "vs-people-input-id", className: "form-control-file", type: "file", name: "people", required: true })),
+                React.createElement("div", { className: "form-group" },
+                    React.createElement("label", { htmlFor: "vs-faculty-input-id" },
+                        React.createElement("b", null, "Faculty Hours")),
+                    React.createElement("input", { id: "vs-faculty-input-id", className: "form-control-file", type: "file", name: "faculty", required: true })),
+                React.createElement(FileInputSubmitButton_1.FileInputSubmitButton, null),
+                React.createElement(DownloadScheduleButton_1.DownloadScheduleButton, null))));
+    };
+    return FileInputForm;
+}(React.Component));
+exports.FileInputForm = FileInputForm;
+
+},{"../../actions/AppActions":41,"./DownloadScheduleButton":44,"./FileInputSubmitButton":46,"./FileUploadMode":49,"react":38}],46:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var APICallerStore_1 = require("../../stores/APICallerStore");
+var FileInputSubmitButton = /** @class */ (function (_super) {
+    __extends(FileInputSubmitButton, _super);
+    function FileInputSubmitButton(props) {
+        var _this = _super.call(this, props) || this;
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
+    }
+    FileInputSubmitButton.prototype.componentWillMount = function () {
+        this.setState(APICallerStore_1.APICallerStore.getState());
+    };
+    FileInputSubmitButton.prototype.componentDidMount = function () {
+        APICallerStore_1.APICallerStore.listen(this.onChange);
+    };
+    FileInputSubmitButton.prototype.componentWillUnmount = function () {
+        APICallerStore_1.APICallerStore.unlisten(this.onChange);
+    };
+    FileInputSubmitButton.prototype.onChange = function (state) {
+        this.setState(state);
+    };
+    FileInputSubmitButton.prototype.render = function () {
+        if (this.state.loading) {
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit", disabled: true });
+        }
+        else {
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit" });
+        }
+    };
+    return FileInputSubmitButton;
+}(React.Component));
+exports.FileInputSubmitButton = FileInputSubmitButton;
+
+},{"../../stores/APICallerStore":56,"react":38}],47:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19867,7 +19970,7 @@ var FileUploadFooter = /** @class */ (function (_super) {
 }(React.Component));
 exports.FileUploadFooter = FileUploadFooter;
 
-},{"../../stores/APICallerStore":57,"react":38}],46:[function(require,module,exports){
+},{"../../stores/APICallerStore":56,"react":38}],48:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19881,9 +19984,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var DownloadScheduleButton_1 = require("./DownloadScheduleButton");
-var GenerateScheduleInput_1 = require("./GenerateScheduleInput");
-var VerifyScheduleInput_1 = require("./VerifyScheduleInput");
+var FileInputForm_1 = require("./FileInputForm");
+// import { GenerateScheduleInput } from "./GenerateScheduleInput";
+// import { VerifyScheduleInput } from "./VerifyScheduleInput";
 var FileUploadFrame = /** @class */ (function (_super) {
     __extends(FileUploadFrame, _super);
     function FileUploadFrame() {
@@ -19891,24 +19994,13 @@ var FileUploadFrame = /** @class */ (function (_super) {
     }
     FileUploadFrame.prototype.render = function () {
         return (React.createElement("div", null,
-            React.createElement("nav", { className: "navbar navbar-expand-lg" },
-                React.createElement("ul", { className: "nav nav-pills", id: "mode-tabs", role: "mode-selection" },
-                    React.createElement("li", { className: "nav-item" },
-                        React.createElement("a", { className: "nav-link active", id: "check-tab", "data-toggle": "tab", href: "#check", role: "tab", "aria-controls": "check", "aria-selected": "true" }, "Check")),
-                    React.createElement("li", { className: "nav-item" },
-                        React.createElement("a", { className: "nav-link", id: "generate-tab", "data-toggle": "tab", href: "#generate", role: "tab", "aria-controls": "generate", "aria-selected": "false" }, "Generate")))),
-            React.createElement("div", { className: "tab-content" },
-                React.createElement("div", { className: "tab-pane fade show active", id: "check", role: "tabpanel", "aria-labelledby": "check-tab" },
-                    React.createElement(VerifyScheduleInput_1.VerifyScheduleInput, null)),
-                React.createElement("div", { className: "tab-pane fade", id: "generate", role: "tabpanel", "aria-labelledby": "generate-tab" },
-                    React.createElement(GenerateScheduleInput_1.GenerateScheduleInput, null),
-                    React.createElement(DownloadScheduleButton_1.DownloadScheduleButton, null)))));
+            React.createElement(FileInputForm_1.FileInputForm, null)));
     };
     return FileUploadFrame;
 }(React.Component));
 exports.FileUploadFrame = FileUploadFrame;
 
-},{"./DownloadScheduleButton":44,"./GenerateScheduleInput":47,"./VerifyScheduleInput":49,"react":38}],47:[function(require,module,exports){
+},{"./FileInputForm":45,"react":38}],49:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19922,183 +20014,27 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
-var AppActions_1 = require("../../actions/AppActions");
-var GenerateScheduleSubmitButton_1 = require("./GenerateScheduleSubmitButton");
-var GenerateScheduleInput = /** @class */ (function (_super) {
-    __extends(GenerateScheduleInput, _super);
-    function GenerateScheduleInput(props) {
-        var _this = _super.call(this, props) || this;
-        _this.onSubmit = _this.onSubmit.bind(_this);
-        return _this;
+var FileUploadMode = /** @class */ (function (_super) {
+    __extends(FileUploadMode, _super);
+    function FileUploadMode() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    GenerateScheduleInput.prototype.onSubmit = function (e) {
-        e.preventDefault();
-        var generateScheduleForm = new FormData($("#generate-schedule-id")[0]);
-        AppActions_1.AppActions.generateSchedule(generateScheduleForm);
+    FileUploadMode.prototype.render = function () {
+        return (React.createElement("div", { className: "row" },
+            React.createElement("div", { className: "justify-content-center" },
+                React.createElement("div", { className: "btn-group btn-group-toggle", "data-toggle": "buttons" },
+                    React.createElement("label", { className: "btn btn-secondary active" },
+                        React.createElement("input", { type: "radio", name: "options", id: "check-schedule", autoComplete: "off", defaultChecked: true, value: "check" }),
+                        "Check"),
+                    React.createElement("label", { className: "btn btn-secondary" },
+                        React.createElement("input", { type: "radio", name: "options", id: "generate-schedule", autoComplete: "off", value: "generate" }),
+                        "Generate")))));
     };
-    GenerateScheduleInput.prototype.render = function () {
-        return (React.createElement("div", null,
-            React.createElement("form", { id: "generate-schedule-id", action: "/generateSchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-courses-input-id" },
-                        React.createElement("b", null, "Schedule")),
-                    React.createElement("input", { id: "vs-courses-input-id", className: "form-control-file", type: "file", name: "courses", required: true })),
-                React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-people-input-id" },
-                        React.createElement("b", null, "TA Preferences")),
-                    React.createElement("input", { id: "vs-people-input-id", className: "form-control-file", type: "file", name: "people", required: true })),
-                React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-faculty-input-id" },
-                        React.createElement("b", null, "Faculty Hours")),
-                    React.createElement("input", { id: "vs-faculty-input-id", className: "form-control-file", type: "file", name: "faculty", required: true })),
-                React.createElement(GenerateScheduleSubmitButton_1.GenerateScheduleSubmitButton, null))));
-    };
-    return GenerateScheduleInput;
+    return FileUploadMode;
 }(React.Component));
-exports.GenerateScheduleInput = GenerateScheduleInput;
+exports.FileUploadMode = FileUploadMode;
 
-},{"../../actions/AppActions":41,"./GenerateScheduleSubmitButton":48,"react":38}],48:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var APICallerStore_1 = require("../../stores/APICallerStore");
-var GenerateScheduleSubmitButton = /** @class */ (function (_super) {
-    __extends(GenerateScheduleSubmitButton, _super);
-    function GenerateScheduleSubmitButton(props) {
-        var _this = _super.call(this, props) || this;
-        _this.onChange = _this.onChange.bind(_this);
-        return _this;
-    }
-    GenerateScheduleSubmitButton.prototype.componentWillMount = function () {
-        this.setState(APICallerStore_1.APICallerStore.getState());
-    };
-    GenerateScheduleSubmitButton.prototype.componentDidMount = function () {
-        APICallerStore_1.APICallerStore.listen(this.onChange);
-    };
-    GenerateScheduleSubmitButton.prototype.componentWillUnmount = function () {
-        APICallerStore_1.APICallerStore.unlisten(this.onChange);
-    };
-    GenerateScheduleSubmitButton.prototype.onChange = function (state) {
-        this.setState(state);
-    };
-    GenerateScheduleSubmitButton.prototype.render = function () {
-        if (this.state.loading) {
-            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit", disabled: true });
-        }
-        else {
-            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit" });
-        }
-    };
-    return GenerateScheduleSubmitButton;
-}(React.Component));
-exports.GenerateScheduleSubmitButton = GenerateScheduleSubmitButton;
-
-},{"../../stores/APICallerStore":57,"react":38}],49:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var AppActions_1 = require("../../actions/AppActions");
-var VerifyScheduleSubmitButton_1 = require("./VerifyScheduleSubmitButton");
-var VerifyScheduleInput = /** @class */ (function (_super) {
-    __extends(VerifyScheduleInput, _super);
-    function VerifyScheduleInput(props) {
-        var _this = _super.call(this, props) || this;
-        _this.onSubmit = _this.onSubmit.bind(_this);
-        return _this;
-    }
-    VerifyScheduleInput.prototype.onSubmit = function (e) {
-        e.preventDefault();
-        var verifyScheduleForm = new FormData($("#verify-schedule-id")[0]);
-        AppActions_1.AppActions.checkSchedule(verifyScheduleForm);
-    };
-    VerifyScheduleInput.prototype.render = function () {
-        return (React.createElement("div", null,
-            React.createElement("form", { id: "verify-schedule-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-courses-input-id" },
-                        React.createElement("b", null, "Schedule")),
-                    React.createElement("input", { id: "vs-courses-input-id", className: "form-control-file", type: "file", name: "courses", required: true })),
-                React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-people-input-id" },
-                        React.createElement("b", null, "TA Preferences")),
-                    React.createElement("input", { id: "vs-people-input-id", className: "form-control-file", type: "file", name: "people", required: true })),
-                React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-faculty-input-id" },
-                        React.createElement("b", null, "Faculty Hours")),
-                    React.createElement("input", { id: "vs-faculty-input-id", className: "form-control-file", type: "file", name: "faculty", required: true })),
-                React.createElement(VerifyScheduleSubmitButton_1.VerifyScheduleSubmitButton, null))));
-    };
-    return VerifyScheduleInput;
-}(React.Component));
-exports.VerifyScheduleInput = VerifyScheduleInput;
-
-},{"../../actions/AppActions":41,"./VerifyScheduleSubmitButton":50,"react":38}],50:[function(require,module,exports){
-"use strict";
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var APICallerStore_1 = require("../../stores/APICallerStore");
-var VerifyScheduleSubmitButton = /** @class */ (function (_super) {
-    __extends(VerifyScheduleSubmitButton, _super);
-    function VerifyScheduleSubmitButton(props) {
-        var _this = _super.call(this, props) || this;
-        _this.onChange = _this.onChange.bind(_this);
-        return _this;
-    }
-    VerifyScheduleSubmitButton.prototype.componentWillMount = function () {
-        this.setState(APICallerStore_1.APICallerStore.getState());
-    };
-    VerifyScheduleSubmitButton.prototype.componentDidMount = function () {
-        APICallerStore_1.APICallerStore.listen(this.onChange);
-    };
-    VerifyScheduleSubmitButton.prototype.componentWillUnmount = function () {
-        APICallerStore_1.APICallerStore.unlisten(this.onChange);
-    };
-    VerifyScheduleSubmitButton.prototype.onChange = function (state) {
-        this.setState(state);
-    };
-    VerifyScheduleSubmitButton.prototype.render = function () {
-        if (this.state.loading) {
-            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit", disabled: true });
-        }
-        else {
-            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit" });
-        }
-    };
-    return VerifyScheduleSubmitButton;
-}(React.Component));
-exports.VerifyScheduleSubmitButton = VerifyScheduleSubmitButton;
-
-},{"../../stores/APICallerStore":57,"react":38}],51:[function(require,module,exports){
+},{"react":38}],50:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20137,7 +20073,7 @@ var Frame = /** @class */ (function (_super) {
 }(React.Component));
 exports.Frame = Frame;
 
-},{"./FileUpload/FileUploadFooter":45,"./FileUpload/FileUploadFrame":46,"./Modals/AboutInfo":52,"./Navbar/Navbar":53,"./Output/OutputFrame":54,"react":38}],52:[function(require,module,exports){
+},{"./FileUpload/FileUploadFooter":47,"./FileUpload/FileUploadFrame":48,"./Modals/AboutInfo":51,"./Navbar/Navbar":52,"./Output/OutputFrame":53,"react":38}],51:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20170,7 +20106,7 @@ var AboutInfo = /** @class */ (function (_super) {
 }(React.Component));
 exports.AboutInfo = AboutInfo;
 
-},{"react":38}],53:[function(require,module,exports){
+},{"react":38}],52:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20204,7 +20140,7 @@ var Navbar = /** @class */ (function (_super) {
 }(React.Component));
 exports.Navbar = Navbar;
 
-},{"../../actions/AppActions":41,"react":38}],54:[function(require,module,exports){
+},{"../../actions/AppActions":41,"react":38}],53:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20253,7 +20189,7 @@ var OutputFrame = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputFrame = OutputFrame;
 
-},{"../../stores/OutputStore":59,"./OutputOverlay":55,"react":38}],55:[function(require,module,exports){
+},{"../../stores/OutputStore":58,"./OutputOverlay":54,"react":38}],54:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20300,7 +20236,7 @@ var OutputOverlay = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputOverlay = OutputOverlay;
 
-},{"../../stores/APICallerStore":57,"react":38}],56:[function(require,module,exports){
+},{"../../stores/APICallerStore":56,"react":38}],55:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Exported bootstrap function for initializing the app.
@@ -20325,7 +20261,7 @@ function setupCsrf() {
     });
 }
 
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20351,7 +20287,7 @@ var APICallerStoreClass = /** @class */ (function (_super) {
         _this.bindAction(AppActions_1.AppActions.generateSchedule, _this.onGenerateSchedule);
         return _this;
     }
-    APICallerStoreClass.prototype.onCheckSchedule = function () {
+    APICallerStoreClass.prototype.onCheckSchedule = function (checkScheduleForm) {
         var _this = this;
         if (this.loading) {
             return;
@@ -20362,7 +20298,7 @@ var APICallerStoreClass = /** @class */ (function (_super) {
         $.ajax({
             url: "verifySchedule",
             type: "POST",
-            data: new FormData($("#verify-schedule-id")[0]),
+            data: checkScheduleForm,
             cache: false,
             contentType: false,
             processData: false,
@@ -20428,11 +20364,11 @@ var APICallerStoreClass = /** @class */ (function (_super) {
                 AppActions_1.AppActions.addToOutput("JSON data response: " + JSON.stringify(data, null, 2));
                 var time = new Date().getTime() - start;
                 _this.setState({ loading: false, delay: time + "ms" });
-                var csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(data);
+                var csvData = "data:application/csv;charset=utf-8," + encodeURIComponent(data);
                 downloadButton.removeClass("disabled");
                 downloadButton.attr({
-                    "href": csvData,
-                    "download": "schedule.csv"
+                    href: csvData,
+                    download: "schedule.csv",
                 });
             },
             error: function (xhr, status, error) {
@@ -20447,7 +20383,7 @@ var APICallerStoreClass = /** @class */ (function (_super) {
 var APICallerStore = alt_1.alt.createStore(APICallerStoreClass, "APICallerStore");
 exports.APICallerStore = APICallerStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}],58:[function(require,module,exports){
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}],57:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var AbstractStoreModel = /** @class */ (function () {
@@ -20457,7 +20393,7 @@ var AbstractStoreModel = /** @class */ (function () {
 }());
 exports.AbstractStoreModel = AbstractStoreModel;
 
-},{}],59:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20493,4 +20429,4 @@ var OutputStoreClass = /** @class */ (function (_super) {
 var OutputStore = alt_1.alt.createStore(OutputStoreClass, "OutputStore");
 exports.OutputStore = OutputStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}]},{},[43]);
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}]},{},[43]);
