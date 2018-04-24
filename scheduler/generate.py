@@ -14,6 +14,10 @@ def generate(courses, people, faculty):
     facultyCopy = [copy.deepcopy(p) for p in faculty]
     coursesCopy = [copy.deepcopy(c) for c in courses]
 
+    courseMapper = {}
+    for i in range(len(coursesCopy)):
+        courseMapper[i] = i     # Initially the one to one mapping
+
     while coursesMatched < len(fullGraph.courses):
 
         # Generate the assignment
@@ -22,25 +26,22 @@ def generate(courses, people, faculty):
         g.printGraph()
         m1 = g.generateHungarianMatrix()
         schedule = g.generateSchedule(m1)
-        courseMapper = {}
         usedCourses = set()
-        for i in range(len(coursesCopy)):
-            courseMapper[i] = i
 
         # Break if no more assignments can be made
         if len(schedule) == 0:
             break
 
         coursesMatched += len(schedule)
-        print('got this many courses', coursesMatched)
 
         # Add the schedule to the completed schedule
         for personIndex, courseIndex in schedule.items():
+            usedCourses.add(courseMapper[courseIndex])
             if personIndex in completedSchedule:
                 pickedCourses = completedSchedule[personIndex]
-                pickedCourses.append(courseIndex)
+                pickedCourses.append(courseMapper[courseIndex])
             else:
-                completedSchedule[personIndex] = [courseIndex]
+                completedSchedule[personIndex] = [courseMapper[courseIndex]]
 
         # Recalculate the hours of the students
         peopleCopy = []
@@ -54,12 +55,9 @@ def generate(courses, people, faculty):
                 course = fullGraph.courses[courseMapper[schedule[i]]].data
                 personCopy.hoursCompleted += course.hoursValue
 
-        # Remove the used courses
-        for i in schedule.values():
-            usedCourses.add(courseMapper[i])
         coursesCopy = []
         indexCounter = 0
-
+        newCourseMapper = {}
         for i, c in enumerate(fullGraph.courses):
 
             # Check if the course is in the schedule
@@ -68,11 +66,17 @@ def generate(courses, people, faculty):
 
             courseCopy = copy.deepcopy(c.data)
             coursesCopy.append(courseCopy)
-            courseMapper[indexCounter] = i
+            newCourseMapper[indexCounter] = i
             indexCounter += 1
+
+        courseMapper = newCourseMapper
 
     printSchedule(fullGraph, completedSchedule)
     csvFilePath = readFromScheduleCSV(fullGraph, completedSchedule)
+    values = set()
+    for i in completedSchedule.values():
+        for v in i:
+            values.add(v)
     return csvFilePath, completedSchedule
 
 def printSchedule(graph, schedule):
