@@ -301,7 +301,6 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
     }
     courses = []
     reader = csv.reader(file)
-    next(reader)
     headers = next(reader)
     fields = mapHeaders(headers, expectedHeaders)
     with open('persons.csv', 'w') as csvfile:
