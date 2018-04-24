@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { IAPICallerStoreState, APICallerStore } from "../../stores/APICallerStore";
 
-export class VerifyScheduleSubmitButton extends React.Component<null, IAPICallerStoreState> {
+export class FileInputSubmitButton extends React.Component<null, IAPICallerStoreState> {
 
   constructor(props: any) {
     super(props);
@@ -29,7 +29,7 @@ export class VerifyScheduleSubmitButton extends React.Component<null, IAPICaller
     if (this.state.loading) {
       return <input type="submit" className="btn btn-primary" value="Upload" name="submit" disabled={true}/>;
     } else {
-      return <input type="submit" className="btn btn-primary" value="Upload" name="submit" />;
+      return <input type="submit" className="btn btn-primary" value="Upload" name="submit"/>;
     }
   }
 }

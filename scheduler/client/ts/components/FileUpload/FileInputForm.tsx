@@ -2,31 +2,35 @@ import * as React from "react";
 
 import { AppActions } from "../../actions/AppActions";
 
-import { GenerateScheduleSubmitButton } from "./GenerateScheduleSubmitButton";
+import { DownloadScheduleButton } from "./DownloadScheduleButton";
+import { FileInputSubmitButton } from "./FileInputSubmitButton";
+import { FileUploadMode } from "./FileUploadMode";
 
-export class GenerateScheduleInput extends React.Component<null, null> {
-
-  constructor(props: any) {
-    super(props);
-    this.onSubmit = this.onSubmit.bind(this);
-  }
+export class FileInputForm extends React.Component<null, null> {
 
   public onSubmit(e: any) {
     e.preventDefault();
-    const generateScheduleForm = new FormData(($("#generate-schedule-id")[0] as HTMLFormElement));
-    AppActions.generateSchedule(generateScheduleForm);
+    const fileInputForm = new FormData(($("#file-input-id")[0] as HTMLFormElement));
+    const mode = $("#file-input-id input:radio:checked").val();
+    if (mode === "check") {
+      AppActions.checkSchedule(fileInputForm);
+    } else if (mode === "generate") {
+      AppActions.generateSchedule(fileInputForm);
+    }
   }
 
   public render() {
     return (
       <div>
         <form
-          id="generate-schedule-id"
-          action="/generateSchedule"
+          id="file-input-id"
+          action="/verifySchedule"
           method="post"
           encType="multipart/form-data"
           onSubmit={this.onSubmit}
         >
+          <FileUploadMode />
+
           <div className="form-group">
             <label htmlFor="vs-courses-input-id"><b>Schedule</b></label>
             <input id="vs-courses-input-id" className="form-control-file" type="file" name="courses" required={true}/>
@@ -42,7 +46,8 @@ export class GenerateScheduleInput extends React.Component<null, null> {
             <input id="vs-faculty-input-id" className="form-control-file" type="file" name="faculty" required={true}/>
           </div>
 
-          <GenerateScheduleSubmitButton />
+          <FileInputSubmitButton />
+          <DownloadScheduleButton />
 
         </form>
       </div>
