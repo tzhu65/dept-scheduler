@@ -369,7 +369,8 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
                     instructorName = ''
 
                 try:
-                    startTime = parseTime(row[fields[ParserScheduleHeaders.START_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
+                    startTime = parseTime(row[fields[ParserScheduleHeaders.START_TIME]].strip(),
+                                          ['%I:%M %p', '%I:%M%p'])
                 except ImproperTimeFormat:
                     startTime = 'N/A'
 
@@ -377,6 +378,8 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
                     endTime = parseTime(row[fields[ParserScheduleHeaders.END_TIME]].strip(), ['%I:%M %p', '%I:%M%p'])
                 except ImproperTimeFormat:
                     endTime = 'N/A'
+
+                assistants = [x.strip() for x in assistant.split(";") if x != '']
 
                 course = Course(row[fields[ParserScheduleHeaders.CLASS]].strip(),  # Course number
                                 row[fields[ParserScheduleHeaders.SECTION]].strip(),  # Section
@@ -386,7 +389,8 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
                                 endTime,
                                 instructorName,
                                 hoursValue,
-                                instructorToHoursVal
+                                instructorToHoursVal,
+                                assistants,
                                 )
                 courses.append(course)
 

@@ -68,8 +68,6 @@ class WeightAssigner:
 
         # Use those three categories to determine the weight of the edge
         weight = (self.preference * prefIndex) * (self.seniority * seniority) * (self.category_pref * categoryPrefIndex)
-        if weight <= 0:
-            print('bad weight', weight)
         return weight
 
     def professorWeight(self, professor, course):
@@ -145,13 +143,35 @@ class Graph:
 
         # Generate all the course nodes
         for c in courses:
+
+            # Calculate the total number of open positions
+            availablePositions = 0
             for t in c.positions:
+                availablePositions += c.positions[t]["amount"]
+
+            for t in c.positions:
+
+                # Skip if it's a teach node and the instructor is set
+                if t == "teach" and c.instructor != "":
+                    continue
+
+                # Skip if the amount needed is only 1 and the instructor is already set or assistants are set
+                if availablePositions == 1 and c.instructor != "":
+                    continue
+
                 for i in range(c.positions[t]["amount"]):
+
+                    # Check the number of assistants
+                    if t == "assist" and i < len(c.assistants):
+                        continue
+
                     # Deep copy this node and set the category
                     course = copy.deepcopy(c)
                     course.positions = {t: {"amount": 1, "hours": c.positions[t]["hours"]}}
                     course.category = t
                     course.hoursValue = c.positions[t]["hours"]
+                    course.instructor = ""
+                    course.assistants = []
                     if not isinstance(course.hoursValue, int):
                         course.hoursValue = 0
                     n = Node('course', course)

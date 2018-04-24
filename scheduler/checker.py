@@ -132,7 +132,7 @@ def checkFacultyHours(courses, facultyHours, errors):
         courseCount = 0
         for course in courses:
             if course.instructor == faculty:
-                courseCount+=1
+                courseCount += 1
         if courseCount != int(facultyHours[faculty]):
             errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
