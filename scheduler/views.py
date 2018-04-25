@@ -37,10 +37,7 @@ def verifySchedule(request):
                     f = TextIOWrapper(courses.file, encoding=request.encoding)
                     courses = parseCourses(f)
             except MissingHeaders as e:
-                if len(e.headers) > 5:
-                    errors.append("Missing too many headers in the schedule spreadsheet")
-                else:
-                    errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
+                errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
 
             try:
                 if people and isinstance(people, TemporaryUploadedFile):
@@ -49,10 +46,7 @@ def verifySchedule(request):
                     f = TextIOWrapper(people.file, encoding=request.encoding)
                     people = parsePeople(f)
             except MissingHeaders as e:
-                if len(e.headers) > 5:
-                    errors.append("Missing too many headers in the TA preferences spreadsheet")
-                else:
-                    errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
+                errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
 
             try:
                 if faculty and isinstance(faculty, TemporaryUploadedFile):
@@ -61,12 +55,9 @@ def verifySchedule(request):
                     f = TextIOWrapper(faculty.file, encoding=request.encoding)
                     facultyHours = parseFacultyHours(f)
             except MissingHeaders as e:
-                if len(e.headers) > 5:
-                    errors.append("Missing too many headers in the faculty hours spreadsheet")
-                else:
-                    errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
+                errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
         else:
-            errors.append("Invalid form submission")
+            errors.append("Invalid form submission. Missing a spreadsheet.")
             print(form.errors)
 
         # Check if there were any parsing errors
