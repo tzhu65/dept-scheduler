@@ -1,7 +1,7 @@
 class Course:
 
     def __init__(self, courseNumber, section, days, positions, startTime, endTime, instructor, hoursValue,
-                 instructorToHoursVal):
+                 instructorToHoursVal, assistants):
         self.courseNumber = courseNumber
         self.section = section
         self.days = days
@@ -11,6 +11,7 @@ class Course:
         self.instructor = instructor
         self.hoursValue = hoursValue
         self.instructorToHoursVal = instructorToHoursVal
+        self.assistants = assistants
 
     def __str__(self):
         return '%5s' % self.courseNumber + ' ' + \
