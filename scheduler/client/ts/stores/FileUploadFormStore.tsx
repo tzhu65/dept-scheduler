@@ -87,14 +87,6 @@ class FileUploadFormStoreClass extends AbstractStoreModel<IFileUploadFormStoreSt
     return window.localStorage.getItem(this.keys.faculty.file);
   }
 
-  private readerHelper(file: any, cb: any) {
-    const reader = new FileReader();
-    reader.onload = (event: any) => {
-      return cb(file.name, event.target.result);
-    }
-    return reader.readAsText(file);
-  }
-
   public onUpdateCourses(file: any) {
     return this.readerHelper(file, (fileName: string, text: string) => {
       this.coursesFileName = fileName;
@@ -153,6 +145,14 @@ class FileUploadFormStoreClass extends AbstractStoreModel<IFileUploadFormStoreSt
     window.localStorage.removeItem(this.keys.faculty.lastUploaded);
     window.localStorage.removeItem(this.keys.faculty.fileName);
     window.localStorage.removeItem(this.keys.faculty.file);
+  }
+
+  private readerHelper(file: any, cb: any) {
+    const reader = new FileReader();
+    reader.onload = (event: any) => {
+      return cb(file.name, event.target.result);
+    };
+    return reader.readAsText(file);
   }
 
 }

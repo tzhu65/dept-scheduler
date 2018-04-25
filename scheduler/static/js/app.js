@@ -19877,6 +19877,14 @@ var FileInputForm = /** @class */ (function (_super) {
     };
     FileInputForm.prototype.componentDidMount = function () {
         FileUploadFormStore_1.FileUploadFormStore.listen(this.onChange);
+        // Load filestyle manually here
+        var style = { text: "Choose File", buttonBefore: true, placeholder: "" };
+        style.placeholder = this.state.coursesFileName === null ? "" : this.state.coursesFileName;
+        $("#vs-courses-input-id").filestyle(style);
+        style.placeholder = this.state.peopleFileName === null ? "" : this.state.peopleFileName;
+        $("#vs-people-input-id").filestyle(style);
+        style.placeholder = this.state.facultyFileName === null ? "" : this.state.facultyFileName;
+        $("#vs-faculty-input-id").filestyle(style);
     };
     FileInputForm.prototype.componentWillUnmount = function () {
         FileUploadFormStore_1.FileUploadFormStore.unlisten(this.onChange);
@@ -19941,19 +19949,19 @@ var FileInputForm = /** @class */ (function (_super) {
                 React.createElement("div", { className: "form-group" },
                     React.createElement("label", null,
                         React.createElement("b", null, "Schedule")),
-                    React.createElement("input", { id: "vs-courses-input-id", type: "file", className: "filestyle", name: "courses", "data-buttonbefore": "true", "data-placeholder": this.state.coursesFileName === null ? "" : this.state.coursesFileName, "data-text": "Choose File", onClick: this.onClickGenerator("vs-courses-input-id", AppActions_1.AppActions.resetCourses), onChange: this.onChangeGenerator("vs-courses-input-id", AppActions_1.AppActions.updateCourses, AppActions_1.AppActions.resetCourses) }),
+                    React.createElement("input", { id: "vs-courses-input-id", type: "file", className: "filestyle", name: "courses", "data-placeholder": this.state.coursesFileName === null ? "" : this.state.coursesFileName, onClick: this.onClickGenerator("vs-courses-input-id", AppActions_1.AppActions.resetCourses), onChange: this.onChangeGenerator("vs-courses-input-id", AppActions_1.AppActions.updateCourses, AppActions_1.AppActions.resetCourses) }),
                     React.createElement("label", { className: "lb-sm" }, this.state.coursesLastUploaded === null ? "" : "Last uploaded: " +
                         timestampToString(this.state.coursesLastUploaded))),
                 React.createElement("div", { className: "form-group" },
                     React.createElement("label", { htmlFor: "vs-people-input-id" },
                         React.createElement("b", null, "TA Preferences")),
-                    React.createElement("input", { id: "vs-people-input-id", type: "file", className: "filestyle", name: "people", "data-buttonbefore": "true", "data-placeholder": this.state.peopleFileName === null ? "" : this.state.peopleFileName, "data-text": "Choose File", onClick: this.onClickGenerator("vs-people-input-id", AppActions_1.AppActions.resetPeople), onChange: this.onChangeGenerator("vs-people-input-id", AppActions_1.AppActions.updatePeople, AppActions_1.AppActions.resetPeople) }),
+                    React.createElement("input", { id: "vs-people-input-id", type: "file", className: "filestyle", name: "people", "data-placeholder": this.state.peopleFileName === null ? "" : this.state.peopleFileName, onClick: this.onClickGenerator("vs-people-input-id", AppActions_1.AppActions.resetPeople), onChange: this.onChangeGenerator("vs-people-input-id", AppActions_1.AppActions.updatePeople, AppActions_1.AppActions.resetPeople) }),
                     React.createElement("label", { className: "lb-sm" }, this.state.peopleLastUploaded === null ? "" : "Last uploaded: " +
                         timestampToString(this.state.peopleLastUploaded))),
                 React.createElement("div", { className: "form-group" },
                     React.createElement("label", { htmlFor: "vs-faculty-input-id" },
                         React.createElement("b", null, "Faculty Hours")),
-                    React.createElement("input", { id: "vs-faculty-input-id", type: "file", className: "filestyle", name: "faculty", "data-buttonbefore": "true", "data-placeholder": this.state.facultyFileName === null ? "" : this.state.facultyFileName, "data-text": "Choose File", onClick: this.onClickGenerator("vs-faculty-input-id", AppActions_1.AppActions.resetFaculty), onChange: this.onChangeGenerator("vs-faculty-input-id", AppActions_1.AppActions.updateFaculty, AppActions_1.AppActions.resetFaculty) }),
+                    React.createElement("input", { id: "vs-faculty-input-id", type: "file", className: "filestyle", name: "faculty", "data-placeholder": this.state.facultyFileName === null ? "" : this.state.facultyFileName, onClick: this.onClickGenerator("vs-faculty-input-id", AppActions_1.AppActions.resetFaculty), onChange: this.onChangeGenerator("vs-faculty-input-id", AppActions_1.AppActions.updateFaculty, AppActions_1.AppActions.resetFaculty) }),
                     React.createElement("label", { className: "lb-sm" }, this.state.facultyLastUploaded === null ? "" : "Last uploaded: " +
                         timestampToString(this.state.facultyLastUploaded))),
                 React.createElement(FileInputSubmitButton_1.FileInputSubmitButton, null),
@@ -20539,13 +20547,6 @@ var FileUploadFormStoreClass = /** @class */ (function (_super) {
     FileUploadFormStoreClass.prototype.getFacultyFile = function () {
         return window.localStorage.getItem(this.keys.faculty.file);
     };
-    FileUploadFormStoreClass.prototype.readerHelper = function (file, cb) {
-        var reader = new FileReader();
-        reader.onload = function (event) {
-            return cb(file.name, event.target.result);
-        };
-        return reader.readAsText(file);
-    };
     FileUploadFormStoreClass.prototype.onUpdateCourses = function (file) {
         var _this = this;
         return this.readerHelper(file, function (fileName, text) {
@@ -20599,6 +20600,13 @@ var FileUploadFormStoreClass = /** @class */ (function (_super) {
         window.localStorage.removeItem(this.keys.faculty.lastUploaded);
         window.localStorage.removeItem(this.keys.faculty.fileName);
         window.localStorage.removeItem(this.keys.faculty.file);
+    };
+    FileUploadFormStoreClass.prototype.readerHelper = function (file, cb) {
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            return cb(file.name, event.target.result);
+        };
+        return reader.readAsText(file);
     };
     return FileUploadFormStoreClass;
 }(AbstractStore_1.AbstractStoreModel));

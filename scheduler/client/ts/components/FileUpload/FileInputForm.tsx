@@ -18,11 +18,11 @@ function timestampToString(timestamp: string) {
   const minutes = date.getMinutes();
   const seconds = date.getSeconds();
 
-  const monthStr = month < 10 ? "0" + month : month
-  const dayStr = day < 10 ? "0" + day : day
-  const hourStr = hour < 10 ? "0" + hour : hour
-  const minutesStr = minutes < 10 ? "0" + minutes : minutes
-  const secondsStr = seconds < 10 ? "0" + seconds : seconds
+  const monthStr = month < 10 ? "0" + month : month;
+  const dayStr = day < 10 ? "0" + day : day;
+  const hourStr = hour < 10 ? "0" + hour : hour;
+  const minutesStr = minutes < 10 ? "0" + minutes : minutes;
+  const secondsStr = seconds < 10 ? "0" + seconds : seconds;
 
   const timeString = monthStr + "/"
     + dayStr + "/"
@@ -46,6 +46,18 @@ export class FileInputForm extends React.Component<null, IFileUploadFormStoreSta
 
   public componentDidMount() {
     FileUploadFormStore.listen(this.onChange);
+
+    // Load filestyle manually here
+    const style = {text: "Choose File", buttonBefore: true, placeholder: ""};
+
+    style.placeholder = this.state.coursesFileName === null ? "" : this.state.coursesFileName;
+    ($("#vs-courses-input-id") as any).filestyle(style);
+
+    style.placeholder = this.state.peopleFileName === null ? "" : this.state.peopleFileName;
+    ($("#vs-people-input-id") as any).filestyle(style);
+
+    style.placeholder = this.state.facultyFileName === null ? "" : this.state.facultyFileName;
+    ($("#vs-faculty-input-id") as any).filestyle(style);
   }
 
   public componentWillUnmount() {
@@ -135,9 +147,7 @@ export class FileInputForm extends React.Component<null, IFileUploadFormStoreSta
               type="file"
               className="filestyle"
               name="courses"
-              data-buttonbefore="true"
               data-placeholder={this.state.coursesFileName === null ? "" : this.state.coursesFileName}
-              data-text="Choose File"
               onClick={this.onClickGenerator("vs-courses-input-id", AppActions.resetCourses)}
               onChange={this.onChangeGenerator("vs-courses-input-id", AppActions.updateCourses,
                 AppActions.resetCourses)}
@@ -155,9 +165,7 @@ export class FileInputForm extends React.Component<null, IFileUploadFormStoreSta
               type="file"
               className="filestyle"
               name="people"
-              data-buttonbefore="true"
               data-placeholder={this.state.peopleFileName === null ? "" : this.state.peopleFileName}
-              data-text="Choose File"
               onClick={this.onClickGenerator("vs-people-input-id", AppActions.resetPeople)}
               onChange={this.onChangeGenerator("vs-people-input-id", AppActions.updatePeople,
                 AppActions.resetPeople)}
@@ -175,9 +183,7 @@ export class FileInputForm extends React.Component<null, IFileUploadFormStoreSta
               type="file"
               className="filestyle"
               name="faculty"
-              data-buttonbefore="true"
               data-placeholder={this.state.facultyFileName === null ? "" : this.state.facultyFileName}
-              data-text="Choose File"
               onClick={this.onClickGenerator("vs-faculty-input-id", AppActions.resetFaculty)}
               onChange={this.onChangeGenerator("vs-faculty-input-id", AppActions.updateFaculty,
                 AppActions.resetFaculty)}
