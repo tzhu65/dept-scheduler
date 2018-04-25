@@ -5,6 +5,7 @@ import { init } from "./init";
 import "./alt";
 import "./actions/AppActions";
 import "./stores/APICallerStore";
+import "./stores/FileUploadFormStore";
 import "./stores/OutputStore";
 
 import { Frame } from "./components/Frame";

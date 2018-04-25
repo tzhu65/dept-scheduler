@@ -8,6 +8,13 @@ interface IAppActions {
   clearOutput(): void;
   checkSchedule(checkScheduleForm: any): void;
   generateSchedule(generateScheduleForm: any): void;
+
+  updateCourses(file: any): void;
+  updatePeople(file: any): void;
+  updateFaculty(file: any): void;
+  resetCourses(): void;
+  resetPeople(): void;
+  resetFaculty(): void;
 }
 
 class AppActionsClass extends AbstractActions {
@@ -18,6 +25,13 @@ class AppActionsClass extends AbstractActions {
       "clearOutput",
       "checkSchedule",
       "generateSchedule",
+
+      "updateCourses",
+      "updatePeople",
+      "updateFaculty",
+      "resetCourses",
+      "resetPeople",
+      "resetFaculty",
     );
   }
 }

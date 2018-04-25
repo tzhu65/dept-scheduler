@@ -22,7 +22,7 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
     this.bindAction(AppActions.generateSchedule, this.onGenerateSchedule);
   }
 
-  public onCheckSchedule() {
+  public onCheckSchedule(checkScheduleForm: any) {
     if (this.loading) {
       return;
     }
@@ -32,7 +32,7 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
     $.ajax({
       url: "verifySchedule",
       type: "POST",
-      data: new FormData(($("#verify-schedule-id")[0] as HTMLFormElement)),
+      data: checkScheduleForm,
       cache: false,
       contentType: false,
       processData: false,
@@ -74,7 +74,7 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
     this.loading = true;
     this.delay = "";
     const start = new Date().getTime();
-    let downloadButton = $("#download-schedule-btn-id");
+    const downloadButton = $("#download-schedule-btn-id");
     downloadButton.addClass("disabled");
     $.ajax({
       url: "generateSchedule",
@@ -103,11 +103,11 @@ class APICallerStoreClass extends AbstractStoreModel<IAPICallerStoreState> imple
         const time = new Date().getTime() - start;
         this.setState({loading: false, delay: time + "ms"});
 
-        let csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(data);
+        const csvData = "data:application/csv;charset=utf-8," + encodeURIComponent(data);
         downloadButton.removeClass("disabled");
         downloadButton.attr({
-            "href": csvData,
-            "download": "schedule.csv"
+            href: csvData,
+            download: "schedule.csv",
         });
       },
       error: (xhr: JQuery.jqXHR, status: string, error: string) => {
