@@ -8,6 +8,7 @@ class AbstractStoreModel<S> implements AltJS.StoreModel<S> {
   public exportConfig: any;
   public getState: () => S;
   public setState: (state: any) => void;
+  public emitChange: () => void;
 }
 
 export { AbstractStoreModel };

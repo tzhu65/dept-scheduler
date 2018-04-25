@@ -19747,7 +19747,7 @@ var AppActionsClass = /** @class */ (function (_super) {
     __extends(AppActionsClass, _super);
     function AppActionsClass(config) {
         var _this = _super.call(this) || this;
-        _this.generateActions("addToOutput", "clearOutput", "checkSchedule", "generateSchedule");
+        _this.generateActions("addToOutput", "clearOutput", "checkSchedule", "generateSchedule", "updateCourses", "updatePeople", "updateFaculty", "resetCourses", "resetPeople", "resetFaculty");
         return _this;
     }
     return AppActionsClass;
@@ -19781,6 +19781,7 @@ var init_1 = require("./init");
 require("./alt");
 require("./actions/AppActions");
 require("./stores/APICallerStore");
+require("./stores/FileUploadFormStore");
 require("./stores/OutputStore");
 var Frame_1 = require("./components/Frame");
 var MainApp = /** @class */ (function (_super) {
@@ -19798,7 +19799,7 @@ exports.MainApp = MainApp;
 init_1.init();
 ReactDOM.render(React.createElement(MainApp, null), document.getElementById("main"));
 
-},{"./actions/AppActions":41,"./alt":42,"./components/Frame":50,"./init":55,"./stores/APICallerStore":56,"./stores/OutputStore":58,"react":38,"react-dom":35}],44:[function(require,module,exports){
+},{"./actions/AppActions":41,"./alt":42,"./components/Frame":50,"./init":55,"./stores/APICallerStore":56,"./stores/FileUploadFormStore":58,"./stores/OutputStore":59,"react":38,"react-dom":35}],44:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19839,17 +19840,63 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var AppActions_1 = require("../../actions/AppActions");
+var FileUploadFormStore_1 = require("../../stores/FileUploadFormStore");
 var DownloadScheduleButton_1 = require("./DownloadScheduleButton");
 var FileInputSubmitButton_1 = require("./FileInputSubmitButton");
 var FileUploadMode_1 = require("./FileUploadMode");
+function timestampToString(timestamp) {
+    var date = new Date(parseInt(timestamp, 10));
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var year = date.getFullYear();
+    var hour = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var monthStr = month < 10 ? "0" + month : month;
+    var dayStr = day < 10 ? "0" + day : day;
+    var hourStr = hour < 10 ? "0" + hour : hour;
+    var minutesStr = minutes < 10 ? "0" + minutes : minutes;
+    var secondsStr = seconds < 10 ? "0" + seconds : seconds;
+    var timeString = monthStr + "/"
+        + dayStr + "/"
+        + year + " @ "
+        + hourStr + ":"
+        + minutesStr + ":"
+        + secondsStr;
+    return timeString;
+}
 var FileInputForm = /** @class */ (function (_super) {
     __extends(FileInputForm, _super);
-    function FileInputForm() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function FileInputForm(props) {
+        var _this = _super.call(this, props) || this;
+        _this.onChange = _this.onChange.bind(_this);
+        return _this;
     }
+    FileInputForm.prototype.componentWillMount = function () {
+        this.setState(FileUploadFormStore_1.FileUploadFormStore.getState());
+    };
+    FileInputForm.prototype.componentDidMount = function () {
+        FileUploadFormStore_1.FileUploadFormStore.listen(this.onChange);
+    };
+    FileInputForm.prototype.componentWillUnmount = function () {
+        FileUploadFormStore_1.FileUploadFormStore.unlisten(this.onChange);
+    };
+    FileInputForm.prototype.onChange = function (state) {
+        this.setState(state);
+    };
     FileInputForm.prototype.onSubmit = function (e) {
         e.preventDefault();
         var fileInputForm = new FormData($("#file-input-id")[0]);
+        // Add the files from local storage
+        var coursesText = FileUploadFormStore_1.FileUploadFormStore.getCoursesFile();
+        var coursesBlob = new Blob([coursesText], { type: "text/csv" });
+        var peopleText = FileUploadFormStore_1.FileUploadFormStore.getPeopleFile();
+        var peopleBlob = new Blob([peopleText], { type: "text/csv" });
+        var facultyText = FileUploadFormStore_1.FileUploadFormStore.getFacultyFile();
+        var facultyBlob = new Blob([facultyText], { type: "text/csv" });
+        fileInputForm.set("courses", coursesBlob);
+        fileInputForm.set("people", peopleBlob);
+        fileInputForm.set("faculty", facultyBlob);
         var mode = $("#file-input-id input:radio:checked").val();
         if (mode === "check") {
             AppActions_1.AppActions.checkSchedule(fileInputForm);
@@ -19858,22 +19905,57 @@ var FileInputForm = /** @class */ (function (_super) {
             AppActions_1.AppActions.generateSchedule(fileInputForm);
         }
     };
+    FileInputForm.prototype.onClickGenerator = function (id, resetAction) {
+        return function (e) {
+            // Reset the input
+            var input = $("#" + id);
+            input.val("");
+            input.filestyle("placeholder", "");
+            input.filestyle("clear");
+            // Send an action to the store to reset
+            resetAction();
+        };
+    };
+    FileInputForm.prototype.onChangeGenerator = function (id, updateAction, resetAction) {
+        if (typeof Storage === "undefined") {
+            return function (e) {
+                return;
+            };
+        }
+        // Return a function that will store the file in local storage
+        return function (e) {
+            if (e.target.files[0] === undefined) {
+                // Reset in local storage if no file selected
+                resetAction();
+                return;
+            }
+            // Update the file in local storage
+            var file = e.target.files[0];
+            updateAction(file);
+        };
+    };
     FileInputForm.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("form", { id: "file-input-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
                 React.createElement(FileUploadMode_1.FileUploadMode, null),
                 React.createElement("div", { className: "form-group" },
-                    React.createElement("label", { htmlFor: "vs-courses-input-id" },
+                    React.createElement("label", null,
                         React.createElement("b", null, "Schedule")),
-                    React.createElement("input", { id: "vs-courses-input-id", className: "form-control-file", type: "file", name: "courses", required: true })),
+                    React.createElement("input", { id: "vs-courses-input-id", type: "file", className: "filestyle", name: "courses", "data-buttonbefore": "true", "data-placeholder": this.state.coursesFileName === null ? "" : this.state.coursesFileName, "data-text": "Choose File", onClick: this.onClickGenerator("vs-courses-input-id", AppActions_1.AppActions.resetCourses), onChange: this.onChangeGenerator("vs-courses-input-id", AppActions_1.AppActions.updateCourses, AppActions_1.AppActions.resetCourses) }),
+                    React.createElement("label", { className: "lb-sm" }, this.state.coursesLastUploaded === null ? "" : "Last uploaded: " +
+                        timestampToString(this.state.coursesLastUploaded))),
                 React.createElement("div", { className: "form-group" },
                     React.createElement("label", { htmlFor: "vs-people-input-id" },
                         React.createElement("b", null, "TA Preferences")),
-                    React.createElement("input", { id: "vs-people-input-id", className: "form-control-file", type: "file", name: "people", required: true })),
+                    React.createElement("input", { id: "vs-people-input-id", type: "file", className: "filestyle", name: "people", "data-buttonbefore": "true", "data-placeholder": this.state.peopleFileName === null ? "" : this.state.peopleFileName, "data-text": "Choose File", onClick: this.onClickGenerator("vs-people-input-id", AppActions_1.AppActions.resetPeople), onChange: this.onChangeGenerator("vs-people-input-id", AppActions_1.AppActions.updatePeople, AppActions_1.AppActions.resetPeople) }),
+                    React.createElement("label", { className: "lb-sm" }, this.state.peopleLastUploaded === null ? "" : "Last uploaded: " +
+                        timestampToString(this.state.peopleLastUploaded))),
                 React.createElement("div", { className: "form-group" },
                     React.createElement("label", { htmlFor: "vs-faculty-input-id" },
                         React.createElement("b", null, "Faculty Hours")),
-                    React.createElement("input", { id: "vs-faculty-input-id", className: "form-control-file", type: "file", name: "faculty", required: true })),
+                    React.createElement("input", { id: "vs-faculty-input-id", type: "file", className: "filestyle", name: "faculty", "data-buttonbefore": "true", "data-placeholder": this.state.facultyFileName === null ? "" : this.state.facultyFileName, "data-text": "Choose File", onClick: this.onClickGenerator("vs-faculty-input-id", AppActions_1.AppActions.resetFaculty), onChange: this.onChangeGenerator("vs-faculty-input-id", AppActions_1.AppActions.updateFaculty, AppActions_1.AppActions.resetFaculty) }),
+                    React.createElement("label", { className: "lb-sm" }, this.state.facultyLastUploaded === null ? "" : "Last uploaded: " +
+                        timestampToString(this.state.facultyLastUploaded))),
                 React.createElement(FileInputSubmitButton_1.FileInputSubmitButton, null),
                 React.createElement(DownloadScheduleButton_1.DownloadScheduleButton, null))));
     };
@@ -19881,7 +19963,7 @@ var FileInputForm = /** @class */ (function (_super) {
 }(React.Component));
 exports.FileInputForm = FileInputForm;
 
-},{"../../actions/AppActions":41,"./DownloadScheduleButton":44,"./FileInputSubmitButton":46,"./FileUploadMode":49,"react":38}],46:[function(require,module,exports){
+},{"../../actions/AppActions":41,"../../stores/FileUploadFormStore":58,"./DownloadScheduleButton":44,"./FileInputSubmitButton":46,"./FileUploadMode":49,"react":38}],46:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19917,10 +19999,10 @@ var FileInputSubmitButton = /** @class */ (function (_super) {
     };
     FileInputSubmitButton.prototype.render = function () {
         if (this.state.loading) {
-            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit", disabled: true });
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Run", name: "submit", disabled: true });
         }
         else {
-            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Upload", name: "submit" });
+            return React.createElement("input", { type: "submit", className: "btn btn-primary", value: "Run", name: "submit" });
         }
     };
     return FileInputSubmitButton;
@@ -19985,8 +20067,6 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var FileInputForm_1 = require("./FileInputForm");
-// import { GenerateScheduleInput } from "./GenerateScheduleInput";
-// import { VerifyScheduleInput } from "./VerifyScheduleInput";
 var FileUploadFrame = /** @class */ (function (_super) {
     __extends(FileUploadFrame, _super);
     function FileUploadFrame() {
@@ -20189,7 +20269,7 @@ var OutputFrame = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputFrame = OutputFrame;
 
-},{"../../stores/OutputStore":58,"./OutputOverlay":54,"react":38}],54:[function(require,module,exports){
+},{"../../stores/OutputStore":59,"./OutputOverlay":54,"react":38}],54:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20394,6 +20474,138 @@ var AbstractStoreModel = /** @class */ (function () {
 exports.AbstractStoreModel = AbstractStoreModel;
 
 },{}],58:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var alt_1 = require("../alt");
+var AbstractStore_1 = require("./AbstractStore");
+var AppActions_1 = require("../actions/AppActions");
+var FileUploadFormStoreClass = /** @class */ (function (_super) {
+    __extends(FileUploadFormStoreClass, _super);
+    function FileUploadFormStoreClass() {
+        var _this = _super.call(this) || this;
+        _this.keys = {
+            courses: {
+                fileName: "courses-filename",
+                file: "courses",
+                lastUploaded: "courses-last-uploaded",
+            },
+            people: {
+                fileName: "people-filename",
+                file: "people",
+                lastUploaded: "people-last-uploaded",
+            },
+            faculty: {
+                fileName: "faculty-filename",
+                file: "faculty",
+                lastUploaded: "faculty-last-uploaded",
+            },
+        };
+        // Get the times each spreadsheet was last Uploaded
+        _this.coursesLastUploaded = window.localStorage.getItem(_this.keys.courses.lastUploaded);
+        _this.peopleLastUploaded = window.localStorage.getItem(_this.keys.people.lastUploaded);
+        _this.facultyLastUploaded = window.localStorage.getItem(_this.keys.faculty.lastUploaded);
+        _this.coursesFileName = window.localStorage.getItem(_this.keys.courses.fileName);
+        _this.peopleFileName = window.localStorage.getItem(_this.keys.people.fileName);
+        _this.facultyFileName = window.localStorage.getItem(_this.keys.faculty.fileName);
+        _this.bindAction(AppActions_1.AppActions.updateCourses, _this.onUpdateCourses);
+        _this.bindAction(AppActions_1.AppActions.updatePeople, _this.onUpdatePeople);
+        _this.bindAction(AppActions_1.AppActions.updateFaculty, _this.onUpdateFaculty);
+        _this.bindAction(AppActions_1.AppActions.resetCourses, _this.onResetCourses);
+        _this.bindAction(AppActions_1.AppActions.resetPeople, _this.onResetPeople);
+        _this.bindAction(AppActions_1.AppActions.resetFaculty, _this.onResetFaculty);
+        _this.exportPublicMethods({
+            getCoursesFile: _this.getCoursesFile.bind(_this),
+            getPeopleFile: _this.getPeopleFile.bind(_this),
+            getFacultyFile: _this.getFacultyFile.bind(_this),
+        });
+        return _this;
+    }
+    FileUploadFormStoreClass.prototype.getCoursesFile = function () {
+        return window.localStorage.getItem(this.keys.courses.file);
+    };
+    FileUploadFormStoreClass.prototype.getPeopleFile = function () {
+        return window.localStorage.getItem(this.keys.people.file);
+    };
+    FileUploadFormStoreClass.prototype.getFacultyFile = function () {
+        return window.localStorage.getItem(this.keys.faculty.file);
+    };
+    FileUploadFormStoreClass.prototype.readerHelper = function (file, cb) {
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            return cb(file.name, event.target.result);
+        };
+        return reader.readAsText(file);
+    };
+    FileUploadFormStoreClass.prototype.onUpdateCourses = function (file) {
+        var _this = this;
+        return this.readerHelper(file, function (fileName, text) {
+            _this.coursesFileName = fileName;
+            window.localStorage.setItem(_this.keys.courses.fileName, fileName);
+            window.localStorage.setItem(_this.keys.courses.file, text);
+            _this.coursesLastUploaded = new Date().getTime().toString();
+            window.localStorage.setItem(_this.keys.courses.lastUploaded, _this.coursesLastUploaded);
+            _this.emitChange();
+        });
+    };
+    FileUploadFormStoreClass.prototype.onUpdatePeople = function (file) {
+        var _this = this;
+        return this.readerHelper(file, function (fileName, text) {
+            _this.peopleFileName = fileName;
+            window.localStorage.setItem(_this.keys.people.fileName, fileName);
+            window.localStorage.setItem(_this.keys.people.file, text);
+            _this.peopleLastUploaded = new Date().getTime().toString();
+            window.localStorage.setItem(_this.keys.people.lastUploaded, _this.peopleLastUploaded);
+            _this.emitChange();
+        });
+    };
+    FileUploadFormStoreClass.prototype.onUpdateFaculty = function (file) {
+        var _this = this;
+        return this.readerHelper(file, function (fileName, text) {
+            _this.facultyFileName = fileName;
+            window.localStorage.setItem(_this.keys.faculty.fileName, fileName);
+            window.localStorage.setItem(_this.keys.faculty.file, text);
+            _this.facultyLastUploaded = new Date().getTime().toString();
+            window.localStorage.setItem(_this.keys.faculty.lastUploaded, _this.facultyLastUploaded);
+            _this.emitChange();
+        });
+    };
+    FileUploadFormStoreClass.prototype.onResetCourses = function () {
+        this.coursesLastUploaded = null;
+        this.coursesFileName = null;
+        window.localStorage.removeItem(this.keys.courses.lastUploaded);
+        window.localStorage.removeItem(this.keys.courses.fileName);
+        window.localStorage.removeItem(this.keys.courses.file);
+    };
+    FileUploadFormStoreClass.prototype.onResetPeople = function () {
+        this.peopleLastUploaded = null;
+        this.peopleFileName = null;
+        window.localStorage.removeItem(this.keys.people.lastUploaded);
+        window.localStorage.removeItem(this.keys.people.fileName);
+        window.localStorage.removeItem(this.keys.people.file);
+    };
+    FileUploadFormStoreClass.prototype.onResetFaculty = function () {
+        this.facultyLastUploaded = null;
+        this.facultyFileName = null;
+        window.localStorage.removeItem(this.keys.faculty.lastUploaded);
+        window.localStorage.removeItem(this.keys.faculty.fileName);
+        window.localStorage.removeItem(this.keys.faculty.file);
+    };
+    return FileUploadFormStoreClass;
+}(AbstractStore_1.AbstractStoreModel));
+var FileUploadFormStore = alt_1.alt.createStore(FileUploadFormStoreClass, "FileUploadFormStore");
+exports.FileUploadFormStore = FileUploadFormStore;
+
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}],59:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||

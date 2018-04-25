@@ -27,9 +27,9 @@ export class FileInputSubmitButton extends React.Component<null, IAPICallerStore
 
   public render() {
     if (this.state.loading) {
-      return <input type="submit" className="btn btn-primary" value="Upload" name="submit" disabled={true}/>;
+      return <input type="submit" className="btn btn-primary" value="Run" name="submit" disabled={true}/>;
     } else {
-      return <input type="submit" className="btn btn-primary" value="Upload" name="submit"/>;
+      return <input type="submit" className="btn btn-primary" value="Run" name="submit"/>;
     }
   }
 }

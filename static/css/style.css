@@ -1,6 +1,13 @@
 .fill-screen {
   height: 100vh; }
 
+.hidden {
+  display: none;
+  visibility: hidden; }
+
+.lb-sm {
+  font-size: 12px; }
+
 .scrollable {
   height: 100vh;
   overflow-y: auto; }
