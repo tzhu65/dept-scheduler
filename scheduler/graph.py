@@ -71,12 +71,11 @@ class WeightAssigner:
         if course.category == "recitation":
             for c in person.coursesAssigned:
                 if c.courseNumber == course.courseNumber and c.section[0] == course.section[0]:
-                    recitationMultiplier *= 0.5
+                    recitationMultiplier *= 0.00001
 
             # Check if the person can teach the other recitations as well
-            availableHours = 18 - person.hoursCompleted - person.hoursBoughtOut
-            teachableSlots = availableHours / course.hoursValue
-            fractionOfTeachable = min(teachableSlots / (course.recitationCount + 1), 1)
+            teachableSlots = 1.0 * person.availableHours() / course.hoursValue
+            fractionOfTeachable = min(1.0 * teachableSlots / (course.recitationCount + 1), 1)
             recitationMultiplier /= fractionOfTeachable
 
         # Use those three categories to determine the weight of the edge

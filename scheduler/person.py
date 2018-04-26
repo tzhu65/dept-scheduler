@@ -48,6 +48,9 @@ class Person:
             conflictStr += str(conflict) + "\n"
         return stri + conflictStr
 
+    def availableHours(self):
+        return 18 - self.hoursCompleted - self.hoursBoughtOut
+
 
 class PersonalConflict:
 

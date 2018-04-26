@@ -46,6 +46,7 @@ def generate(courses, people, faculty):
 
     # Keep looping until all courses are matched or no more people can be matched
     peopleCopy = [copy.deepcopy(p) for p in people]
+    newPeopleCopy = [copy.deepcopy(x) for x in peopleCopy]
     facultyCopy = [copy.deepcopy(p) for p in faculty]
     coursesCopy = generateAllCourses(courses)
     newCoursesCopy = [copy.deepcopy(x) for x in coursesCopy]
@@ -58,12 +59,15 @@ def generate(courses, people, faculty):
     courseMapper = {}   # Map the index generated in the schedule to the actual course
     for i in range(len(coursesCopy)):
         courseMapper[i] = i
+    personMapper = {}   # Map the index generated in the schedule to the actual person
+    for i in range(len(peopleCopy)):
+        personMapper[i] = i
     usedCourses = set()     # Courses that have already been matched
 
     while coursesMatched < len(coursesCopy):
         # Generate the assignment
         wa = WeightAssigner()
-        g = Graph(peopleCopy, facultyCopy, newCoursesCopy, wa)
+        g = Graph(newPeopleCopy, facultyCopy, newCoursesCopy, wa)
         g.printGraph()
         m1 = g.generateHungarianMatrix()
         schedule = g.generateSchedule(m1)
@@ -77,25 +81,32 @@ def generate(courses, people, faculty):
         # Add the schedule to the completed schedule
         for personIndex, courseIndex in schedule.items():
             usedCourses.add(courseMapper[courseIndex])
-            if personIndex in completedSchedule:
-                pickedCourses = completedSchedule[personIndex]
+            if personMapper[personIndex] in completedSchedule:
+                pickedCourses = completedSchedule[personMapper[personIndex]]
                 pickedCourses.append(courseMapper[courseIndex])
             else:
-                completedSchedule[personIndex] = [courseMapper[courseIndex]]
+                completedSchedule[personMapper[personIndex]] = [courseMapper[courseIndex]]
 
-        # Recalculate the hours of the students
+            # Update the person's hours
+            person = peopleCopy[personMapper[personIndex]]
+            course = coursesCopy[courseMapper[courseIndex]]
+            person.hoursCompleted += course.hoursValue
+            person.coursesAssigned.append(course)
+
+        # Remove people with not enough hours to do anything
         newPeopleCopy = []
+        personIndex = 0
+        newPersonMapper = {}
         for i, p in enumerate(peopleCopy):
+            if p.availableHours() < 3:
+                # Not enough hours to do anything, so don't include on next run of hungarian
+                continue
+
             personCopy = copy.deepcopy(p)
             newPeopleCopy.append(personCopy)
-
-            # Check if the person is in the schedule
-            if i in schedule:
-                # Increase their hours completed amounts
-                course = coursesCopy[courseMapper[schedule[i]]]
-                personCopy.hoursCompleted += course.hoursValue
-                personCopy.coursesAssigned.append(course)
-        peopleCopy = newPeopleCopy
+            newPersonMapper[personIndex] = i
+            personIndex += 1
+        personMapper = newPersonMapper
 
         newCoursesCopy = []
         indexCounter = 0
@@ -122,10 +133,13 @@ def printSchedule(people, courses, schedule):
           '%6s' % 'CSE' +
           '%6s' % ' SEC' +
           ' CATEGORY\n')
+    count = 0
     for i in sorted(schedule.items(), key=lambda x: people[x[0]].name):
         pIndex = i[0]
         for cIndex in i[1]:
-            print('%30s' % people[pIndex].name +
+            count += 1
+            print('%5d' % count +
+                  '%30s' % people[pIndex].name +
                   ": " +
                   '%5s' % courses[cIndex].courseNumber +
                   ", " +
