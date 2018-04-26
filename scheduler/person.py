@@ -34,9 +34,10 @@ class Person:
         self.computerSkills = computerSkills
         self.hoursCompleted = hoursCompleted
         self.hoursBoughtOut = hoursBoughtOut
+        self.coursesAssigned = []
 
     def __str__(self):
-        str = ("name={%s}, fullySupported={%s}, supportingProfessor={%s}, yearInSchool={%s}, pureOrApplied={%s}"
+        stri = ("name={%s}, fullySupported={%s}, supportingProfessor={%s}, yearInSchool={%s}, pureOrApplied={%s}"
                ", qualifyingExams={%s}, teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
                ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}, hoursBoughtOut={%s}" % (
                    self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied,
@@ -44,8 +45,8 @@ class Person:
                    self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted, self.hoursBoughtOut))
         conflictStr = "\n"
         for conflict in self.conflicts:
-            conflictStr += conflict + "\n"
-        return str + conflictStr
+            conflictStr += str(conflict) + "\n"
+        return stri + conflictStr
 
 
 class PersonalConflict:

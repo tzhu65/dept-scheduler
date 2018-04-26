@@ -134,48 +134,40 @@ class Graph:
     Graph class to represent an undirected weighted graph.
     """
     def __init__(self, people, faculty, courses, wa):
-        global val
         self.edges = []
 
         self.people = []
         self.faculty = []
         self.courses = []
+        self.courseMapper = {}  # Map the indices in self.courses to the indices in courses
 
+        coursesWithRecitations = set()
         # Generate all the course nodes
-        for c in courses:
-
-            # Calculate the total number of open positions
-            availablePositions = 0
+        courseCounter = 0
+        for courseIndex, c in enumerate(courses):
             for t in c.positions:
-                availablePositions += c.positions[t]["amount"]
-
-            for t in c.positions:
-
-                # Skip if it's a teach node and the instructor is set
-                if t == "teach" and c.instructor != "":
-                    continue
-
-                # Skip if the amount needed is only 1 and the instructor is already set or assistants are set
-                if availablePositions == 1 and c.instructor != "":
-                    continue
-
-                for i in range(c.positions[t]["amount"]):
-
-                    # Check the number of assistants
-                    if t == "assist" and i < len(c.assistants):
+                if t == "recitation":
+                    courseTuple = (c.courseNumber, c.section[0])
+                    if courseTuple in coursesWithRecitations:
                         continue
+                            
+                # Deep copy this node and set the category
+                course = copy.deepcopy(c)
+                course.positions = {t: {"amount": 1, "hours": c.positions[t]["hours"]}}
+                course.category = t
+                course.hoursValue = c.positions[t]["hours"]
+                course.instructor = ""
+                course.assistants = []
+                if not isinstance(course.hoursValue, int):
+                    course.hoursValue = 0
+                n = Node('course', course)
+                self.courses.append(n)
+                self.courseMapper[courseCounter] = courseIndex
+                courseCounter += 1
 
-                    # Deep copy this node and set the category
-                    course = copy.deepcopy(c)
-                    course.positions = {t: {"amount": 1, "hours": c.positions[t]["hours"]}}
-                    course.category = t
-                    course.hoursValue = c.positions[t]["hours"]
-                    course.instructor = ""
-                    course.assistants = []
-                    if not isinstance(course.hoursValue, int):
-                        course.hoursValue = 0
-                    n = Node('course', course)
-                    self.courses.append(n)
+
+                if t == "recitation":
+                    coursesWithRecitations.add((c.courseNumber, c.section[0]))
 
         # Generate all the people nodes
         for p in people:
@@ -236,7 +228,7 @@ class Graph:
         scheduleDict = {}
         for personIndex, courseIndex in schedule:
             if personIndex < len(self.people) and courseIndex < len(self.courses):
-                scheduleDict[personIndex] = courseIndex
+                scheduleDict[personIndex] = self.courseMapper[courseIndex]
         return scheduleDict
 
 

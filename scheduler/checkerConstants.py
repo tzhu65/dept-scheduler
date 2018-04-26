@@ -14,4 +14,4 @@ qualifyingExams['677'] = 'Algebra'
 qualifyingExams['680'] = 'Topology'
 qualifyingExams['681'] = 'Topology'
 
-MAX_HOURS = 30
+MAX_HOURS = 18
