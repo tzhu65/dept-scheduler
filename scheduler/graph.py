@@ -71,9 +71,13 @@ class WeightAssigner:
         if course.category == "recitation":
             for c in person.coursesAssigned:
                 if c.courseNumber == course.courseNumber and c.section[0] == course.section[0]:
-                    recitationMultiplier = 0.5
-                    break
+                    recitationMultiplier *= 0.5
 
+            # Check if the person can teach the other recitations as well
+            availableHours = 18 - person.hoursCompleted - person.hoursBoughtOut
+            teachableSlots = availableHours / course.hoursValue
+            fractionOfTeachable = min(teachableSlots / (course.recitationCount + 1), 1)
+            recitationMultiplier /= fractionOfTeachable
 
         # Use those three categories to determine the weight of the edge
         weight = (self.preference * prefIndex) * (self.seniority * seniority) * (self.category_pref * categoryPrefIndex)
@@ -150,15 +154,18 @@ class Graph:
         self.faculty = []
         self.courses = []
         self.courseMapper = {}  # Map the indices in self.courses to the indices in courses
+        recitationMapper = {}  # Map a recitation type to the course object
 
         coursesWithRecitations = set()
         # Generate all the course nodes
         courseCounter = 0
         for courseIndex, c in enumerate(courses):
             for t in c.positions:
+
                 if t == "recitation":
                     courseTuple = (c.courseNumber, c.section[0])
                     if courseTuple in coursesWithRecitations:
+                        recitationMapper[courseTuple].recitationCount += 1
                         continue
                             
                 # Deep copy this node and set the category
@@ -175,9 +182,9 @@ class Graph:
                 self.courseMapper[courseCounter] = courseIndex
                 courseCounter += 1
 
-
                 if t == "recitation":
                     coursesWithRecitations.add((c.courseNumber, c.section[0]))
+                    recitationMapper[(c.courseNumber, c.section[0])] = course
 
         # Generate all the people nodes
         for p in people:

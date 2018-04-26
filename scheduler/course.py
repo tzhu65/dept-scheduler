@@ -12,6 +12,7 @@ class Course:
         self.hoursValue = hoursValue
         self.instructorToHoursVal = instructorToHoursVal
         self.assistants = assistants
+        self.recitationCount = 0    # Count of other recitations of the same section type (for generation)
 
     def __str__(self):
         return '%5s' % self.courseNumber + ' ' + \
