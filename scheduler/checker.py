@@ -62,6 +62,18 @@ def checkIfClassIsPreferredClass(person, course, errors):
             return False
     return True
 
+def checkHoursConstraint(person, course, errors):
+    courseHoursValue = course.hoursValue
+    avaliableHours = MAX_HOURS-person.hoursCompleted-person.hoursBoughtOut-courseHoursValue
+    if avaliableHours < 0:
+        #error
+        appendError(person,course,"Instructor has passed their allowed hours for this semester", errors)
+        return False
+    else:
+        return True
+        print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
+        person.hoursCompleted = person.hoursCompleted - courseHoursValue
+
 def checkSchedulerHoursConstraint(person, course, errors):
     courseHoursValue = course.hoursValue
     availableHours = MAX_HOURS - person.hoursCompleted - person.hoursBoughtOut - courseHoursValue

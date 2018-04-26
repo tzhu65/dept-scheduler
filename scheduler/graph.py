@@ -66,8 +66,18 @@ class WeightAssigner:
         # Check if the instructor is the person's sponsor
         # sponsor = person.supportingProfessor == course.instructor
 
+        # Grab the same recitation multiplier
+        recitationMultiplier = 1
+        if course.category == "recitation":
+            for c in person.coursesAssigned:
+                if c.courseNumber == course.courseNumber and c.section[0] == course.section[0]:
+                    recitationMultiplier = 0.5
+                    break
+
+
         # Use those three categories to determine the weight of the edge
         weight = (self.preference * prefIndex) * (self.seniority * seniority) * (self.category_pref * categoryPrefIndex)
+        weight *= recitationMultiplier
         return weight
 
     def professorWeight(self, professor, course):

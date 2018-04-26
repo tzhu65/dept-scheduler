@@ -94,6 +94,7 @@ def generate(courses, people, faculty):
                 # Increase their hours completed amounts
                 course = coursesCopy[courseMapper[schedule[i]]]
                 personCopy.hoursCompleted += course.hoursValue
+                personCopy.coursesAssigned.append(course)
         peopleCopy = newPeopleCopy
 
         newCoursesCopy = []
