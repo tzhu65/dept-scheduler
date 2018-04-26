@@ -248,16 +248,6 @@ class Graph:
                     ", " +
                     self.courses[cIndex].data.category)
 
-    def classInSchedule(self,schedule,cse,sec):
-        for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
-            pIndex = i[0]
-            cIndices = i[1]
-            for cIndex in cIndices:
-                if cse == self.courses[cIndex].data.courseNumber and sec == self.courses[cIndex].data.section:
-                    tup = (self.people[pIndex].data.name,self.courses[cIndex].data.courseNumber,self.courses[cIndex].data.section,self.courses[cIndex].data.category)
-                    return tup
-        return None
-
 #max of vertical vs horizontal at index row col
 def hvMax(m1, rowIndex, colIndex):
         vertical = 0

@@ -93,7 +93,6 @@ def generate(courses, people, faculty):
             if i in schedule:
                 # Increase their hours completed amounts
                 course = coursesCopy[courseMapper[schedule[i]]]
-                p.coursesAssigned.append(course)
                 personCopy.hoursCompleted += course.hoursValue
         peopleCopy = newPeopleCopy
 
@@ -114,7 +113,7 @@ def generate(courses, people, faculty):
         courseMapper = newCourseMapper
 
     printSchedule(peopleCopy, coursesCopy, completedSchedule)
-    csvFilePath = readFromScheduleCSV(fullGraph, completedSchedule)
+    csvFilePath = readFromScheduleCSV(peopleCopy, coursesCopy, completedSchedule)
     return csvFilePath, completedSchedule
 
 def printSchedule(people, courses, schedule):
@@ -148,7 +147,18 @@ def printSchedule(people, courses, schedule):
 #         pIndex = i[0]
 #         cIndex = i[1]
 
-def readFromScheduleCSV(g,schedule):
+
+def classInSchedule(people, courses, schedule,cse,sec):
+    for i in sorted(schedule.items(), key=lambda x: people[x[0]].name):
+        pIndex = i[0]
+        cIndices = i[1]
+        for cIndex in cIndices:
+            if cse == courses[cIndex].courseNumber and sec == courses[cIndex].section:
+                tup = (people[pIndex].name,courses[cIndex].courseNumber,courses[cIndex].section,courses[cIndex].category)
+                return tup
+    return None
+
+def readFromScheduleCSV(people, courses,schedule):
     print(type(schedule))
     print(schedule)
     newSchedule = []
@@ -157,7 +167,7 @@ def readFromScheduleCSV(g,schedule):
         for row in reader:
             if row:
                 # print(row)
-                classScheduled = g.classInSchedule(schedule,row[0],row[1])
+                classScheduled = classInSchedule(people, courses, schedule,row[0],row[1])
                 if classScheduled is not None:
                     if classScheduled[3] == 'assist':
                         row[12] = classScheduled[0]
