@@ -1,15 +1,25 @@
+"""Constants for parsing from the csv files."""
+
+
 class ParserPreferencesHeaders:
     """Headers for the preferences csv file."""
     ASSISTING_PREF = "Your preference for assisting."
-    CATEGORY_ASSISTING = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Assiting]"
-    CATEGORY_LABS = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Labs]"
-    CATEGORY_MHC = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Math help center]"
-    CATEGORY_RECITATION = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Recitation]"
-    CATEGORY_TEACHING = "If you could choose between teaching, recitation, assisting, and Math Help Center, which would you want most? [Teaching]"
+    CATEGORY_ASSISTING = "If you could choose between teaching, recitation, assisting, and Math Help Center, " + \
+                         "which would you want most? [Assiting]"
+    CATEGORY_LABS = "If you could choose between teaching, recitation, assisting, and Math Help Center, " + \
+                    "which would you want most? [Labs]"
+    CATEGORY_MHC = "If you could choose between teaching, recitation, assisting, and Math Help Center, " + \
+                   "which would you want most? [Math help center]"
+    CATEGORY_RECITATION = "If you could choose between teaching, recitation, assisting, and Math Help Center, " + \
+                          "which would you want most? [Recitation]"
+    CATEGORY_TEACHING = "If you could choose between teaching, recitation, assisting, and Math Help Center, " + \
+                        "which would you want most? [Teaching]"
     COMPUTER_SKILLS = "Your computer programming skills?"
     DAY_PREF = "Your day preference."
-    FULLY_SUPPORTED = "Do you expect to be fully supported as a research assistant for the entire academic year next year?"
-    HOURS_BOUGHT_OUT = "Based on the above description of TA hours and assignments, how many hours, if any, do you expect to be BOUGHT OUT of?"
+    FULLY_SUPPORTED = "Do you expect to be fully supported as a research assistant " + \
+                      "for the entire academic year next year?"
+    HOURS_BOUGHT_OUT = "Based on the above description of TA hours and assignments, " + \
+                       "how many hours, if any, do you expect to be BOUGHT OUT of?"
     HOURS_COMPLETED = "Hours completed last semester (0 for fall)"
     LAB_PREF = "Your preference for labs."
     NAME = "Name"
@@ -17,7 +27,8 @@ class ParserPreferencesHeaders:
     QUALIFYING_EXAMS = "Qualifying exams passed to date?"
     RECITATION_PREF = "Your recitation preference."
     RETURNING = "Will you be returning in Fall?"
-    SUPPORTING_PROFESSOR = "If you will be bought out of any Fall hours, what is the name of the professor who will be supporting you?"
+    SUPPORTING_PROFESSOR = "If you will be bought out of any Fall hours, " + \
+                           "what is the name of the professor who will be supporting you?"
     TEACHING_PREF = "Your preference for teaching."
     TIME_CONFLICT = "Your time conflicts. Which of these classes will you take in Fall 2018?"
     YEAR_IN_SCHOOL = "What year will you be in Fall?"   # TODO: handle Spring case? Regex?

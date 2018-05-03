@@ -3,7 +3,7 @@ import numpy as np
 import math
 import sys
 
-from .checker import validateComputerSkill, validateQualifyingExam, checkClassTimes, checkSchedulerHoursConstraint
+from .checker import validateComputerSkill, validateQualifyingExam, validateClassTimes, validateSchedulerHoursConstraint
 from .hungarian import Hungarian
 
 
@@ -114,7 +114,7 @@ def validPersonCourseEdge(person, course, errors):
     :return:
     """
     # Check if there is a time conflict
-    if not checkClassTimes(person, course, [], errors):
+    if not validateClassTimes(person, course, person.coursesAssigned, errors):
         return False
 
     # Check for qualifying exams
@@ -122,7 +122,7 @@ def validPersonCourseEdge(person, course, errors):
         return False
 
     # Check if the person has enough teaching hours
-    if not checkSchedulerHoursConstraint(person, course, errors):
+    if not validateSchedulerHoursConstraint(person, course, errors):
         return False
 
     # Check if the class needs a computer science background

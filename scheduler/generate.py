@@ -181,8 +181,7 @@ def readFromScheduleCSV(people, courses,schedule):
         reader = csv.reader(f)
         for row in reader:
             if row:
-                # print(row)
-                classScheduled = classInSchedule(people, courses, schedule,row[0],row[1])
+                classScheduled = classInSchedule(people, courses, schedule, row[0], row[1])
                 if classScheduled is not None:
                     if classScheduled[3] == 'assist':
                         row[12] = classScheduled[0]
