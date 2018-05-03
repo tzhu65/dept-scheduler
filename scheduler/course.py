@@ -1,7 +1,21 @@
-class Course:
+"""Course classes."""
 
-    def __init__(self, courseNumber, section, days, positions, startTime, endTime, instructor, hoursValue,
-                 instructorToHoursVal, assistants):
+import datetime
+import typing
+
+
+class Course:
+    def __init__(self,
+                 courseNumber: str,
+                 section: str,
+                 days: typing.List[str],
+                 positions: typing.Dict[str, int],
+                 startTime: datetime.time,
+                 endTime: datetime.time,
+                 instructor: str,
+                 hoursValue: int,
+                 instructorToHoursVal: typing.Dict[str, int],
+                 assistants: typing.List[str]):
         self.courseNumber = courseNumber
         self.section = section
         self.days = days

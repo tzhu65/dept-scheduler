@@ -390,8 +390,7 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
                                 instructorName,
                                 hoursValue,
                                 instructorToHoursVal,
-                                assistants,
-                                )
+                                assistants)
                 courses.append(course)
 
     return courses

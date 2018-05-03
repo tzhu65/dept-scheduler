@@ -1,8 +1,23 @@
-from .graph import WeightAssigner, Graph, Node
+"""Schedule generator."""
+
 import copy
 import csv
+import typing
 
-def generateAllCourses(courses):
+from .course import Course
+from .graph import Graph, WeightAssigner
+from .person import Person
+
+
+def generateAllCourses(courses: typing.List[Course]) -> typing.List[Course]:
+    """
+    Generate all course nodes from the parsed courses.
+
+    This function goes through all available positions in a course, and generates new courses for them. This way the
+    algorithm can generate an assignment for all available positions of a course.
+    :param courses: List of all the courses.
+    :return: List of all the courses, where each course represents an available position.
+    """
 
     coursesCopy = []
 
@@ -42,7 +57,15 @@ def generateAllCourses(courses):
                 coursesCopy.append(course)
     return coursesCopy
 
-def generate(courses, people, faculty):
+
+def generate(courses: typing.List[Course], people: typing.List[Person], faculty: typing.Dict[str, int]):
+    """
+    Generate a schedule.
+    :param courses: List of all the courses.
+    :param people: List of all the people.
+    :param faculty: Mapping of the faculty names to their respective hours.
+    :return: The path to the final csv, and a mapping of the people to the courses.
+    """
 
     # Keep looping until all courses are matched or no more people can be matched
     peopleCopy = [copy.deepcopy(p) for p in people]
@@ -128,7 +151,15 @@ def generate(courses, people, faculty):
     csvFilePath = readFromScheduleCSV(peopleCopy, coursesCopy, completedSchedule)
     return csvFilePath, completedSchedule
 
-def printSchedule(people, courses, schedule):
+
+def printSchedule(people: typing.List[Person], courses: typing.List[Course], schedule: typing.Dict[int, int]):
+    """
+    Prints the generated schedule in a readable format.
+    :param people: List of all the people.
+    :param courses: List of all the possible course positions.
+    :param schedule: Mapping of the indices between the people and courses.
+    :return: None
+    """
     print('%30s' % 'INSTRUCTOR' +
           '%6s' % 'CSE' +
           '%6s' % ' SEC' +
@@ -146,21 +177,6 @@ def printSchedule(people, courses, schedule):
                   '%5s' % courses[cIndex].section +
                   ", " +
                   courses[cIndex].category)
-
-# def createScheduleCSV(headers):
-#     for header in headers:
-#         # print('header is ' , header)
-#
-#         with open('newschedule.csv', 'w') as csvfile:
-#             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-#             for header in headers:
-#                 filewriter.writerow(header)
-
-#
-# def courseInSchedule(cse,sec,schedule):
-#     for i in sorted(schedule.items(), key=lambda x: self.people[x[0]].data.name):
-#         pIndex = i[0]
-#         cIndex = i[1]
 
 
 def classInSchedule(people, courses, schedule,cse,sec):
@@ -195,7 +211,6 @@ def readFromScheduleCSV(people, courses,schedule):
                     print('modified', row)
 
                 newSchedule.append(row)
-                # print('this mah shit' ,row)
 
     fileName = 'newschedule.csv'
     createScheduleCSV(newSchedule, fileName)
@@ -204,8 +219,6 @@ def readFromScheduleCSV(people, courses,schedule):
 
 def createScheduleCSV(headers, fileName):
     for header in headers:
-        # print('header is ' , header)
-
         with open(fileName, 'w', newline='') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             for header in headers:
