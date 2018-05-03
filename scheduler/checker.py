@@ -71,9 +71,8 @@ def checkHoursConstraint(person, course, errors):
         appendError(person,course,"Instructor has passed their allowed hours for this semester", errors)
         return False
     else:
-        return True
-        print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
         person.hoursCompleted = person.hoursCompleted - courseHoursValue
+        return True
 
 def checkSchedulerHoursConstraint(person, course, errors):
     courseHoursValue = course.hoursValue
@@ -89,9 +88,8 @@ def checkSchedulerHoursConstraint(person, course, errors):
         appendError(person,course,"Instructor has passed their allowed hours for this semester", errors)
         return False
     else:
-        return True
-        print("%s is enrolled in the proper number of hours, he has %i remaining" % (person.name,person.hoursCompleted))
         person.hoursCompleted = person.hoursCompleted - courseHoursValue
+        return True
 
 
 # Check to make sure that no person has classes on MWF and TR
@@ -132,7 +130,7 @@ def checkFacultyHours(courses, facultyHours, errors):
         courseCount = 0
         for course in courses:
             if course.instructor == faculty:
-                courseCount += 1
+                courseCount+=1
         if courseCount != int(facultyHours[faculty]):
             errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
 
@@ -163,8 +161,7 @@ def checkIfAssignmentsAreValid(people, courses, facultyHours,errors):
 
     for course in courses:
         if course.instructor not in facultyHours and course.instructor not in peopleList:
-            errors.append("ERR: %s is assigned to a course but not on the list of faculty or graduate students" % course.instructor)
-
+            errors.append("ERR: %s is assigned to a %s section %s but not on the list of faculty or graduate students" % (course.instructor, course.courseNumber, course.section))
 def check(courses, people, facultyHours):
     # Make set of courseNames that will be used to ensure every course is assigned
     courseNames = set([course.courseNumber for course in courses])
@@ -175,7 +172,10 @@ def check(courses, people, facultyHours):
 
     checkFacultyHours(courses, facultyHours, errors)
     checkIfAssignmentsAreValid(people,courses,facultyHours,errors)
-
+    for person in people:
+        print(person.name)
+    for course in courses:
+        print(course.instructorToHoursVal)
     for person in people:
         for course in courses:
             # Found a course that person is teaching
