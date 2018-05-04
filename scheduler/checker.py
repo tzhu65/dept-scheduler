@@ -234,7 +234,7 @@ def checkClassDaysOfTheWeek(person: Person, course: Course, courses: typing.List
         appendError(person, course, "Cannot teach on both MWF and TR", errors) # TODO: say which classes they are
         return False
     return True
-
+ 
 
 def checkFacultyHours(courses: typing.List[Course], facultyHours: typing.Dict[str, int], errors: typing.List[str]) \
         -> bool:
@@ -251,7 +251,7 @@ def checkFacultyHours(courses: typing.List[Course], facultyHours: typing.Dict[st
         courseCount = 0
         for course in courses:
             if course.instructor == faculty:
-                courseCount += 1
+                courseCount+=1
         if courseCount != int(facultyHours[faculty]):
             errors.append("ERROR %s is NOT enrolled in correct number of courses, enrolled: %s, expected: %s" % (faculty, courseCount, facultyHours[faculty]))
             correctlyAssigned = False
@@ -294,7 +294,6 @@ def checkIfAssignmentsAreValid(people: typing.List[Person], courses: typing.List
     peopleList = {}
     for person in people:
         peopleList[person.name] = 1
-
     for course in courses:
         if course.instructor not in facultyHours and course.instructor not in peopleList:
             errors.append("ERR: %s is assigned to a course but not on the list of faculty or graduate students" %
@@ -310,7 +309,6 @@ def check(courses: typing.List[Course], people: typing.List[Person], facultyHour
     :param facultyHours: Mapping of faculty names to their respective hours.
     :return: List of errors.
     """
-
     # Make set of courseNames that will be used to ensure every course is assigned
     courseNames = set([course.courseNumber for course in courses])
     print("START: " + str(courseNames))
@@ -319,7 +317,6 @@ def check(courses: typing.List[Course], people: typing.List[Person], facultyHour
 
     checkFacultyHours(courses, facultyHours, errors)
     checkIfAssignmentsAreValid(people, courses, facultyHours, errors)
-
     for person in people:
         for course in courses:
             # Found a course that person is teaching
