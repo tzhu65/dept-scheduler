@@ -29,7 +29,6 @@ def verifySchedule(request):
             people = form.cleaned_data['people']
             faculty = form.cleaned_data['faculty']
             semester = form.cleaned_data['semester']    # Either `FALL` or `SPRING`
-
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             try:
                 if courses and isinstance(courses, TemporaryUploadedFile):
@@ -69,10 +68,11 @@ def verifySchedule(request):
                         person.coursesAssigned.append(course)
 
         # Check if there were any parsing errors
+        facHoursToCheck = facultyHours[0] if semester == "FALL" else facultyHours[1]
         if len(errors) > 0:
             return JsonResponse({"errors": errors})
         else:
-            checkerErrors = check(courses, people, facultyHours[0])
+            checkerErrors = check(courses, people, facHoursToCheck)
             if len(checkerErrors) > 0:
                 return JsonResponse({"errors": checkerErrors})
             else:

@@ -249,7 +249,7 @@ def checkClassDaysOfTheWeek(person: Person, course: Course, courses: typing.List
         appendError(person, course, "Cannot teach on both MWF and TR", errors) # TODO: say which classes they are
         return False
     return True
- 
+
 
 def checkFacultyHours(courses: typing.List[Course], facultyHours: typing.Dict[str, int], errors: typing.List[str]) \
         -> bool:
@@ -326,7 +326,7 @@ def check(courses: typing.List[Course], people: typing.List[Person], facultyHour
     """
     # Make set of courseNames that will be used to ensure every course is assigned
     courseNames = set([course.courseNumber for course in courses])
-    print("START: " + str(courseNames))
+    #print("START: " + str(courseNames))
     personCourses = {}      # Dict of mapping a person to their courses
     errors = []     # List of errors
 
@@ -353,5 +353,5 @@ def check(courses: typing.List[Course], people: typing.List[Person], facultyHour
             except KeyError:
                 continue
 
-    print(errors)
+    #print(errors)
     return errors
