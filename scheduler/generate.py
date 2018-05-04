@@ -114,23 +114,27 @@ def readFromScheduleCSV(g,schedule):
         reader = csv.reader(f)
         for row in reader:
             if row:
-                # print(row)
-                classScheduled = g.classInSchedule(schedule,row[0],row[1])
-                if classScheduled is not None:
+                allclasseseScheduled = g.classInSchedule(schedule,row[0],row[1])
+                allclasseseScheduled.sort(key=lambda tup:tup[3],reverse=True)
+                if len(allclasseseScheduled) > 1:
+                    print(allclasseseScheduled)
+                for classScheduled in allclasseseScheduled:
+                    # print('scheduled classese are ' , classScheduled)
                     if classScheduled[3] == 'assist':
-                        row[11] = classScheduled[0]
-                        row[15] = 1
+                        # row[11] = classScheduled[0]
+                        if row[12]: # if there is a mark in assiting and teaching then put them in assiting else put them in teaching
+                            if row[11]:
+                                row[11] += ';' , classScheduled[0]
+                            else:
+                                row[11] = classScheduled[0]
+                        else:
+                            row[10] = classScheduled[0]
+            
                     else:
                         row[10] = classScheduled[0]
-                        if classScheduled[3] == 'teach':
-                            row[12] = 1
-                        elif classScheduled[3] == 'recitation':
-                            row[14] = 1
-                    print('modified', row)
-
                 newSchedule.append(row)
                 # print('this mah shit' ,row)
-
+#
     fileName = 'newschedule.csv'
     createScheduleCSV(newSchedule, fileName)
     return fileName
@@ -144,5 +148,5 @@ def createScheduleCSV(headers, fileName):
             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             for header in headers:
                 if header[0]:
-                    print('writing ' , header)
+                    # print('writing ' , header)
                     filewriter.writerow(header)
