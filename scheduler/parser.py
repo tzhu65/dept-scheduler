@@ -50,7 +50,7 @@ def sanitizeName(name: str) -> str:
     :return: Name in `first last` format, or empty string.
     :raises ImproperNameFormat: The input cannot be parsed into a name.
     """
-    sanitized = name
+    sanitized = name.strip()
     correctFormat = False
     if ',' in name:
         nameParts = name.split(',')

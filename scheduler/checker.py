@@ -158,10 +158,10 @@ def checkIfAssignmentsAreValid(people, courses, facultyHours,errors):
     peopleList = {}
     for person in people:
         peopleList[person.name] = 1
-
     for course in courses:
-        if course.instructor not in facultyHours and course.instructor not in peopleList:
-            errors.append("ERR: %s is assigned to a %s section %s but not on the list of faculty or graduate students" % (course.instructor, course.courseNumber, course.section))
+        for instructor in course.instructorToHoursVal:
+            if (instructor not in facultyHours) and (instructor not in peopleList):
+                errors.append("ERR: %s is assigned to a %s section %s but not on the list of faculty or graduate students" % (instructor, course.courseNumber, course.section))
 def check(courses, people, facultyHours):
     # Make set of courseNames that will be used to ensure every course is assigned
     courseNames = set([course.courseNumber for course in courses])
@@ -172,10 +172,6 @@ def check(courses, people, facultyHours):
 
     checkFacultyHours(courses, facultyHours, errors)
     checkIfAssignmentsAreValid(people,courses,facultyHours,errors)
-    for person in people:
-        print(person.name)
-    for course in courses:
-        print(course.instructorToHoursVal)
     for person in people:
         for course in courses:
             # Found a course that person is teaching
