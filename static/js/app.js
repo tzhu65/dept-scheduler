@@ -19799,7 +19799,7 @@ exports.MainApp = MainApp;
 init_1.init();
 ReactDOM.render(React.createElement(MainApp, null), document.getElementById("main"));
 
-},{"./actions/AppActions":41,"./alt":42,"./components/Frame":50,"./init":55,"./stores/APICallerStore":56,"./stores/FileUploadFormStore":58,"./stores/OutputStore":59,"react":38,"react-dom":35}],44:[function(require,module,exports){
+},{"./actions/AppActions":41,"./alt":42,"./components/Frame":51,"./init":56,"./stores/APICallerStore":57,"./stores/FileUploadFormStore":59,"./stores/OutputStore":60,"react":38,"react-dom":35}],44:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -19844,6 +19844,7 @@ var FileUploadFormStore_1 = require("../../stores/FileUploadFormStore");
 var DownloadScheduleButton_1 = require("./DownloadScheduleButton");
 var FileInputSubmitButton_1 = require("./FileInputSubmitButton");
 var FileUploadMode_1 = require("./FileUploadMode");
+var SemesterSelect_1 = require("./SemesterSelect");
 function timestampToString(timestamp) {
     var date = new Date(parseInt(timestamp, 10));
     var month = date.getMonth() + 1;
@@ -19905,7 +19906,17 @@ var FileInputForm = /** @class */ (function (_super) {
         fileInputForm.set("courses", coursesBlob);
         fileInputForm.set("people", peopleBlob);
         fileInputForm.set("faculty", facultyBlob);
-        var mode = $("#file-input-id input:radio:checked").val();
+        // Get the semester mode
+        var semester = $("#semester-select-id input:radio:checked").val();
+        if (semester === "fall") {
+            fileInputForm.set("semester", "FALL");
+            console.log("fall");
+        }
+        else if (semester === "spring") {
+            fileInputForm.set("semester", "SPRING");
+            console.log("spring");
+        }
+        var mode = $("#file-upload-mode-id input:radio:checked").val();
         if (mode === "check") {
             AppActions_1.AppActions.checkSchedule(fileInputForm);
         }
@@ -19945,7 +19956,10 @@ var FileInputForm = /** @class */ (function (_super) {
     FileInputForm.prototype.render = function () {
         return (React.createElement("div", null,
             React.createElement("form", { id: "file-input-id", action: "/verifySchedule", method: "post", encType: "multipart/form-data", onSubmit: this.onSubmit },
-                React.createElement(FileUploadMode_1.FileUploadMode, null),
+                React.createElement("div", { className: "row" },
+                    React.createElement(FileUploadMode_1.FileUploadMode, null),
+                    React.createElement("div", { className: "text-right" },
+                        React.createElement(SemesterSelect_1.SemesterSelect, null))),
                 React.createElement("div", { className: "form-group" },
                     React.createElement("label", null,
                         React.createElement("b", null, "Schedule")),
@@ -19971,7 +19985,7 @@ var FileInputForm = /** @class */ (function (_super) {
 }(React.Component));
 exports.FileInputForm = FileInputForm;
 
-},{"../../actions/AppActions":41,"../../stores/FileUploadFormStore":58,"./DownloadScheduleButton":44,"./FileInputSubmitButton":46,"./FileUploadMode":49,"react":38}],46:[function(require,module,exports){
+},{"../../actions/AppActions":41,"../../stores/FileUploadFormStore":59,"./DownloadScheduleButton":44,"./FileInputSubmitButton":46,"./FileUploadMode":49,"./SemesterSelect":50,"react":38}],46:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20017,7 +20031,7 @@ var FileInputSubmitButton = /** @class */ (function (_super) {
 }(React.Component));
 exports.FileInputSubmitButton = FileInputSubmitButton;
 
-},{"../../stores/APICallerStore":56,"react":38}],47:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],47:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20060,7 +20074,7 @@ var FileUploadFooter = /** @class */ (function (_super) {
 }(React.Component));
 exports.FileUploadFooter = FileUploadFooter;
 
-},{"../../stores/APICallerStore":56,"react":38}],48:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],48:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20108,21 +20122,51 @@ var FileUploadMode = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     FileUploadMode.prototype.render = function () {
-        return (React.createElement("div", { className: "row" },
-            React.createElement("div", { className: "justify-content-center" },
-                React.createElement("div", { className: "btn-group btn-group-toggle", "data-toggle": "buttons" },
-                    React.createElement("label", { className: "btn btn-secondary active" },
-                        React.createElement("input", { type: "radio", name: "options", id: "check-schedule", autoComplete: "off", defaultChecked: true, value: "check" }),
-                        "Check"),
-                    React.createElement("label", { className: "btn btn-secondary" },
-                        React.createElement("input", { type: "radio", name: "options", id: "generate-schedule", autoComplete: "off", value: "generate" }),
-                        "Generate")))));
+        return (React.createElement("div", { id: "file-upload-mode-id", className: "btn-group btn-group-toggle", "data-toggle": "buttons" },
+            React.createElement("label", { className: "btn btn-secondary active" },
+                React.createElement("input", { type: "radio", name: "upload-mode", id: "check-schedule", autoComplete: "off", defaultChecked: true, value: "check" }),
+                "Check"),
+            React.createElement("label", { className: "btn btn-secondary" },
+                React.createElement("input", { type: "radio", name: "upload-mode", id: "generate-schedule", autoComplete: "off", value: "generate" }),
+                "Generate")));
     };
     return FileUploadMode;
 }(React.Component));
 exports.FileUploadMode = FileUploadMode;
 
 },{"react":38}],50:[function(require,module,exports){
+"use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var React = require("react");
+var SemesterSelect = /** @class */ (function (_super) {
+    __extends(SemesterSelect, _super);
+    function SemesterSelect() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SemesterSelect.prototype.render = function () {
+        return (React.createElement("div", { id: "semester-select-id", className: "btn-group btn-group-toggle", "data-toggle": "buttons" },
+            React.createElement("label", { className: "btn btn-secondary active" },
+                React.createElement("input", { type: "radio", name: "semester-select", id: "fall-semester", autoComplete: "off", defaultChecked: true, value: "fall" }),
+                "Fall"),
+            React.createElement("label", { className: "btn btn-secondary" },
+                React.createElement("input", { type: "radio", name: "semester-select", id: "spring-semester", autoComplete: "off", value: "spring" }),
+                "Spring")));
+    };
+    return SemesterSelect;
+}(React.Component));
+exports.SemesterSelect = SemesterSelect;
+
+},{"react":38}],51:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20161,7 +20205,7 @@ var Frame = /** @class */ (function (_super) {
 }(React.Component));
 exports.Frame = Frame;
 
-},{"./FileUpload/FileUploadFooter":47,"./FileUpload/FileUploadFrame":48,"./Modals/AboutInfo":51,"./Navbar/Navbar":52,"./Output/OutputFrame":53,"react":38}],51:[function(require,module,exports){
+},{"./FileUpload/FileUploadFooter":47,"./FileUpload/FileUploadFrame":48,"./Modals/AboutInfo":52,"./Navbar/Navbar":53,"./Output/OutputFrame":54,"react":38}],52:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20194,7 +20238,7 @@ var AboutInfo = /** @class */ (function (_super) {
 }(React.Component));
 exports.AboutInfo = AboutInfo;
 
-},{"react":38}],52:[function(require,module,exports){
+},{"react":38}],53:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20228,7 +20272,7 @@ var Navbar = /** @class */ (function (_super) {
 }(React.Component));
 exports.Navbar = Navbar;
 
-},{"../../actions/AppActions":41,"react":38}],53:[function(require,module,exports){
+},{"../../actions/AppActions":41,"react":38}],54:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20277,7 +20321,7 @@ var OutputFrame = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputFrame = OutputFrame;
 
-},{"../../stores/OutputStore":59,"./OutputOverlay":54,"react":38}],54:[function(require,module,exports){
+},{"../../stores/OutputStore":60,"./OutputOverlay":55,"react":38}],55:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20324,7 +20368,7 @@ var OutputOverlay = /** @class */ (function (_super) {
 }(React.Component));
 exports.OutputOverlay = OutputOverlay;
 
-},{"../../stores/APICallerStore":56,"react":38}],55:[function(require,module,exports){
+},{"../../stores/APICallerStore":57,"react":38}],56:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // Exported bootstrap function for initializing the app.
@@ -20349,7 +20393,7 @@ function setupCsrf() {
     });
 }
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20471,7 +20515,7 @@ var APICallerStoreClass = /** @class */ (function (_super) {
 var APICallerStore = alt_1.alt.createStore(APICallerStoreClass, "APICallerStore");
 exports.APICallerStore = APICallerStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}],57:[function(require,module,exports){
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}],58:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var AbstractStoreModel = /** @class */ (function () {
@@ -20481,7 +20525,7 @@ var AbstractStoreModel = /** @class */ (function () {
 }());
 exports.AbstractStoreModel = AbstractStoreModel;
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20613,7 +20657,7 @@ var FileUploadFormStoreClass = /** @class */ (function (_super) {
 var FileUploadFormStore = alt_1.alt.createStore(FileUploadFormStoreClass, "FileUploadFormStore");
 exports.FileUploadFormStore = FileUploadFormStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}],59:[function(require,module,exports){
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}],60:[function(require,module,exports){
 "use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -20649,4 +20693,4 @@ var OutputStoreClass = /** @class */ (function (_super) {
 var OutputStore = alt_1.alt.createStore(OutputStoreClass, "OutputStore");
 exports.OutputStore = OutputStore;
 
-},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":57}]},{},[43]);
+},{"../actions/AppActions":41,"../alt":42,"./AbstractStore":58}]},{},[43]);
