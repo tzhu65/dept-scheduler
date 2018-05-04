@@ -1,17 +1,17 @@
 strongComputerSkillClasses = ['383', '528', '529']
 
 qualifyingExams = {}
-qualifyingExams['521'] = 'Analysis Comp'
-qualifyingExams['653'] = 'Analysis Comp'
-qualifyingExams['656'] = 'Analysis Comp'
-qualifyingExams['657'] = 'Analysis Comp'
-qualifyingExams['661'] = 'Scientific Comp'
-qualifyingExams['662'] = 'Scientific Comp'
-qualifyingExams['668'] = 'Math Methods'
-qualifyingExams['669'] = 'Math Methods'
+qualifyingExams['521'] = 'Analysis'
+qualifyingExams['653'] = 'Analysis'
+qualifyingExams['656'] = 'Analysis'
+qualifyingExams['657'] = 'Analysis'
+qualifyingExams['661'] = 'Scientific Computing'
+qualifyingExams['662'] = 'Scientific Computing'
+qualifyingExams['668'] = 'Methods'
+qualifyingExams['669'] = 'Methods'
 qualifyingExams['676'] = 'Algebra'
 qualifyingExams['677'] = 'Algebra'
-qualifyingExams['680'] = 'Topology'
-qualifyingExams['681'] = 'Topology'
+qualifyingExams['680'] = 'Geo/Topo'
+qualifyingExams['681'] = 'Geo/Topo'
 
 MAX_HOURS = 30
