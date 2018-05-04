@@ -54,7 +54,7 @@ def sanitizeName(name: str) -> str:
     correctFormat = False
     if ',' in name:
         nameParts = name.split(',')
-        sanitizedList = nameParts[1], ' ', nameParts[0]
+        sanitizedList = nameParts[1].strip(), ' ', nameParts[0].strip()
         sanitized = ''.join(sanitizedList)
         correctFormat = True
     elif ' ' in name:
