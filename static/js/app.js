@@ -19910,11 +19910,9 @@ var FileInputForm = /** @class */ (function (_super) {
         var semester = $("#semester-select-id input:radio:checked").val();
         if (semester === "fall") {
             fileInputForm.set("semester", "FALL");
-            console.log("fall");
         }
         else if (semester === "spring") {
             fileInputForm.set("semester", "SPRING");
-            console.log("spring");
         }
         var mode = $("#file-upload-mode-id input:radio:checked").val();
         if (mode === "check") {

@@ -116,6 +116,7 @@ def parseConflicts(listOfConflicts: typing.List[str]) -> typing.List[PersonalCon
         conflicts.append(conflict)
     return conflicts
 
+
 def handleAssistants(recitationVal: int, assistVal: int, labVal: int, instructorToHoursVal: typing.Dict[str,int], assistant: str):
     """Gets recitation/assist/lab values and adds the respective value to the instructor to hours val Dictionary
     :param recitationVal integer of recitation column, corosponds to # of recitation
@@ -130,6 +131,7 @@ def handleAssistants(recitationVal: int, assistVal: int, labVal: int, instructor
         addInstructorToHoursVal(instructorToHoursVal, assistant, 6)
     elif labVal > 0:
         addInstructorToHoursVal(instructorToHoursVal, assistant, 6)
+
 
 def addInstructorToHoursVal(dictRep: typing.Dict[str, int], lineOfInstr: str, hoursVal: int):
     """Gets all the instructors and assigns them an hour value.
@@ -352,14 +354,14 @@ def parseCourses(file: typing.IO) -> typing.List[Course]:
                     row[fields[ParserScheduleHeaders.ASSISTING_ASSIGNMENT]] else ""
                 if instructor != "":
                     if (teachVal+recitationVal+assistVal+labVal) == 0:
-                        #Only an instructor and no graduate students
+                        # Only an instructor and no graduate students
                         addInstructorToHoursVal(instructorToHoursVal, instructor, 0)
                     elif teachVal == 0 and (recitationVal+assistVal+labVal)>0 and assistant!="":
-                        #Faculty who is teaching and has assistant(s)
+                        # Faculty who is teaching and has assistant(s)
                         addInstructorToHoursVal(instructorToHoursVal, instructor, 0)
                         handleAssistants(recitationVal, assistVal, labVal, instructorToHoursVal, assistant)
                     elif teachVal == 1:
-                        #Graduate student is instructing the course
+                        # Graduate student is instructing the course
                         addInstructorToHoursVal(instructorToHoursVal, instructor, 12)
                         handleAssistants(recitationVal, assistVal, labVal, instructorToHoursVal, assistant)
                     elif assistant == "":
