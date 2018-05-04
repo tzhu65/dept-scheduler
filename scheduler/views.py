@@ -80,7 +80,7 @@ def verifySchedule(request):
                 else:
                     return HttpResponse("checked the schedule")
             except Exception as e:
-                return JsonResponse({"errors": e})
+                return JsonResponse({"errors": str(e)})
 
 
 
@@ -165,5 +165,5 @@ def generateSchedule(request):
                         writer.writerow(row)
                 return response
             except Exception as e:
-                return JsonResponse({"errors": e})
+                return JsonResponse({"errors": str(e)})
     raise Http404()
