@@ -311,8 +311,8 @@ def checkIfAssignmentsAreValid(people: typing.List[Person], courses: typing.List
         peopleList[person.name] = 1
     for course in courses:
         if course.instructor not in facultyHours and course.instructor not in peopleList:
-            errors.append("ERR: %s is assigned to a course but not on the list of faculty or graduate students" %
-                          course.instructor)
+            errors.append("ERR: %s is assigned to a course: %s section %s but not on the list of faculty or graduate students" %
+            (course.instructor, course.courseNumber, course.section))
 
 
 def check(courses: typing.List[Course], people: typing.List[Person], facultyHours: typing.Dict[str, int]) \
