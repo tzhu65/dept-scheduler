@@ -31,31 +31,35 @@ def verifySchedule(request):
             semester = form.cleaned_data['semester']    # Either `FALL` or `SPRING`
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             try:
-                if courses and isinstance(courses, TemporaryUploadedFile):
-                    courses = parseCoursesFromPath(courses.temporary_file_path())
-                elif courses and isinstance(courses, InMemoryUploadedFile):
-                    f = TextIOWrapper(courses.file, encoding=request.encoding)
-                    courses = parseCourses(f)
-            except MissingHeaders as e:
-                errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
+                try:
+                    if courses and isinstance(courses, TemporaryUploadedFile):
+                        courses = parseCoursesFromPath(courses.temporary_file_path())
+                    elif courses and isinstance(courses, InMemoryUploadedFile):
+                        f = TextIOWrapper(courses.file, encoding=request.encoding)
+                        courses = parseCourses(f)
+                except MissingHeaders as e:
+                    errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
 
-            try:
-                if people and isinstance(people, TemporaryUploadedFile):
-                    people = parsePeopleFromPath(people.temporary_file_path())
-                elif people and isinstance(people, InMemoryUploadedFile):
-                    f = TextIOWrapper(people.file, encoding=request.encoding)
-                    people = parsePeople(f)
-            except MissingHeaders as e:
-                errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
+                try:
+                    if people and isinstance(people, TemporaryUploadedFile):
+                        people = parsePeopleFromPath(people.temporary_file_path())
+                    elif people and isinstance(people, InMemoryUploadedFile):
+                        f = TextIOWrapper(people.file, encoding=request.encoding)
+                        people = parsePeople(f)
+                except MissingHeaders as e:
+                    errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
 
-            try:
-                if faculty and isinstance(faculty, TemporaryUploadedFile):
-                    facultyHours = parseFacultyHoursFromPath(faculty.temporary_file_path())
-                elif faculty and isinstance(faculty, InMemoryUploadedFile):
-                    f = TextIOWrapper(faculty.file, encoding=request.encoding)
-                    facultyHours = parseFacultyHours(f)
-            except MissingHeaders as e:
-                errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
+                try:
+                    if faculty and isinstance(faculty, TemporaryUploadedFile):
+                        facultyHours = parseFacultyHoursFromPath(faculty.temporary_file_path())
+                    elif faculty and isinstance(faculty, InMemoryUploadedFile):
+                        f = TextIOWrapper(faculty.file, encoding=request.encoding)
+                        facultyHours = parseFacultyHours(f)
+                except MissingHeaders as e:
+                    errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
+            except Exception as e:
+                print(e)
+                return JsonResponse({"errors": str(e)})
         else:
             errors.append("Invalid form submission. Missing a spreadsheet.")
             print(form.errors)
@@ -103,40 +107,45 @@ def generateSchedule(request):
 
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             try:
-                if courses and isinstance(courses, TemporaryUploadedFile):
-                    courses = parseCoursesFromPath(courses.temporary_file_path())
-                elif courses and isinstance(courses, InMemoryUploadedFile):
-                    f = TextIOWrapper(courses.file, encoding=request.encoding)
-                    courses = parseCourses(f)
-            except MissingHeaders as e:
-                if len(e.headers) > 5:
-                    errors.append("Missing too many headers in the schedule spreadsheet")
-                else:
-                    errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
+                try:
+                    if courses and isinstance(courses, TemporaryUploadedFile):
+                        courses = parseCoursesFromPath(courses.temporary_file_path())
+                    elif courses and isinstance(courses, InMemoryUploadedFile):
+                        f = TextIOWrapper(courses.file, encoding=request.encoding)
+                        courses = parseCourses(f)
+                except MissingHeaders as e:
+                    if len(e.headers) > 5:
+                        errors.append("Missing too many headers in the schedule spreadsheet")
+                    else:
+                        errors.append("Missing headers in the schedule spreadsheet: " + str(e.headers))
 
-            try:
-                if people and isinstance(people, TemporaryUploadedFile):
-                    people = parsePeopleFromPath(people.temporary_file_path())
-                elif people and isinstance(people, InMemoryUploadedFile):
-                    f = TextIOWrapper(people.file, encoding=request.encoding)
-                    people = parsePeople(f)
-            except MissingHeaders as e:
-                if len(e.headers) > 5:
-                    errors.append("Missing too many TA preferences in the TA preferences spreadsheet")
-                else:
-                    errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
+                try:
+                    if people and isinstance(people, TemporaryUploadedFile):
+                        people = parsePeopleFromPath(people.temporary_file_path())
+                    elif people and isinstance(people, InMemoryUploadedFile):
+                        f = TextIOWrapper(people.file, encoding=request.encoding)
+                        people = parsePeople(f)
+                except MissingHeaders as e:
+                    if len(e.headers) > 5:
+                        errors.append("Missing too many TA preferences in the TA preferences spreadsheet")
+                    else:
+                        errors.append("Missing headers in the TA preferences spreadsheet: " + str(e.headers))
 
-            try:
-                if faculty and isinstance(faculty, TemporaryUploadedFile):
-                    faculty = parseFacultyHoursFromPath(faculty.temporary_file_path())
-                elif faculty and isinstance(faculty, InMemoryUploadedFile):
-                    f = TextIOWrapper(faculty.file, encoding=request.encoding)
-                    faculty = parseFacultyHours(f)
-            except MissingHeaders as e:
-                if len(e.headers) > 5:
-                    errors.append("Missing too many headers in the faculty hours spreadsheet")
-                else:
-                    errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
+                try:
+                    if faculty and isinstance(faculty, TemporaryUploadedFile):
+                        faculty = parseFacultyHoursFromPath(faculty.temporary_file_path())
+                    elif faculty and isinstance(faculty, InMemoryUploadedFile):
+                        f = TextIOWrapper(faculty.file, encoding=request.encoding)
+                        faculty = parseFacultyHours(f)
+                except MissingHeaders as e:
+                    if len(e.headers) > 5:
+                        errors.append("Missing too many headers in the faculty hours spreadsheet")
+                    else:
+                        errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
+            except Exception as e:
+                print(e)
+                return JsonResponse({"errors": str(e)})
+
         else:
             errors.append("Invalid form submission")
             print(form.errors)
