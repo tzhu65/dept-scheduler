@@ -72,11 +72,18 @@ def verifySchedule(request):
         if len(errors) > 0:
             return JsonResponse({"errors": errors})
         else:
-            checkerErrors = check(courses, people, facHoursToCheck)
-            if len(checkerErrors) > 0:
-                return JsonResponse({"errors": checkerErrors})
-            else:
-                return HttpResponse("checked the schedule")
+
+            try:
+                checkerErrors = check(courses, people, facultyHours[0])
+                if len(checkerErrors) > 0:
+                    return JsonResponse({"errors": checkerErrors})
+                else:
+                    return HttpResponse("checked the schedule")
+            except Exception as e:
+                return JsonResponse({"errors": e})
+
+
+
     raise Http404()
 
 
@@ -144,17 +151,19 @@ def generateSchedule(request):
         if len(errors) > 0:
             return JsonResponse({"errors": errors})
         else:
-            csvFilePath = generate(courses, people, faculty)[0]
+            try:
+                csvFilePath = generate(courses, people, faculty)[0]
 
-            # Create the HttpResponse object with the appropriate CSV header.
-            response = HttpResponse(content_type='application/download')
-            response['Content-Disposition'] = 'attachment; filename="%s"' % csvFilePath
+                # Create the HttpResponse object with the appropriate CSV header.
+                response = HttpResponse(content_type='application/download')
+                response['Content-Disposition'] = 'attachment; filename="%s"' % csvFilePath
 
-            writer = csv.writer(response)
-            with open(csvFilePath, 'r', newline='') as f:
-                reader = csv.reader(f)
-                for row in reader:
-                    writer.writerow(row)
-            return response
-            # return HttpResponse("generated a schedule")
+                writer = csv.writer(response)
+                with open(csvFilePath, 'r', newline='') as f:
+                    reader = csv.reader(f)
+                    for row in reader:
+                        writer.writerow(row)
+                return response
+            except Exception as e:
+                return JsonResponse({"errors": e})
     raise Http404()
