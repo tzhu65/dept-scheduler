@@ -1,51 +1,7 @@
+"""Classes for representing people."""
+
 from datetime import datetime
-
-
-class Person:
-
-    def __init__(self,
-                 name,
-                 fullySupported,
-                 supportingProfessor,
-                 yearInSchool,
-                 pureOrApplied,
-                 qualifyingExams,
-                 teachingPrefs,
-                 labPrefs,
-                 assistingPrefs,
-                 recitationPrefs,
-                 categoryPrefs,
-                 conflicts,
-                 computerSkills,
-                 hoursCompleted,
-                 hoursBoughtOut):
-        self.name = name
-        self.fullySupported = fullySupported
-        self.supportingProfessor = supportingProfessor
-        self.yearInSchool = yearInSchool
-        self.pureOrApplied = pureOrApplied
-        self.qualifyingExams = qualifyingExams
-        self.teachingPrefs = teachingPrefs
-        self.labPrefs = labPrefs
-        self.assistingPrefs = assistingPrefs
-        self.recitationPrefs = recitationPrefs
-        self.categoryPrefs = categoryPrefs
-        self.conflicts = conflicts
-        self.computerSkills = computerSkills
-        self.hoursCompleted = hoursCompleted
-        self.hoursBoughtOut = hoursBoughtOut
-
-    def __str__(self):
-        str = ("name={%s}, fullySupported={%s}, supportingProfessor={%s}, yearInSchool={%s}, pureOrApplied={%s}"
-               ", qualifyingExams={%s}, teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
-               ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}, hoursBoughtOut={%s}" % (
-                   self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied,
-                   self.qualifyingExams, self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
-                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted, self.hoursBoughtOut))
-        conflictStr = "\n"
-        for conflict in self.conflicts:
-            conflictStr += conflict + "\n"
-        return str + conflictStr
+import typing
 
 
 class PersonalConflict:
@@ -63,3 +19,56 @@ class PersonalConflict:
                 self.classNumber, self.day, self.startTime, self.endTime))
         else:
             return ""
+
+
+class Person:
+    def __init__(self,
+                 name: str,
+                 fullySupported: bool,
+                 supportingProfessor: str,
+                 yearInSchool: int,
+                 pureOrApplied: str,
+                 qualifyingExams: typing.List[str],
+                 teachingPrefs: typing.List[str],
+                 labPrefs: typing.List[str],
+                 assistingPrefs: typing.List[str],
+                 recitationPrefs: typing.List[str],
+                 categoryPrefs: typing.Dict[str, int],
+                 conflicts: typing.List[PersonalConflict],
+                 computerSkills: int,
+                 hoursCompleted: int,
+                 hoursBoughtOut: int):
+        self.name = name
+        self.fullySupported = fullySupported
+        self.supportingProfessor = supportingProfessor
+        self.yearInSchool = yearInSchool
+        self.pureOrApplied = pureOrApplied
+        self.qualifyingExams = qualifyingExams
+        self.teachingPrefs = teachingPrefs
+        self.labPrefs = labPrefs
+        self.assistingPrefs = assistingPrefs
+        self.recitationPrefs = recitationPrefs
+        self.categoryPrefs = categoryPrefs
+        self.conflicts = conflicts
+        self.computerSkills = computerSkills
+        self.hoursCompleted = hoursCompleted
+        self.hoursBoughtOut = hoursBoughtOut
+        self.coursesAssigned = []
+
+    def __str__(self):
+        stri = ("name={%s}, fullySupported={%s}, supportingProfessor={%s}, yearInSchool={%s}, pureOrApplied={%s}"
+                ", qualifyingExams={%s}, teachingPrefs={%s}, labPrefs={%s}, assistingPrefs={%s}, recitationPrefs={%s}"
+                ", categoryPrefs={%s}, conflicts={%s},computerSkills={%s}, hoursCompleted={%s}, hoursBoughtOut={%s}" % (
+                   self.name, self.fullySupported, self.supportingProfessor ,self.yearInSchool, self.pureOrApplied,
+                   self.qualifyingExams, self.teachingPrefs, self.labPrefs, self.assistingPrefs, self.recitationPrefs,
+                   self.categoryPrefs, self.conflicts, self.computerSkills, self.hoursCompleted, self.hoursBoughtOut))
+        conflictStr = "\n"
+        for conflict in self.conflicts:
+            conflictStr += str(conflict) + "\n"
+        return stri + conflictStr
+
+    def availableHours(self) -> int:
+        """
+        :return: The number of hours the person has available.
+        """
+        return 18 - self.hoursCompleted - self.hoursBoughtOut

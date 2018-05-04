@@ -60,6 +60,13 @@ def verifySchedule(request):
             errors.append("Invalid form submission. Missing a spreadsheet.")
             print(form.errors)
 
+        # Add assignedCourses field
+        for course in courses:
+            if course.instructor:
+                for person in people:
+                    if person.name == course.instructor:
+                        person.coursesAssigned.append(course)
+
         # Check if there were any parsing errors
         if len(errors) > 0:
             return JsonResponse({"errors": errors})
@@ -123,6 +130,13 @@ def generateSchedule(request):
         else:
             errors.append("Invalid form submission")
             print(form.errors)
+
+        # Add assignedCourses field
+        for course in courses:
+            if course.instructor:
+                for person in people:
+                    if person.name == course.instructor:
+                        person.coursesAssigned.append(course)
 
         # Check if there were any parsing errors
         if len(errors) > 0:

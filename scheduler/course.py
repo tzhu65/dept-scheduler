@@ -1,7 +1,21 @@
-class Course:
+"""Course classes."""
 
-    def __init__(self, courseNumber, section, days, positions, startTime, endTime, instructor, hoursValue,
-                 instructorToHoursVal, assistants):
+import datetime
+import typing
+
+
+class Course:
+    def __init__(self,
+                 courseNumber: str,
+                 section: str,
+                 days: typing.List[str],
+                 positions: typing.Dict[str, int],
+                 startTime: datetime.time,
+                 endTime: datetime.time,
+                 instructor: str,
+                 hoursValue: int,
+                 instructorToHoursVal: typing.Dict[str, int],
+                 assistants: typing.List[str]):
         self.courseNumber = courseNumber
         self.section = section
         self.days = days
@@ -12,6 +26,7 @@ class Course:
         self.hoursValue = hoursValue
         self.instructorToHoursVal = instructorToHoursVal
         self.assistants = assistants
+        self.recitationCount = 0    # Count of other recitations of the same section type (for generation)
 
     def __str__(self):
         return '%5s' % self.courseNumber + ' ' + \
