@@ -5,13 +5,32 @@ from .checker import *
 from .parser import *
 # Create your tests here.
 class AnalysisCompQualification(TestCase):
-    "Test to see if individuals analysis comp constraint is functioning"
-    FACULTY_HOURS = "scheduler/static/data/faculty_hours/faculty_hours_April8.csv"
-    PREFERENCES =  "scheduler/static/data/preferences/Test/analysis_comp_test_pref.cvs"
-    SCHEDULE = "scheduler/static/data/schedule/Test/analysis_comp_test_schedule.csv"
-
-    schedule = parseCoursesFromPath(SCHEDULE)
-    preferences = parsePeopleFromPath(PREFERENCES)
-    facultyHours = parseFacultyHoursFromPath(FACULTY_HOURS)
-
-    check(courses, people, facultyHours[0])
+    temp = {}
+    people = {}
+    temp["aaron zhang"] = 12
+    course = Course(521,  # Course number
+                    1,  # Section
+                    "MWF",
+                    None,
+                    "9:00AM",
+                    "10:15AM",
+                    "aaron zhang",
+                    12,
+                    temp,
+                    None,
+                    )
+    courses = []
+    courses.append(course)
+    name = "aaron zhang"
+    fullySupported = "no"
+    supportingProfessor = None
+    yearInSchool = 3
+    pureOrApplied = "Pure"
+    qualifyingExams = ["scientific comp"]
+    teachingPrefs = ""
+    labPrefs
+    assistingPrefs
+    person = Person(name, fullySupported, supportingProfessor, yearInSchool, pureOrApplied, qualifyingExams,
+                    teachingPrefs, labPrefs, assistingPrefs, recitationPrefs, categoryPrefs, conflicts,
+                    computerSkills, hoursCompleted, hoursBoughtOut)
+    people.append(person)
