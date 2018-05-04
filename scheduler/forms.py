@@ -11,9 +11,11 @@ class VerifySchedule(forms.Form):
     courses = forms.FileField(max_length=128, allow_empty_file=False)
     people = forms.FileField(max_length=128, allow_empty_file=False)
     faculty = forms.FileField(max_length=128, allow_empty_file=False)
+    semester = forms.CharField(max_length=10, required=True)
 
 
 class GenerateSchedule(forms.Form):
     courses = forms.FileField(max_length=128, allow_empty_file=False)
     people = forms.FileField(max_length=128, allow_empty_file=False)
     faculty = forms.FileField(max_length=128, allow_empty_file=False)
+    semester = forms.CharField(max_length=10, required=True)

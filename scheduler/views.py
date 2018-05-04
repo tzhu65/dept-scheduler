@@ -28,6 +28,7 @@ def verifySchedule(request):
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
             faculty = form.cleaned_data['faculty']
+            semester = form.cleaned_data['semester']    # Either `FALL` or `SPRING`
 
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             try:
@@ -90,6 +91,7 @@ def generateSchedule(request):
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
             faculty = form.cleaned_data['faculty']
+            semester = form.cleaned_data['semester']  # Either `FALL` or `SPRING`
 
             # Have to do a separate case for when it's a tmp file and when it's already in memory
             try:

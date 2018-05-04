@@ -1,30 +1,30 @@
 import * as React from "react";
 
-export class FileUploadMode extends React.Component<null, null> {
+export class SemesterSelect extends React.Component<null, null> {
 
   public render() {
     return (
-      <div id="file-upload-mode-id" className="btn-group btn-group-toggle" data-toggle="buttons">
+      <div id="semester-select-id" className="btn-group btn-group-toggle" data-toggle="buttons">
         <label className="btn btn-secondary active">
           <input
             type="radio"
-            name="upload-mode"
-            id="check-schedule"
+            name="semester-select"
+            id="fall-semester"
             autoComplete="off"
             defaultChecked={true}
-            value="check"
+            value="fall"
           />
-          Check
+          Fall
         </label>
         <label className="btn btn-secondary">
           <input
             type="radio"
-            name="upload-mode"
-            id="generate-schedule"
+            name="semester-select"
+            id="spring-semester"
             autoComplete="off"
-            value="generate"
+            value="spring"
           />
-          Generate
+          Spring
         </label>
       </div>
     );

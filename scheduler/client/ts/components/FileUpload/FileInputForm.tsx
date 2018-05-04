@@ -7,6 +7,7 @@ import { FileUploadFormStore, IFileUploadFormStoreState } from "../../stores/Fil
 import { DownloadScheduleButton } from "./DownloadScheduleButton";
 import { FileInputSubmitButton } from "./FileInputSubmitButton";
 import { FileUploadMode } from "./FileUploadMode";
+import { SemesterSelect } from "./SemesterSelect";
 
 function timestampToString(timestamp: string) {
   const date = new Date(parseInt(timestamp, 10));
@@ -84,7 +85,15 @@ export class FileInputForm extends React.Component<null, IFileUploadFormStoreSta
     fileInputForm.set("people", peopleBlob);
     fileInputForm.set("faculty", facultyBlob);
 
-    const mode = $("#file-input-id input:radio:checked").val();
+    // Get the semester mode
+    const semester = $("#semester-select-id input:radio:checked").val();
+    if (semester === "fall") {
+      fileInputForm.set("semester", "FALL");
+    } else if (semester === "spring") {
+      fileInputForm.set("semester", "SPRING");
+    }
+
+    const mode = $("#file-upload-mode-id input:radio:checked").val();
     if (mode === "check") {
       AppActions.checkSchedule(fileInputForm);
     } else if (mode === "generate") {
@@ -138,7 +147,12 @@ export class FileInputForm extends React.Component<null, IFileUploadFormStoreSta
           encType="multipart/form-data"
           onSubmit={this.onSubmit}
         >
-          <FileUploadMode />
+          <div className="row">
+            <FileUploadMode />
+            <div className="text-right">
+              <SemesterSelect />
+            </div>
+          </div>
 
           <div className="form-group">
             <label><b>Schedule</b></label>
