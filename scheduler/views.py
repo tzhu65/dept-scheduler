@@ -78,7 +78,7 @@ def verifySchedule(request):
                 else:
                     return HttpResponse("checked the schedule")
             except Exception as e:
-                return JsonResponse({"error": e})
+                return JsonResponse({"errors": e})
 
 
     raise Http404()
