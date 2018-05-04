@@ -118,10 +118,10 @@ def readFromScheduleCSV(g,schedule):
                 classScheduled = g.classInSchedule(schedule,row[0],row[1])
                 if classScheduled is not None:
                     if classScheduled[3] == 'assist':
-                        row[12] = classScheduled[0]
+                        row[11] = classScheduled[0]
                         row[15] = 1
                     else:
-                        row[11] = classScheduled[0]
+                        row[10] = classScheduled[0]
                         if classScheduled[3] == 'teach':
                             row[12] = 1
                         elif classScheduled[3] == 'recitation':
@@ -144,4 +144,5 @@ def createScheduleCSV(headers, fileName):
             filewriter = csv.writer(csvfile, delimiter=',', quoting=csv.QUOTE_MINIMAL)
             for header in headers:
                 if header[0]:
+                    print('writing ' , header)
                     filewriter.writerow(header)
