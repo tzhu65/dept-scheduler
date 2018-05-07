@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module scheduler.checker</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="scheduler.html"><font color="#ffffff">scheduler</font></a>.checker</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/tony/PycharmProjects/dept-scheduler/scheduler/checker.py">/Users/tony/PycharmProjects/dept-scheduler/scheduler/checker.py</a></font></td></tr></table>
+    <p><tt>Schedule&nbsp;checker.<br>
+&nbsp;<br>
+Currently&nbsp;checking&nbsp;for:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Qualified&nbsp;computer&nbsp;skills<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Passed&nbsp;qualifying&nbsp;exams<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Conflicting&nbsp;times<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;MWF/TR&nbsp;conflicts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Preferences<br>
+&nbsp;<br>
+Functions&nbsp;prefixed&nbsp;with&nbsp;`validate`&nbsp;check&nbsp;for&nbsp;hard&nbsp;requirements,&nbsp;and&nbsp;functions<br>
+prefixed&nbsp;with&nbsp;`check`&nbsp;check&nbsp;for&nbsp;soft&nbsp;requirements.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="typing.html">typing</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-appendError"><strong>appendError</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, message:str, errors:List[str]) -&gt; None</dt><dd><tt>Add&nbsp;an&nbsp;error&nbsp;related&nbsp;to&nbsp;a&nbsp;person&nbsp;and&nbsp;course&nbsp;to&nbsp;a&nbsp;list&nbsp;of&nbsp;errors.<br>
+:param&nbsp;person:&nbsp;The&nbsp;person&nbsp;related&nbsp;to&nbsp;the&nbsp;error&nbsp;or&nbsp;conflict.<br>
+:param&nbsp;course:&nbsp;The&nbsp;course&nbsp;related&nbsp;to&nbsp;the&nbsp;error&nbsp;or&nbsp;conflict.<br>
+:param&nbsp;message:&nbsp;Description&nbsp;of&nbsp;the&nbsp;error.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;that&nbsp;will&nbsp;have&nbsp;the&nbsp;new&nbsp;error&nbsp;message&nbsp;appended&nbsp;to&nbsp;it.<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-appendErrorNoCourse"><strong>appendErrorNoCourse</strong></a>(person:scheduler.person.Person, message:str, errors:List[str]) -&gt; None</dt><dd><tt>Add&nbsp;an&nbsp;error&nbsp;related&nbsp;to&nbsp;a&nbsp;person&nbsp;to&nbsp;a&nbsp;list&nbsp;of&nbsp;errors.<br>
+:param&nbsp;person:&nbsp;The&nbsp;person&nbsp;related&nbsp;to&nbsp;the&nbsp;error&nbsp;or&nbsp;conflict.<br>
+:param&nbsp;message:&nbsp;Description&nbsp;of&nbsp;the&nbsp;error.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;that&nbsp;will&nbsp;have&nbsp;the&nbsp;new&nbsp;error&nbsp;message&nbsp;appended&nbsp;to&nbsp;it.<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-check"><strong>check</strong></a>(courses:List[scheduler.course.Course], people:List[scheduler.person.Person], facultyHours:Dict[str, int]) -&gt; List[str]</dt><dd><tt>Check&nbsp;for&nbsp;all&nbsp;errors&nbsp;given&nbsp;a&nbsp;schedule.<br>
+:param&nbsp;courses:&nbsp;List&nbsp;of&nbsp;all&nbsp;the&nbsp;courses.<br>
+:param&nbsp;people:&nbsp;List&nbsp;of&nbsp;all&nbsp;the&nbsp;people&nbsp;(graduate&nbsp;students).<br>
+:param&nbsp;facultyHours:&nbsp;Mapping&nbsp;of&nbsp;faculty&nbsp;names&nbsp;to&nbsp;their&nbsp;respective&nbsp;hours.<br>
+:return:&nbsp;List&nbsp;of&nbsp;errors.</tt></dd></dl>
+ <dl><dt><a name="-checkClassDaysOfTheWeek"><strong>checkClassDaysOfTheWeek</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, courses:List[scheduler.course.Course], errors:List[str]) -&gt; bool</dt><dd><tt>Check&nbsp;to&nbsp;make&nbsp;sure&nbsp;that&nbsp;a&nbsp;person&nbsp;doesn't&nbsp;have&nbsp;classes&nbsp;on&nbsp;both&nbsp;MWF&nbsp;and&nbsp;TR.<br>
+:param&nbsp;person:&nbsp;Person&nbsp;object.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;object&nbsp;to&nbsp;check&nbsp;against.<br>
+:param&nbsp;courses:&nbsp;List&nbsp;of&nbsp;courses&nbsp;that&nbsp;the&nbsp;person&nbsp;is&nbsp;currently&nbsp;assigned&nbsp;to.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;person&nbsp;does&nbsp;not&nbsp;have&nbsp;any&nbsp;classes&nbsp;on&nbsp;both&nbsp;MWF&nbsp;and&nbsp;TR.</tt></dd></dl>
+ <dl><dt><a name="-checkFacultyHours"><strong>checkFacultyHours</strong></a>(courses:List[scheduler.course.Course], facultyHours:Dict[str, int], errors:List[str]) -&gt; bool</dt><dd><tt>Validate&nbsp;that&nbsp;all&nbsp;faculty&nbsp;have&nbsp;the&nbsp;correct&nbsp;number&nbsp;of&nbsp;hours&nbsp;assigned.<br>
+:param&nbsp;courses:&nbsp;List&nbsp;of&nbsp;all&nbsp;the&nbsp;courses.<br>
+:param&nbsp;facultyHours:&nbsp;Dictionary&nbsp;mapping&nbsp;the&nbsp;faculty&nbsp;member's&nbsp;name&nbsp;to&nbsp;the&nbsp;hours.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;all&nbsp;faculty&nbsp;are&nbsp;correctly&nbsp;assigned.</tt></dd></dl>
+ <dl><dt><a name="-checkIfAssignmentsAreValid"><strong>checkIfAssignmentsAreValid</strong></a>(people:List[scheduler.person.Person], courses:List[scheduler.course.Course], facultyHours:Dict[str, int], errors:List[str]) -&gt; None</dt><dd><tt>Check&nbsp;that&nbsp;all&nbsp;the&nbsp;assigned&nbsp;instructors&nbsp;were&nbsp;passed&nbsp;in&nbsp;as&nbsp;people&nbsp;or&nbsp;faculty.<br>
+:param&nbsp;people:&nbsp;List&nbsp;of&nbsp;all&nbsp;the&nbsp;people&nbsp;(graduate&nbsp;students).<br>
+:param&nbsp;courses:&nbsp;List&nbsp;of&nbsp;all&nbsp;the&nbsp;courses.<br>
+:param&nbsp;facultyHours:&nbsp;Map&nbsp;of&nbsp;the&nbsp;names&nbsp;of&nbsp;the&nbsp;faculty&nbsp;to&nbsp;their&nbsp;respective&nbsp;hours.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-checkIfClassIsPreferredClass"><strong>checkIfClassIsPreferredClass</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, errors:List[str]) -&gt; bool</dt><dd><tt>Check&nbsp;that&nbsp;a&nbsp;course&nbsp;is&nbsp;one&nbsp;of&nbsp;the&nbsp;person's&nbsp;preferred&nbsp;classes.<br>
+:param&nbsp;person:&nbsp;Person&nbsp;object.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;object.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;class&nbsp;is&nbsp;one&nbsp;of&nbsp;the&nbsp;person's&nbsp;preferred&nbsp;class.</tt></dd></dl>
+ <dl><dt><a name="-checkTimeOverlap"><strong>checkTimeOverlap</strong></a>(courseA:scheduler.course.Course, courseB:scheduler.course.Course) -&gt; bool</dt><dd><tt>Check&nbsp;if&nbsp;there&nbsp;are&nbsp;time&nbsp;overlaps&nbsp;between&nbsp;two&nbsp;courses.<br>
+:param&nbsp;courseA:<br>
+:param&nbsp;courseB:<br>
+:return:&nbsp;True&nbsp;if&nbsp;there&nbsp;is&nbsp;a&nbsp;time&nbsp;conflict.</tt></dd></dl>
+ <dl><dt><a name="-printError"><strong>printError</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, message:str) -&gt; None</dt><dd><tt>Print&nbsp;an&nbsp;error&nbsp;related&nbsp;to&nbsp;a&nbsp;person&nbsp;and&nbsp;course.<br>
+:param&nbsp;person:&nbsp;The&nbsp;person&nbsp;related&nbsp;to&nbsp;the&nbsp;error&nbsp;or&nbsp;conflict.<br>
+:param&nbsp;course:&nbsp;The&nbsp;course&nbsp;related&nbsp;to&nbsp;the&nbsp;error&nbsp;or&nbsp;conflict.<br>
+:param&nbsp;message:&nbsp;Description&nbsp;of&nbsp;the&nbsp;error.<br>
+:return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-validate"><strong>validate</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, personCourses:Dict[str, scheduler.course.Course], errors:List[str]) -&gt; bool</dt><dd><tt>Validate&nbsp;that&nbsp;a&nbsp;person&nbsp;can&nbsp;teach&nbsp;a&nbsp;course.&nbsp;This&nbsp;includes&nbsp;ensuring&nbsp;sufficient&nbsp;computer&nbsp;skills,&nbsp;qualification&nbsp;exams,<br>
+the&nbsp;class&nbsp;is&nbsp;one&nbsp;of&nbsp;the&nbsp;person's&nbsp;preferences,&nbsp;and&nbsp;that&nbsp;the&nbsp;class&nbsp;makes&nbsp;it&nbsp;stick&nbsp;to&nbsp;either&nbsp;a&nbsp;MWF&nbsp;or&nbsp;TR&nbsp;schedule.<br>
+:param&nbsp;person:&nbsp;Person&nbsp;object.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;to&nbsp;validate&nbsp;for.<br>
+:param&nbsp;personCourses:&nbsp;The&nbsp;other&nbsp;courses&nbsp;the&nbsp;person&nbsp;is&nbsp;teaching.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;person&nbsp;can&nbsp;teach&nbsp;the&nbsp;course.</tt></dd></dl>
+ <dl><dt><a name="-validateClassTimes"><strong>validateClassTimes</strong></a>(person, course, courses, errors)</dt><dd><tt>Validate&nbsp;that&nbsp;assigning&nbsp;a&nbsp;person&nbsp;to&nbsp;a&nbsp;class&nbsp;would&nbsp;not&nbsp;create&nbsp;conflicts&nbsp;with&nbsp;other&nbsp;classes&nbsp;the&nbsp;person&nbsp;is&nbsp;assigned&nbsp;to.<br>
+:param&nbsp;person:&nbsp;Person&nbsp;object.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;to&nbsp;test.<br>
+:param&nbsp;courses:&nbsp;List&nbsp;of&nbsp;courses&nbsp;the&nbsp;person&nbsp;is&nbsp;assigned&nbsp;to.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;there&nbsp;are&nbsp;no&nbsp;time&nbsp;conflicts.</tt></dd></dl>
+ <dl><dt><a name="-validateComputerSkill"><strong>validateComputerSkill</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, errors:List[str]) -&gt; bool</dt><dd><tt>Validate&nbsp;that&nbsp;a&nbsp;person&nbsp;has&nbsp;the&nbsp;necessary&nbsp;computer&nbsp;skills&nbsp;to&nbsp;teach&nbsp;a&nbsp;class.<br>
+:param&nbsp;person:&nbsp;The&nbsp;person&nbsp;expected&nbsp;to&nbsp;the&nbsp;teach&nbsp;the&nbsp;course.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;object.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;to&nbsp;keep&nbsp;track&nbsp;of.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;person&nbsp;is&nbsp;qualified&nbsp;to&nbsp;teach&nbsp;the&nbsp;course.</tt></dd></dl>
+ <dl><dt><a name="-validateHoursConstraint"><strong>validateHoursConstraint</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, errors:List[str]) -&gt; bool</dt><dd><tt>Validate&nbsp;that&nbsp;a&nbsp;person&nbsp;has&nbsp;enough&nbsp;hours&nbsp;remaining&nbsp;to&nbsp;teach&nbsp;a&nbsp;class.&nbsp;Used&nbsp;in&nbsp;the&nbsp;schedule&nbsp;checker.<br>
+:param&nbsp;person:&nbsp;Person&nbsp;object.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;object.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;person&nbsp;has&nbsp;enough&nbsp;hours&nbsp;remaining&nbsp;to&nbsp;teach&nbsp;a&nbsp;class.</tt></dd></dl>
+ <dl><dt><a name="-validateQualifyingExam"><strong>validateQualifyingExam</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, errors:List[str]) -&gt; bool</dt><dd><tt>Validate&nbsp;that&nbsp;a&nbsp;person&nbsp;passed&nbsp;the&nbsp;necessary&nbsp;qualifying&nbsp;exams&nbsp;to&nbsp;teach&nbsp;a&nbsp;class.<br>
+:param&nbsp;person:&nbsp;The&nbsp;person&nbsp;expected&nbsp;to&nbsp;teach&nbsp;the&nbsp;course.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;object.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;person&nbsp;is&nbsp;qualified&nbsp;to&nbsp;teach&nbsp;the&nbsp;course.</tt></dd></dl>
+ <dl><dt><a name="-validateSchedulerHoursConstraint"><strong>validateSchedulerHoursConstraint</strong></a>(person:scheduler.person.Person, course:scheduler.course.Course, errors:List[str]) -&gt; bool</dt><dd><tt>Validate&nbsp;that&nbsp;a&nbsp;person&nbsp;has&nbsp;enough&nbsp;hours&nbsp;remaining&nbsp;to&nbsp;teach&nbsp;a&nbsp;class.&nbsp;Used&nbsp;in&nbsp;the&nbsp;schedule&nbsp;generator.<br>
+:param&nbsp;person:&nbsp;Person&nbsp;object.<br>
+:param&nbsp;course:&nbsp;Course&nbsp;object.<br>
+:param&nbsp;errors:&nbsp;List&nbsp;of&nbsp;errors&nbsp;for&nbsp;bookkeeping.<br>
+:return:&nbsp;True&nbsp;if&nbsp;the&nbsp;person&nbsp;has&nbsp;enough&nbsp;hours&nbsp;remaining&nbsp;to&nbsp;teach&nbsp;a&nbsp;class.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>MAX_HOURS</strong> = 18<br>
+<strong>qualifyingExams</strong> = {'521': 'Analysis', '653': 'Analysis', '656': 'Analysis', '657': 'Analysis', '661': 'Scientific Computing', '662': 'Scientific Computing', '668': 'Methods', '669': 'Methods', '676': 'Algebra', '677': 'Algebra', ...}<br>
+<strong>strongComputerSkillClasses</strong> = ['383', '528', '529']</td></tr></table>
+</body></html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module scheduler.hungarian</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="scheduler.html"><font color="#ffffff">scheduler</font></a>.hungarian</strong></big></big> (version 1.1.1)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/tony/PycharmProjects/dept-scheduler/scheduler/hungarian.py">/Users/tony/PycharmProjects/dept-scheduler/scheduler/hungarian.py</a></font></td></tr></table>
+    <p><tt>Implementation&nbsp;of&nbsp;the&nbsp;<a href="#Hungarian">Hungarian</a>&nbsp;(Munkres)&nbsp;Algorithm&nbsp;using&nbsp;Python&nbsp;and&nbsp;NumPy<br>
+References:&nbsp;<a href="http://www.ams.jhu.edu/~castello/362/Handouts/hungarian.pdf">http://www.ams.jhu.edu/~castello/362/Handouts/hungarian.pdf</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://weber.ucsd.edu/~vcrawfor/hungar.pdf">http://weber.ucsd.edu/~vcrawfor/hungar.pdf</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/Hungarian_algorithm">http://en.wikipedia.org/wiki/Hungarian_algorithm</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.public.iastate.edu/~ddoty/HungarianAlgorithm.html">http://www.public.iastate.edu/~ddoty/HungarianAlgorithm.html</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.clapper.org/software/python/munkres/">http://www.clapper.org/software/python/munkres/</a></tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#Exception">builtins.Exception</a>(<a href="builtins.html#BaseException">builtins.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="scheduler.hungarian.html#HungarianError">HungarianError</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="scheduler.hungarian.html#CoverZeros">CoverZeros</a>
+</font></dt><dt><font face="helvetica, arial"><a href="scheduler.hungarian.html#Hungarian">Hungarian</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="CoverZeros">class <strong>CoverZeros</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Use&nbsp;minimum&nbsp;number&nbsp;of&nbsp;lines&nbsp;to&nbsp;cover&nbsp;all&nbsp;zeros&nbsp;in&nbsp;the&nbsp;matrix.<br>
+Algorithm&nbsp;based&nbsp;on:&nbsp;<a href="http://weber.ucsd.edu/~vcrawfor/hungar.pdf">http://weber.ucsd.edu/~vcrawfor/hungar.pdf</a><br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="CoverZeros-__init__"><strong>__init__</strong></a>(self, matrix)</dt><dd><tt>Input&nbsp;a&nbsp;matrix&nbsp;and&nbsp;save&nbsp;it&nbsp;as&nbsp;a&nbsp;boolean&nbsp;matrix&nbsp;to&nbsp;designate&nbsp;zero&nbsp;locations.<br>
+Run&nbsp;calculation&nbsp;procedure&nbsp;to&nbsp;generate&nbsp;results.</tt></dd></dl>
+
+<dl><dt><a name="CoverZeros-get_covered_columns"><strong>get_covered_columns</strong></a>(self)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;covered&nbsp;columns.</tt></dd></dl>
+
+<dl><dt><a name="CoverZeros-get_covered_rows"><strong>get_covered_rows</strong></a>(self)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;covered&nbsp;rows.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Hungarian">class <strong>Hungarian</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Implementation&nbsp;of&nbsp;the&nbsp;<a href="#Hungarian">Hungarian</a>&nbsp;(Munkres)&nbsp;Algorithm&nbsp;using&nbsp;np.<br>
+&nbsp;<br>
+Usage:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian&nbsp;=&nbsp;<a href="#Hungarian">Hungarian</a>(cost_matrix)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian.<a href="#Hungarian-calculate">calculate</a>()<br>
+or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian&nbsp;=&nbsp;<a href="#Hungarian">Hungarian</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian.<a href="#Hungarian-calculate">calculate</a>(cost_matrix)<br>
+&nbsp;<br>
+Handle&nbsp;Profit&nbsp;matrix:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian&nbsp;=&nbsp;<a href="#Hungarian">Hungarian</a>(profit_matrix,&nbsp;is_profit_matrix=True)<br>
+or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cost_matrix&nbsp;=&nbsp;<a href="#Hungarian">Hungarian</a>.<a href="#Hungarian-make_cost_matrix">make_cost_matrix</a>(profit_matrix)<br>
+&nbsp;<br>
+The&nbsp;matrix&nbsp;will&nbsp;be&nbsp;automatically&nbsp;padded&nbsp;if&nbsp;it&nbsp;is&nbsp;not&nbsp;square.<br>
+For&nbsp;that&nbsp;numpy's&nbsp;resize&nbsp;function&nbsp;is&nbsp;used,&nbsp;which&nbsp;automatically&nbsp;adds&nbsp;0's&nbsp;to&nbsp;any&nbsp;row/column&nbsp;that&nbsp;is&nbsp;added<br>
+&nbsp;<br>
+Get&nbsp;results&nbsp;and&nbsp;total&nbsp;potential&nbsp;after&nbsp;calculation:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian.<a href="#Hungarian-get_results">get_results</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hungarian.<a href="#Hungarian-get_total_potential">get_total_potential</a>()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Hungarian-__init__"><strong>__init__</strong></a>(self, input_matrix=None, is_profit_matrix=False)</dt><dd><tt>input_matrix&nbsp;is&nbsp;a&nbsp;List&nbsp;of&nbsp;Lists.<br>
+input_matrix&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;a&nbsp;cost&nbsp;matrix&nbsp;unless&nbsp;is_profit_matrix&nbsp;is&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="Hungarian-calculate"><strong>calculate</strong></a>(self, input_matrix=None, is_profit_matrix=False)</dt><dd><tt>Implementation&nbsp;of&nbsp;the&nbsp;<a href="#Hungarian">Hungarian</a>&nbsp;(Munkres)&nbsp;Algorithm.<br>
+&nbsp;<br>
+input_matrix&nbsp;is&nbsp;a&nbsp;List&nbsp;of&nbsp;Lists.<br>
+input_matrix&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;a&nbsp;cost&nbsp;matrix&nbsp;unless&nbsp;is_profit_matrix&nbsp;is&nbsp;True.</tt></dd></dl>
+
+<dl><dt><a name="Hungarian-get_results"><strong>get_results</strong></a>(self)</dt><dd><tt>Get&nbsp;results&nbsp;after&nbsp;calculation.</tt></dd></dl>
+
+<dl><dt><a name="Hungarian-get_total_potential"><strong>get_total_potential</strong></a>(self)</dt><dd><tt>Returns&nbsp;expected&nbsp;value&nbsp;after&nbsp;calculation.</tt></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="Hungarian-make_cost_matrix"><strong>make_cost_matrix</strong></a>(profit_matrix)</dt><dd><tt>Converts&nbsp;a&nbsp;profit&nbsp;matrix&nbsp;into&nbsp;a&nbsp;cost&nbsp;matrix.<br>
+Expects&nbsp;NumPy&nbsp;objects&nbsp;as&nbsp;input.</tt></dd></dl>
+
+<dl><dt><a name="Hungarian-select_arbitrary_match"><strong>select_arbitrary_match</strong></a>(zero_locations)</dt><dd><tt>Selects&nbsp;row&nbsp;column&nbsp;combination&nbsp;with&nbsp;minimum&nbsp;number&nbsp;of&nbsp;zeros&nbsp;in&nbsp;it.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="HungarianError">class <strong>HungarianError</strong></a>(<a href="builtins.html#Exception">builtins.Exception</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Common&nbsp;base&nbsp;class&nbsp;for&nbsp;all&nbsp;non-exit&nbsp;exceptions.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="scheduler.hungarian.html#HungarianError">HungarianError</a></dd>
+<dd><a href="builtins.html#Exception">builtins.Exception</a></dd>
+<dd><a href="builtins.html#BaseException">builtins.BaseException</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Methods inherited from <a href="builtins.html#Exception">builtins.Exception</a>:<br>
+<dl><dt><a name="HungarianError-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;<a href="builtins.html#object">object</a>.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
+<dl><dt><a name="HungarianError-__delattr__"><strong>__delattr__</strong></a>(self, name, /)</dt><dd><tt>Implement&nbsp;delattr(self,&nbsp;name).</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-__getattribute__"><strong>__getattribute__</strong></a>(self, name, /)</dt><dd><tt>Return&nbsp;getattr(self,&nbsp;name).</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-__reduce__"><strong>__reduce__</strong></a>(...)</dt><dd><tt>helper&nbsp;for&nbsp;pickle</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-__repr__"><strong>__repr__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-__setattr__"><strong>__setattr__</strong></a>(self, name, value, /)</dt><dd><tt>Implement&nbsp;setattr(self,&nbsp;name,&nbsp;value).</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
+
+<dl><dt><a name="HungarianError-__str__"><strong>__str__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+
+<dl><dt><a name="HungarianError-with_traceback"><strong>with_traceback</strong></a>(...)</dt><dd><tt><a href="builtins.html#Exception">Exception</a>.<a href="#HungarianError-with_traceback">with_traceback</a>(tb)&nbsp;--<br>
+set&nbsp;self.<strong>__traceback__</strong>&nbsp;to&nbsp;tb&nbsp;and&nbsp;return&nbsp;self.</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
+<dl><dt><strong>__cause__</strong></dt>
+<dd><tt>exception&nbsp;cause</tt></dd>
+</dl>
+<dl><dt><strong>__context__</strong></dt>
+<dd><tt>exception&nbsp;context</tt></dd>
+</dl>
+<dl><dt><strong>__dict__</strong></dt>
+</dl>
+<dl><dt><strong>__suppress_context__</strong></dt>
+</dl>
+<dl><dt><strong>__traceback__</strong></dt>
+</dl>
+<dl><dt><strong>args</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__copyright__</strong> = '(c) 2010 Thom Dedecko'<br>
+<strong>__license__</strong> = 'MIT License'<br>
+<strong>__url__</strong> = 'http://github.com/tdedecko/hungarian-algorithm'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Thom&nbsp;Dedecko</td></tr></table>
+</body></html>
