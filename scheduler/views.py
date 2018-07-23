@@ -60,7 +60,7 @@ def verifySchedule(request):
                     errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
             except Exception as e:
                 print(e)
-                return JsonResponse({"errors": str(e)})
+                return JsonResponse({"errors": [str(e)]})
         else:
             errors.append("Invalid form submission. Missing a spreadsheet.")
             print(form.errors)
