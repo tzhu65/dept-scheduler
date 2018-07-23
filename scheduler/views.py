@@ -1,5 +1,6 @@
 import csv
 from io import TextIOWrapper
+import traceback
 
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render
@@ -60,7 +61,7 @@ def verifySchedule(request):
                     errors.append("Missing headers in the faculty hours spreadsheet: " + str(e.headers))
             except Exception as e:
                 print(e)
-                return JsonResponse({"errors": [str(e)]})
+                return JsonResponse({"errors": [str(e), traceback.format_exc()]})
         else:
             errors.append("Invalid form submission. Missing a spreadsheet.")
             print(form.errors)
@@ -86,7 +87,7 @@ def verifySchedule(request):
                     return HttpResponse("checked the schedule")
             except Exception as e:
                 print(e)
-                return JsonResponse({"errors": [str(e)]})
+                return JsonResponse({"errors": [str(e), traceback.format_exc()]})
 
 
 
