@@ -24,6 +24,7 @@ def verifySchedule(request):
         courses = []
         people = []
         facultyHours = []
+        semester = "FALL"   # Default to Fall
         if form.is_valid():
             courses = form.cleaned_data['courses']
             people = form.cleaned_data['people']
@@ -85,7 +86,7 @@ def verifySchedule(request):
                     return HttpResponse("checked the schedule")
             except Exception as e:
                 print(e)
-                return JsonResponse({"errors": str(e)})
+                return JsonResponse({"errors": [str(e)]})
 
 
 
